@@ -66,13 +66,14 @@ toda la partida) · *El Farsante* (hacé creer a 3 jugadores un cargo falso) ·
 *El Rencoroso* (lográ que un jugador asignado sea amonestado) · *El Networker*
 (jugá una llamada 1-a-1 con cada jugador) · *El Honesto Imposible* (ganá un
 desafío sin mentir).
+>DANI: Profundizmos esta parte? o la dejamos afuera de un MVP. preparamos el modelo a futuro apra esto? Porque siento que es muy ambiguo como esta definido  ahora mismo
 
 ### 2.3 Historial de Traiciones
 La web no ve Teams, pero **sí ve los resultados reportados**. Tras cada desafío
 registra y muestra un historial: *"En el Bono Trimestral, Marcos te traicionó"*.
 Da munición concreta para las discusiones y hace que la reputación pese de
 desafío en desafío. Es la memoria social de la partida.
-
+>DANI: Siento que al final de cada minijuego deberias ver los resultados parciales. Es decir como aumento tu puntaje para sacar concluciones pero que no te diga explicitamente quien te traiciono
 ---
 
 ## 3. Economía y recursos
@@ -82,8 +83,9 @@ Sistema **minimalista: 2 recursos personales**.
 | Recurso | Visible | Función |
 |---|---|---|
 | **Influencia Corporativa** | Según el desafío/modo | Puntaje principal. Decide al ganador. |
+>DANI: Al final de cada minijuego mostrar si aumento o disminuyo
 | **Sospecha** | Sí | Riesgo de despido. Sube al mentir y ser pillado, al ser acusado, al actuar raro. |
-
+>DANI: No se que tan util sea este al principio . Podriamos dejarlo afuera.
 - **Sobornos / tratos**: se hacen transfiriendo Influencia directamente.
 - **Reputación y Confianza**: existen de forma **narrativa** (en la voz y en el
   Historial de Traiciones), sin barra.
@@ -93,7 +95,7 @@ La visibilidad de la Influencia es **por desafío**: algunos muestran el puntaje
 en tiempo real (p. ej. El Botón del Bonus), otros lo ocultan.
 - **Modo Anónimo** (opción de partida): oculta toda la Influencia hasta el final.
 - Sin Modo Anónimo: marcador global **semi-oculto** (posiciones, no cifras).
-
+>DANI: Por ahora oslo mantengamos **Influencia Corporativa** . Y dejemos el resto de los Marcadores para mas adelante. No sienot que aporten mucho en unas primeras versiones y complejiza el entendimiento,
 ---
 
 ## 4. Flujo de partida y ritmo
@@ -159,6 +161,7 @@ usa solo una selección por vez (ver §11).
   Se repite con varias parejas distintas.
 - **Puntuación:** Verde/Verde → +3 ambos · Rojo vs Verde → +5 al rojo, 0 al
   otro · Rojo/Rojo → +1 ambos.
+>DANI: Este ponrlo si o si en un MVP
 
 #### A2 · Encontrar Departamentos *(Room Number Discovery)*
 - **Formato:** serie de llamadas 1-a-1 · **8–10 min** · **Marcador:** oculto
@@ -187,6 +190,7 @@ usa solo una selección por vez (ver §11).
 - **Dinámica:** tanda de llamadas libres para pactar; luego cada uno elige en
   secreto a un jugador. Solo puntúa la elección **mutua**.
 - **Puntuación:** elección mutua → +X ambos · no correspondida → 0.
+>DANI: Este ponrlo si o si en un MVP
 
 #### A6 · Pizarrón de Brainstorming *(Caballete)*
 - **Formato:** llamadas 1-a-1 libres + lienzo en la web · **6–8 min**
@@ -206,6 +210,9 @@ usa solo una selección por vez (ver §11).
 - **Puntuación:** reporte correcto a tiempo → +X · incompleto → pérdida de
   Influencia.
 
+>DANI: EN ninguna veo la de escribir algo y que el resto adivine la palabra. Deberiamos adaptar alguno a esta mecanica.
+
+
 ### 6.B — Desafíos de reunión grupal
 
 #### G1 · Bono Trimestral *(Prisoner's Dilemma grupal — híbrido)*
@@ -224,6 +231,7 @@ usa solo una selección por vez (ver §11).
   ④ acusación final / voto (1 min). Nadie tiene la verdad completa.
 - **Puntuación:** aciertan al culpable → +15 a quienes votaron bien · el
   saboteador no descubierto → +25.
+>Dani: Incluir
 
 #### G3 · Reunión de Status *(detección de mentiras)*
 - **Formato:** reunión grupal · **8 min**
@@ -372,9 +380,14 @@ se fía del cliente). Integración con Teams = **solo instrucciones manuales**.
 ## 11. Decisiones abiertas
 
 - [ ] ¿Cuántas rondas exactas y qué desafíos por ronda? ¿Fijo o según nº de jugadores?
+>Dani: Y yo diria que lo idea serian 5 rondas. 3 grupales y 2 individuales
 - [ ] Selección del subconjunto de desafíos por partida (no se usan los 19).
 - [ ] Regla de desempate en la pantalla final.
+>Dani: Votacion directo y sin vueltas
 - [ ] Balance fino de las tablas de puntos (los valores X) de cada desafío.
 - [ ] Set definitivo de Misiones Personales (deben contradecirse).
+>Dani: No incluir misiones personales en  un MVP
 - [ ] Consecuencias concretas de Sospecha alta.
+>Dani: No incluir Sospecha como marcador. 
 - [ ] Destino final del A6 Pizarrón y el G12 El Marrón (los dos "⚠️ a medias").
+>Dani: no inclur

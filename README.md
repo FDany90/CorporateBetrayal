@@ -13,6 +13,8 @@ donde cada jugador compite por el ascenso pisándose entre sí.
 
 - [Documento de Diseño (GDD)](docs/GDD.md) — mecánicas, catálogo de desafíos,
   economía, arquitectura e infraestructura.
+- [Borradores de Pantalla (UI)](docs/UI-borradores.md) — wireframes de las
+  pantallas: lobby, llamadas, votación y resultados.
 
 ## Estado
 
