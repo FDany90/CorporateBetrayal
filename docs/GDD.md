@@ -3,7 +3,7 @@
 > Juego web de desafíos sociales **inspirado en *Scam Line***, jugado sobre
 > llamadas y reuniones reales de Microsoft Teams. Todos contra todos.
 
-**Versión:** 0.6 (catálogo filtrado para MVP) · **Fecha:** 2026-05-17
+**Versión:** 0.7 (catálogo filtrado para MVP) · **Fecha:** 2026-05-17
 
 ---
 
@@ -131,8 +131,8 @@ entre los empatados.
 
 ## 6. Catálogo de desafíos
 
-Catálogo **filtrado para el MVP**: 6 individuales + 6 grupales. Una partida usa
-2 individuales y 3 grupales (§4.1), rotando del pool.
+Catálogo **filtrado para el MVP**: 6 individuales + 7 grupales (13 desafíos).
+Una partida usa 2 individuales y 3 grupales (§4.1), rotando del pool.
 
 ### 6.A — MVP · Desafíos individuales (llamadas 1-a-1)
 
@@ -179,9 +179,8 @@ Catálogo **filtrado para el MVP**: 6 individuales + 6 grupales. Una partida usa
   sobre cuánto valen.
 - **Puntuación:** al cierre, tu Influencia = suma de los valores reales de las
   tarjetas que te quedaron. *Traición: encajarle deuda técnica a otro.*
-- *Propuesta abierta: era "algo de PROD o tablero SCRUM"; este es el SCRUM. Una
-  variante grupal de PROD ("El Deploy del Viernes") queda en el backlog.*
-> DANI: POdemos agregar juego. El Deploy del Viernes" donde se vote si se deploya o no. Cuanto mas voten alto ams chances hay de que eso suceda. pero si alguien vota lo contrario, da chances de que no suceda. Asi Acordando algo en grupo pero pensando que alguein ams va a votar diferente y traicionar al grupo. Esos votos dan chances de que esos suced. Ej: 7 votan SI 70% Deploy Exitoso. 3 Votos NO. 30% De fallo. Si falla. ganan los que votaron no el proporcional. Te parece?
+- *Nota: era "algo de PROD o tablero SCRUM"; esta es la versión SCRUM. La
+  versión PROD es "El Deploy del Viernes" (§6.B).*
 
 ### 6.B — MVP · Desafíos grupales (reunión de Teams)
 
@@ -225,6 +224,17 @@ Catálogo **filtrado para el MVP**: 6 individuales + 6 grupales. Una partida usa
 - **Puntuación:** sobrevivir → +X.
 - *Nota: el más cercano a un juego de reflejos; usar como caos puntual.*
 
+#### El Deploy del Viernes *(nuevo — pedido de Dani)*
+- **Formato:** reunión grupal · **6–8 min** · Marcador oculto
+- **Dinámica:** debate grupal y luego cada uno vota en secreto **Deployar** o
+  **Esperar**. La proporción de votos "Deployar" es la **probabilidad de que el
+  deploy salga bien** (7 de 10 → 70 %); la web tira el dado.
+- **Puntuación:** hay un pozo de Influencia. Deploy exitoso → el pozo se reparte
+  entre quienes votaron Deployar; deploy fallido → entre quienes votaron Esperar.
+  **Cuantos menos sean del lado ganador, más le toca a cada uno.**
+- *Traición: el grupo acuerda "votemos todos Deployar"; quien vota Esperar baja
+  la probabilidad y apuesta a llevarse casi todo el pozo si el deploy falla.*
+
 ### 6.C — Backlog post-MVP
 Desafíos diseñados pero **fuera del MVP**, para sumar después:
 - *Individuales:* Encontrar Departamentos, Pizarrón de Brainstorming, El Deadline.
@@ -232,8 +242,7 @@ Desafíos diseñados pero **fuera del MVP**, para sumar después:
   El Impostor del Dress Code *(reformatearlo a llamadas, no 100 % grupal)*,
   ¿Salimos a Fumar? *(definir la comunicación adentro/afuera)*, Votación
   Corporativa, Recortes de Presupuesto.
-- *Otros:* Fase de Pasillo (interludio), El Deploy del Viernes (variante grupal
-  del juego de PROD).
+- *Otros:* Fase de Pasillo (interludio).
 
 ### 6.D — Lo que NO es minijuego (es el motor)
 - **Alianzas** — emergen solas; comportamiento, no reglas.
