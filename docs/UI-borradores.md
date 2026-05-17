@@ -1,342 +1,375 @@
 # Traición en la Oficina — Borradores de Pantalla (UI)
 
 > Bocetos de baja fidelidad (wireframes en ASCII) para discutir **estructura y
-> flujo**, no estética. Acompaña al [GDD](GDD.md).
+> flujo**, no estética. Acompaña al [GDD](GDD.md) y al
+> [Modelo de Datos](modelo-datos.md).
 
-**Versión:** 0.1 · **Fecha:** 2026-05-17
+**Versión:** 0.2 · **Fecha:** 2026-05-17
 
 ---
 
 ## 0. Alcance de estos borradores (MVP)
 
-Según el feedback de Dani sobre el GDD, estos borradores asumen un MVP recortado:
-
 | Decisión | En el MVP |
 |---|---|
 | Recursos | **Solo Influencia Corporativa**. Sin Sospecha, sin Reputación. |
 | Misión Personal | **Fuera del MVP**. El modelo de datos la contempla a futuro. |
-| Resultados | Al cerrar un minijuego se muestra **el cambio de Influencia** y resultados parciales. **Nunca** "Fulano te traicionó" de forma explícita. |
-| Modo Anónimo | Fuera del MVP. El marcador se muestra normal. |
+| Resultados | Se muestra **el cambio de Influencia** y tu propia decisión. **Nunca** la decisión ajena ni "Fulano te traicionó". |
+| Modo Anónimo | Fuera del MVP. El marcador se muestra normal y completo. |
+| Plataforma | **Mobile First** — diseñado para celular; responsive a desktop después. |
+
+> **Por qué Mobile First:** muchas redes corporativas bloquean sitios web en sus
+> equipos → el celular del jugador es el dispositivo más confiable. Además, a
+> futuro se piensa integrar las llamadas dentro del juego, y eso vive mejor en
+> mobile.
 
 ---
 
-## 1. Componentes reutilizables
+## 1. Concepto visual: la suite de apps corporativas
 
-Toda la app se arma con pocas piezas repetidas:
+La web **no simula una oficina** (Teams ya pone las caras y las voces; simular
+presencia sería redundante y caro). En cambio, la web se disfraza de **software
+de empresa**: una intranet corporativa ficticia.
 
-**Barra superior** — siempre visible:
+### 1.1 La empresa ficticia
+La partida transcurre dentro de **"SINERGIA CORP"** (nombre satírico, por
+defecto; a futuro el creador de la sala podría ponerle el suyo). Todo el humor
+vive en los textos: comunicados de RRHH, jerga, microcopys pasivo-agresivos.
+
+### 1.2 El shell (marco constante)
+Todas las pantallas comparten un marco fijo y el contenido cambia de "app":
+
 ```
-┌──────────────────────────────────────────┐
-│ ⌂  Ronda 2 / 5            💼 Influencia 34 │
-└──────────────────────────────────────────┘
+┌──────────────────────────────────┐
+│ ☰  SINERGIA CORP          💼 46   │  ← shell: marca + Influencia
+├──────────────────────────────────┤
+│  PORTAL RRHH · Comunicado         │  ← nombre de la "app" activa
+│  ································  │
+│                                   │
+│   [ contenido del minijuego ]     │
+│                                   │
+│  ································  │
+│   [   ACCIÓN PRINCIPAL   ]        │  ← un botón grande, abajo (mobile)
+└──────────────────────────────────┘
 ```
 
-**Lista de jugadores** — se reusa en 3 modos:
-- *informativa* (solo ver quién está),
-- *seleccionable* (votar / elegir a alguien),
-- *de estado* (quién ya terminó una fase).
+### 1.3 Skins de app (reutilización)
+En vez de 19 diseños únicos, hay **~6 "skins" de app**. Cada minijuego elige una.
+Esto se enchufa con el `config` del [modelo de datos](modelo-datos.md).
 
-**Cronómetro** — barra + cuenta regresiva, sincronizado por el servidor:
-```
-   ⏱ 01:00   ▓▓▓▓▓▓▓▓▓░░░░░░
-```
+| Skin de app | Minijuegos que la usan |
+|---|---|
+| **Bandeja de Correo** | Email Filtrado, La Filtración Controlada |
+| **Portal de RRHH** | El Recorte, Votación de Reconocimiento, El Reconocimiento del Mes, El Impostor del Dress Code, Tu Cargo Real |
+| **Sistema de Aprobaciones** | El Botón del Bonus, Bono Trimestral, Votación Corporativa, ¿Salimos a Fumar? |
+| **Panel de Finanzas** | Recortes de Presupuesto, El Catering Sospechoso |
+| **Gestor de Tareas / KPIs** | El Deadline, El Marrón, Reunión de Status |
+| **Pizarra Colaborativa** | Pizarrón de Brainstorming, Encontrar Departamentos |
 
-**Panel de resultado** — el cambio de Influencia, sin editorializar.
-
-**Tarjeta de instrucción** — el bloque central que dice *qué hacer ahora*.
+Una skin define colores, íconos y encabezado; la **estructura** (shell + fases)
+es siempre la misma → escala sin rediseñar.
 
 ---
 
-## 2. Pantallas comunes
+## 2. Componentes reutilizables
 
-### 2.1 Lobby — listado de jugadores
-```
-┌──────────────────────────────────────────┐
-│  TRAICIÓN EN LA OFICINA                    │
-│  Sala  KPXZT              Jugadores 8 / 12 │
-├──────────────────────────────────────────┤
-│  🟢 Ana             lista                  │
-│  🟢 Beto            listo                  │
-│  ⚪ Caro            eligiendo avatar       │
-│  🟢 Dani  (vos)     listo                  │
-│  🟢 Elena           lista                  │
-│  ⚪ Fede            conectando…            │
-│  🟢 Gastón          listo                  │
-│  🟢 Inés            lista                  │
-├──────────────────────────────────────────┤
-│  Empieza cuando todos estén listos.        │
-│              [   ESTOY LISTO   ]           │
-└──────────────────────────────────────────┘
-```
-- Se entra con el **código de sala** + apodo + avatar (pantalla previa, no mostrada).
-- 🟢 = listo · ⚪ = aún no. Esta misma lista, en *modo estado*, reaparece dentro
-  de los desafíos para ver quién terminó cada fase.
-
-### 2.2 Briefing de desafío
-La tarjeta de instrucción anuncia el desafío y sus reglas antes de empezar.
-Ver ejemplos en §3 y §4.
-
-### 2.3 Marcador (entre rondas)
-```
-┌──────────────────────────────────────────┐
-│  MARCADOR — fin de la Ronda 2              │
-├──────────────────────────────────────────┤
-│   1.  Ana            58  ▲                 │
-│   2.  Dani  (vos)    46  ▲                 │
-│   3.  Gastón         44  ▬                 │
-│   4.  Elena          39  ▲                 │
-│   5.  Inés           33  ▼                 │
-│   6.  Beto           31  ▼                 │
-│   7.  Caro           28  ▬                 │
-│   8.  Fede           25  ▼                 │
-├──────────────────────────────────────────┤
-│              [  SIGUIENTE RONDA  ]         │
-└──────────────────────────────────────────┘
-```
-- Única métrica: **Influencia**. ▲▬▼ indican si subió/bajó respecto de la ronda
-  anterior — pista para deducir sin señalar a nadie.
+- **Shell** — barra superior (marca + Influencia) + encabezado de app + zona de
+  acción inferior. Siempre presente.
+- **Lista de jugadores** — 3 modos: *informativa*, *seleccionable* (votar),
+  *de estado* (quién terminó). Se muestra **solo cuando el desafío la necesita**.
+- **Cronómetro** — barra + cuenta regresiva, sincronizado por el servidor.
+- **Panel de decisión** — según tipo: 2 botones / lista seleccionable / número.
+- **Panel de resultado** — el cambio de Influencia, sin editorializar.
 
 ---
 
-## 3. Ejemplo INDIVIDUAL — A1 · El Botón del Bonus
+## 3. Pantallas comunes
 
-Desafío de **serie de llamadas 1-a-1**. Flujo de 5 pantallas.
+### 3.1 Lobby — alta en la empresa
+```
+┌──────────────────────────────────┐
+│  SINERGIA CORP · Intranet         │
+├──────────────────────────────────┤
+│  Bienvenido al equipo.            │
+│  Sala  KPXZT       Plantilla 8/12 │
+│  ································  │
+│  ▸ Ana            ✓ operativo     │
+│  ▸ Beto           ✓ operativo     │
+│  ▸ Caro           · ingresando…   │
+│  ▸ Dani  (vos)    ✓ operativo     │
+│  ▸ Elena          ✓ operativo     │
+│  ▸ Fede           · conectando…   │
+│  ▸ Gastón         ✓ operativo     │
+│  ▸ Inés           ✓ operativo     │
+├──────────────────────────────────┤
+│      [   FICHAR ENTRADA   ]       │
+└──────────────────────────────────┘
+```
+- Se entra con **código de sala** + apodo + avatar (pantalla previa).
 
-### 3.1 Briefing
+### 3.2 Marcador (entre rondas) — lista completa
 ```
-┌──────────────────────────────────────────┐
-│ ⌂  Ronda 2 / 5            💼 Influencia 34 │
-├──────────────────────────────────────────┤
-│              DESAFÍO                       │
-│         EL BOTÓN DEL BONUS                 │
-│                                            │
-│  Vas a hablar 1-a-1 con varios             │
-│  compañeros. Al colgar, cada uno elige     │
-│  Verde o Rojo en secreto.                  │
-│                                            │
-│     🟢 + 🟢   →  +3 los dos                │
-│     🔴 vs 🟢  →  +5  /  0                  │
-│     🔴 + 🔴   →  +1 los dos                │
-│                                            │
-│              [   ENTENDIDO   ]             │
-└──────────────────────────────────────────┘
+┌──────────────────────────────────┐
+│ ☰  SINERGIA CORP          💼 46   │
+├──────────────────────────────────┤
+│  RANKING · fin de la Ronda 2      │
+│  ································  │
+│   1.  Ana           58   ▲        │
+│   2.  Dani  (vos)   46   ▲        │
+│   3.  Gastón        44   ▬        │
+│   4.  Elena         39   ▲        │
+│   5.  Inés          33   ▼        │
+│   6.  Beto          31   ▼        │
+│   7.  Caro          28   ▬        │
+│   8.  Fede          25   ▼        │
+│  ································  │
+│      [   SIGUIENTE RONDA   ]      │
+└──────────────────────────────────┘
 ```
-
-### 3.2 Tarjeta de llamada
-```
-┌──────────────────────────────────────────┐
-│ ⌂  Ronda 2 / 5            💼 Influencia 34 │
-├──────────────────────────────────────────┤
-│  LLAMADA  2 de 5                           │
-│                                            │
-│             📞  LLAMÁ A BETO               │
-│                ahora, por Teams            │
-│                                            │
-│                  🧑‍💼                       │
-│                  Beto                      │
-│                                            │
-│  Cuando los dos estén en la llamada:       │
-│           [   ESTAMOS EN LLAMADA   ]       │
-└──────────────────────────────────────────┘
-```
-- A Beto, en su pantalla, le aparece `Beto: te va a llamar Dani` → **solo uno
-  inicia**, cero llamadas cruzadas.
-
-### 3.3 En llamada (cronómetro)
-```
-┌──────────────────────────────────────────┐
-│ ⌂  Ronda 2 / 5            💼 Influencia 34 │
-├──────────────────────────────────────────┤
-│  EN LLAMADA CON BETO                       │
-│                                            │
-│            ⏱ 01:00                          │
-│        ▓▓▓▓▓▓▓▓▓▓▓░░░░░░                   │
-│                                            │
-│  Negociá. Prometé. Mentí.                  │
-│  Cuando termine el tiempo, vas a elegir.   │
-└──────────────────────────────────────────┘
-```
-
-### 3.4 Tu decisión (así se "vota" en un desafío individual)
-```
-┌──────────────────────────────────────────┐
-│ ⌂  Ronda 2 / 5            💼 Influencia 34 │
-├──────────────────────────────────────────┤
-│  TU DECISIÓN — llamada con Beto             │
-│  Elegí en secreto. Beto no ve tu elección. │
-│                                            │
-│    ┌────────────────┐ ┌────────────────┐  │
-│    │      🟢        │ │      🔴        │  │
-│    │     VERDE      │ │      ROJO      │  │
-│    │   Cooperar     │ │   Traicionar   │  │
-│    └────────────────┘ └────────────────┘  │
-│                                            │
-│  Esperando que Beto también elija…         │
-└──────────────────────────────────────────┘
-```
-
-### 3.5 Resultado de la llamada
-```
-┌──────────────────────────────────────────┐
-│ ⌂  Ronda 2 / 5            💼 Influencia 39 │
-├──────────────────────────────────────────┤
-│  RESULTADO — llamada con Beto               │
-│                                            │
-│         Influencia   34 → 39   (+5)        │
-│                                            │
-│  Vos elegiste 🔴 Rojo.                     │
-│  Sacá tus conclusiones sobre Beto.         │
-│                                            │
-│              [   SIGUIENTE LLAMADA   ]     │
-└──────────────────────────────────────────┘
-```
-- Muestra **solo tu cambio de Influencia**. No dice "Beto cooperó / te
-  traicionó" — el número (+5) deja que **vos lo deduzcas**.
-
-### 3.6 Cierre del desafío (resultados parciales)
-```
-┌──────────────────────────────────────────┐
-│  EL BOTÓN DEL BONUS — terminó              │
-├──────────────────────────────────────────┤
-│  Tus 5 llamadas:                           │
-│     vs Ana      +3                         │
-│     vs Beto     +5                         │
-│     vs Caro      0                         │
-│     vs Elena    +1                         │
-│     vs Fede     +3                         │
-│  ────────────────────                      │
-│  Total del desafío   +12                   │
-│  Influencia    34 → 46                     │
-├──────────────────────────────────────────┤
-│              [   CONTINUAR   ]             │
-└──────────────────────────────────────────┘
-```
-- Da material para deducir (vs Caro = 0 → los dos jugaron Rojo) **sin** acusar a
-  nadie por vos.
+- **Lista completa** de los 8. ▲▬▼ = subió/bajó respecto de la ronda anterior.
 
 ---
 
-## 4. Ejemplo GRUPAL — G4 · El Recorte
+## 4. Ejemplo INDIVIDUAL — El Botón del Bonus
 
-Desafío de **reunión grupal** con votación. Flujo de 5 pantallas.
+Skin: **Sistema de Aprobaciones**. Serie de llamadas 1-a-1. 5 pantallas.
 
-### 4.1 Briefing + entrada a la reunión
+### 4.1 Briefing
 ```
-┌──────────────────────────────────────────┐
-│ ⌂  Ronda 3 / 5            💼 Influencia 46 │
-├──────────────────────────────────────────┤
-│              DESAFÍO                       │
-│             EL RECORTE                     │
-│                                            │
-│  ⚠ Crisis: la empresa debe amonestar a     │
-│  un empleado. Defendete, acusá, negociá.   │
-│  El más votado pierde Influencia.          │
-│                                            │
-│         [  ENTRAR A LA REUNIÓN  ]          │
-│         Abre la reunión grupal de Teams    │
-└──────────────────────────────────────────┘
-```
-
-### 4.2 Sala de espera de la reunión (quórum)
-```
-┌──────────────────────────────────────────┐
-│  REUNIÓN GRUPAL                            │
-│  [ 🎦 Abrir reunión en Teams ]             │
-├──────────────────────────────────────────┤
-│  En la sala   6 / 8                        │
-│                                            │
-│  🟢 Ana     🟢 Beto    🟢 Dani  🟢 Elena   │
-│  🟢 Gastón  🟢 Inés    ⚪ Caro   ⚪ Fede    │
-├──────────────────────────────────────────┤
-│  El debate arranca cuando entren todos.    │
-└──────────────────────────────────────────┘
+┌──────────────────────────────────┐
+│ ☰  SINERGIA CORP          💼 34   │
+├──────────────────────────────────┤
+│  APROBACIONES · Bono del Equipo   │
+│  ································  │
+│  Vas a revisar el bono con varios │
+│  colegas por llamada. Al cerrar   │
+│  cada llamada, en secreto:        │
+│                                   │
+│   🟢 Compartir + 🟢 Compartir →+3 │
+│   🔴 Quedármelo vs 🟢      → +5/0 │
+│   🔴 Quedármelo + 🔴       →+1    │
+│  ································  │
+│      [   COMENZAR   ]             │
+└──────────────────────────────────┘
 ```
 
-### 4.3 Debate (cronómetro)
+### 4.2 Tarjeta de llamada
 ```
-┌──────────────────────────────────────────┐
-│ ⌂  Ronda 3 / 5            💼 Influencia 46 │
-├──────────────────────────────────────────┤
-│  EL RECORTE — DEBATE                       │
-│            ⏱ 03:12                          │
-│        ▓▓▓▓▓▓▓▓░░░░░░░░░░                  │
-│                                            │
-│  Hablen en Teams. Defendete y acusá.       │
-│  Cuando termine el tiempo, se vota.        │
-└──────────────────────────────────────────┘
+┌──────────────────────────────────┐
+│ ☰  SINERGIA CORP          💼 34   │
+├──────────────────────────────────┤
+│  APROBACIONES · Llamada 2 de 5    │
+│  ································  │
+│        📞  LLAMAR A BETO          │
+│           por Teams, ahora        │
+│                                   │
+│              ▸ Beto               │
+│  ································  │
+│   [   ESTAMOS EN LLAMADA   ]      │
+└──────────────────────────────────┘
+```
+- A Beto le aparece `Beto: te va a llamar Dani` → solo uno inicia.
+
+### 4.3 En llamada (cronómetro)
+```
+┌──────────────────────────────────┐
+│ ☰  SINERGIA CORP          💼 34   │
+├──────────────────────────────────┤
+│  APROBACIONES · en llamada        │
+│  ································  │
+│           ⏱ 01:00                 │
+│       ▓▓▓▓▓▓▓▓▓▓░░░░░░            │
+│                                   │
+│  Negociá. Prometé. Mentí.         │
+│  Al terminar, vas a decidir.      │
+└──────────────────────────────────┘
 ```
 
-### 4.4 Votación (así se "vota" en un desafío grupal)
+### 4.4 Tu decisión (binaria secreta)
 ```
-┌──────────────────────────────────────────┐
-│ ⌂  Ronda 3 / 5            💼 Influencia 46 │
-├──────────────────────────────────────────┤
-│  VOTÁ A QUIÉN AMONESTAR                     │
-│  Voto secreto. Elegí un jugador.            │
-│                                            │
-│   ◯  🧑‍💼 Ana                               │
-│   ◉  🧑‍💼 Beto              ← tu elección   │
-│   ◯  🧑‍💼 Caro                              │
-│   ◯  🧑‍💼 Elena                             │
-│   ◯  🧑‍💼 Fede                              │
-│   ◯  🧑‍💼 Gastón                            │
-│   ◯  🧑‍💼 Inés                              │
-│   ◯  ⊘  Abstenerse                          │
-│                                            │
-│          [   CONFIRMAR VOTO   ]            │
-│  Votaron 5 / 8 …                           │
-└──────────────────────────────────────────┘
+┌──────────────────────────────────┐
+│ ☰  SINERGIA CORP          💼 34   │
+├──────────────────────────────────┤
+│  APROBACIONES · Dictamen          │
+│  ································  │
+│  Bono de la llamada con Beto:     │
+│                                   │
+│   ┌────────────┐  ┌────────────┐  │
+│   │ 🟢         │  │ 🔴         │  │
+│   │ COMPARTIR  │  │ QUEDÁRMELO │  │
+│   └────────────┘  └────────────┘  │
+│  ································  │
+│  Secreto. Beto no ve tu elección. │
+└──────────────────────────────────┘
 ```
-- Es la **lista de jugadores en modo seleccionable** — el mismo componente que
-  el lobby, con radio-buttons. Este patrón sirve para *cualquier* desafío que
-  pida "elegí a un jugador" (El Recorte, Compañero de Proyecto, Reconocimiento…).
 
-### 4.5 Resultado de la votación
+### 4.5 Resultado de la llamada
 ```
-┌──────────────────────────────────────────┐
-│ ⌂  Ronda 3 / 5            💼 Influencia 46 │
-├──────────────────────────────────────────┤
-│  RESULTADO — EL RECORTE                     │
-│                                            │
-│  Amonestado:   🧑‍💼 Beto                    │
-│  Beto pierde Influencia.                   │
-│                                            │
-│  Tu Influencia   46 → 46   (sin cambios)   │
-│                                            │
-│  No se muestra quién votó a quién.         │
-│              [   CONTINUAR   ]             │
-└──────────────────────────────────────────┘
+┌──────────────────────────────────┐
+│ ☰  SINERGIA CORP          💼 39   │
+├──────────────────────────────────┤
+│  APROBACIONES · Resultado         │
+│  ································  │
+│   Influencia   34 → 39   (+5)     │
+│                                   │
+│   Vos elegiste 🔴 Quedártelo.     │
+│   Sacá tus conclusiones de Beto.  │
+│  ································  │
+│   [   SIGUIENTE LLAMADA   ]       │
+└──────────────────────────────────┘
 ```
-- Se ve **el desenlace** (a quién amonestaron) pero **no el detalle de votos**:
-  quién votó a quién queda para la deducción y el chusmerío.
+- Muestra **tu cambio de Influencia** y **tu** elección — nunca la de Beto. El
+  número (+5) deja que vos lo deduzcas.
+
+### 4.6 Cierre del desafío (resultados parciales)
+```
+┌──────────────────────────────────┐
+│ ☰  SINERGIA CORP          💼 46   │
+├──────────────────────────────────┤
+│  APROBACIONES · Cierre del bono   │
+│  ································  │
+│   Tus 5 llamadas:                 │
+│     vs Ana      +3                │
+│     vs Beto     +5                │
+│     vs Caro      0                │
+│     vs Elena    +1                │
+│     vs Fede     +3                │
+│   ─────────────────               │
+│   Total   +12      34 → 46        │
+│  ································  │
+│      [   CONTINUAR   ]            │
+└──────────────────────────────────┘
+```
 
 ---
 
-## 5. Patrón general de votación
+## 5. Ejemplo GRUPAL — El Recorte
 
-Los desafíos piden decisiones de 3 tipos, todos con el mismo componente base:
+Skin: **Portal de RRHH**. Reunión grupal con votación. 5 pantallas.
 
-| Tipo de decisión | Ejemplo | UI |
+### 5.1 Briefing + entrada a la reunión
+```
+┌──────────────────────────────────┐
+│ ☰  SINERGIA CORP          💼 46   │
+├──────────────────────────────────┤
+│  PORTAL RRHH · Comunicado         │
+│  ································  │
+│  ⚠ AJUSTE DE PLANTILLA — Q3       │
+│                                   │
+│  Dirección debe amonestar a un    │
+│  empleado. Defendete, acusá y     │
+│  negociá. Después se vota.        │
+│  ································  │
+│  [  ENTRAR A LA REUNIÓN ▸ Teams ] │
+└──────────────────────────────────┘
+```
+
+### 5.2 Sala de espera (quórum)
+```
+┌──────────────────────────────────┐
+│  PORTAL RRHH · Reunión            │
+│  [ 🎦 Abrir reunión en Teams ]    │
+├──────────────────────────────────┤
+│  En la sala   6 / 8               │
+│                                   │
+│  ✓ Ana    ✓ Beto   ✓ Dani         │
+│  ✓ Elena  ✓ Gastón ✓ Inés         │
+│  · Caro   · Fede                  │
+├──────────────────────────────────┤
+│  El debate arranca con todos.     │
+└──────────────────────────────────┘
+```
+
+### 5.3 Debate (cronómetro)
+```
+┌──────────────────────────────────┐
+│ ☰  SINERGIA CORP          💼 46   │
+├──────────────────────────────────┤
+│  PORTAL RRHH · Debate             │
+│  ································  │
+│           ⏱ 03:12                 │
+│       ▓▓▓▓▓▓▓░░░░░░░░░░           │
+│                                   │
+│  Hablen en Teams. Defendete.      │
+│  Al terminar, se vota.            │
+└──────────────────────────────────┘
+```
+
+### 5.4 Votación (elegir un jugador)
+```
+┌──────────────────────────────────┐
+│ ☰  SINERGIA CORP          💼 46   │
+├──────────────────────────────────┤
+│  PORTAL RRHH · Voto confidencial  │
+│  ································  │
+│  ¿A quién amonestar?              │
+│                                   │
+│   ○ Ana                           │
+│   ● Caro            ← tu elección │
+│   ○ Beto                          │
+│   ○ Elena                         │
+│   ○ Fede                          │
+│   ○ Inés                          │
+│   ○ Abstenerse                    │
+│  ································  │
+│   [   ENVIAR DICTAMEN   ]         │
+│  Recibidos 5 / 8 · ⏱ 00:42        │
+└──────────────────────────────────┘
+```
+- Es la **lista de jugadores en modo seleccionable** — mismo componente que el
+  lobby. Sirve para cualquier desafío de "elegí un jugador".
+
+### 5.5 Resultado de la votación
+```
+┌──────────────────────────────────┐
+│ ☰  SINERGIA CORP          💼 46   │
+├──────────────────────────────────┤
+│  PORTAL RRHH · Resolución         │
+│  ································  │
+│   Amonestado:   ▸ Beto            │
+│   Beto pierde Influencia.         │
+│                                   │
+│   Tu Influencia  46 → 46          │
+│  ································  │
+│   No se muestra quién votó a      │
+│   quién — eso queda para deducir. │
+│      [   CONTINUAR   ]            │
+└──────────────────────────────────┘
+```
+
+---
+
+## 6. Patrón general de votación
+
+Toda decisión es de uno de 3 tipos, con el mismo componente base:
+
+| Tipo | Ejemplo | UI |
 |---|---|---|
-| **Binaria secreta** | El Botón (Verde/Rojo), Bono Trimestral | 2 botones grandes |
-| **Elegir un jugador** | El Recorte, Compañero de Proyecto | Lista seleccionable + Confirmar |
-| **Reparto / cantidad** | Recortes de Presupuesto | Slider o input numérico |
+| **Binaria secreta** | El Botón, Bono Trimestral | 2 botones grandes |
+| **Elegir un jugador** | El Recorte, Compañero de Proyecto | Lista seleccionable |
+| **Reparto / cantidad** | Recortes de Presupuesto | Slider o número |
 
-Siempre: elección **secreta** → pantalla de espera ("votaron X/N") → resultado.
+Siempre: elección **secreta** → espera ("recibidos X/N") → resultado.
+
+**Decisión grupal sin compartir pantalla:** como el estado está sincronizado,
+todos ven la misma pantalla a la vez en su propio celular. Si decide una sola
+persona (ej. el "Jefe"), esa ve los botones y el resto ve la misma pantalla en
+modo espectador. No hace falta screen-share de Teams.
 
 ---
 
-## 6. Preguntas abiertas para Dani
+## 7. Decisiones cerradas (feedback de Dani)
 
-- [ ] ¿La lista de jugadores va siempre visible (panel lateral) o solo cuando el
-      desafío la necesita? En móvil el espacio es poco.
-      >Dani:Podemos Por ahora solo cuando el desafio lo necesita
-- [ ] En el resultado de llamada (§3.5), ¿mostramos "vos elegiste Rojo" o lo
-      omitimos para que ni te acuerdes y haya más caos?
-      >Dani:Mostrar vos elegiste rojo. Pero no mostrar lod el oponente
-- [ ] El marcador entre rondas (§2.3): ¿lista completa, o solo tu puesto y los
-      vecinos para generar más incertidumbre?
-      >Dani:lista Completa
-- [ ] ¿La web corre al lado de Teams en la misma pantalla (diseño angosto) o se
-      asume una segunda pantalla / celular?
-      >Dani: Creoq ue hacerla para celular. Si podemos adaptarla luego resposive mejor. Pero teniendo en cueta que muchas empresas bloqeuan sitios en su red corporativa. Ademas que en un futuro pienso Integrar llamadas al juego asi que Mobile First
+- ✅ Lista de jugadores: **solo cuando el desafío la necesita** (no panel fijo).
+- ✅ Resultado de llamada: **mostrar tu elección**, nunca la del rival.
+- ✅ Marcador entre rondas: **lista completa**.
+- ✅ Plataforma: **Mobile First**, responsive a desktop después.
+- ✅ Enfoque visual: **suite de apps corporativas** (§1).
+
+## 8. Preguntas abiertas
+
+- [ ] Nombre de la empresa: ¿"SINERGIA CORP" fijo, o lo elige quien crea la sala?
+- [ ] ¿La Influencia del shell (💼 46) se ve siempre, o se oculta en algunos
+      desafíos para sumar incertidumbre?
+- [ ] Set de avatares: ¿ilustraciones de personajes de oficina, o algo más
+      simple (iniciales / íconos) para el MVP?
