@@ -21,6 +21,8 @@ donde cada jugador compite por el ascenso pisándose entre sí.
   reconexión, sesión recuperable y despliegue.
 - [Guía del Código](docs/codigo.md) — cómo está organizado el código del
   server y de la web.
+- [Estado y Guía para Retomar](docs/handoff.md) — **empezá acá** si retomás el
+  proyecto en otra PC o sesión: estado, flujo de trabajo y próximos pasos.
 
 ## Prototipo HTML
 
