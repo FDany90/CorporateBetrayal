@@ -15,6 +15,8 @@ donde cada jugador compite por el ascenso pisándose entre sí.
   economía, arquitectura e infraestructura.
 - [Borradores de Pantalla (UI)](docs/UI-borradores.md) — wireframes de las
   pantallas: lobby, llamadas, votación y resultados.
+- [Modelo de Datos](docs/modelo-datos.md) — entidades, sistema de minijuegos
+  enchufable y mapa estado → pantalla.
 
 ## Estado
 

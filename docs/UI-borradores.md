@@ -330,9 +330,13 @@ Siempre: elección **secreta** → pantalla de espera ("votaron X/N") → result
 
 - [ ] ¿La lista de jugadores va siempre visible (panel lateral) o solo cuando el
       desafío la necesita? En móvil el espacio es poco.
+      >Dani:Podemos Por ahora solo cuando el desafio lo necesita
 - [ ] En el resultado de llamada (§3.5), ¿mostramos "vos elegiste Rojo" o lo
       omitimos para que ni te acuerdes y haya más caos?
+      >Dani:Mostrar vos elegiste rojo. Pero no mostrar lod el oponente
 - [ ] El marcador entre rondas (§2.3): ¿lista completa, o solo tu puesto y los
       vecinos para generar más incertidumbre?
+      >Dani:lista Completa
 - [ ] ¿La web corre al lado de Teams en la misma pantalla (diseño angosto) o se
       asume una segunda pantalla / celular?
+      >Dani: Creoq ue hacerla para celular. Si podemos adaptarla luego resposive mejor. Pero teniendo en cueta que muchas empresas bloqeuan sitios en su red corporativa. Ademas que en un futuro pienso Integrar llamadas al juego asi que Mobile First
