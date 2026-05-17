@@ -19,6 +19,8 @@ donde cada jugador compite por el ascenso pisándose entre sí.
   enchufable y mapa estado → pantalla.
 - [Arquitectura e Infraestructura](docs/arquitectura.md) — tiempo real,
   reconexión, sesión recuperable y despliegue.
+- [Guía del Código](docs/codigo.md) — cómo está organizado el código del
+  server y de la web.
 
 ## Prototipo HTML
 
