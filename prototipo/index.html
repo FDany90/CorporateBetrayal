@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Traición en la Oficina — Prototipo</title>
+<style>
+  :root{
+    --bg:#eef1f6; --card:#ffffff; --ink:#0f172a; --muted:#64748b;
+    --line:#e2e8f0; --primary:#2563eb; --primary-d:#1d4ed8;
+    --green:#16a34a; --red:#dc2626; --rrhh:#7c3aed; --warn:#d97706;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  body{
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    background:#cbd5e1;color:var(--ink);line-height:1.45;
+  }
+  /* selector de pantallas (solo prototipo) */
+  .protobar{
+    position:sticky;top:0;z-index:50;background:#0f172a;color:#fff;
+    display:flex;gap:8px;align-items:center;padding:8px 12px;font-size:13px;
+  }
+  .protobar select{flex:1;padding:6px;border-radius:6px;border:0;font-size:13px;}
+  /* "celular" */
+  .phone{
+    max-width:430px;margin:0 auto;background:var(--bg);min-height:100vh;
+    display:flex;flex-direction:column;position:relative;
+  }
+  .screen{display:none;flex-direction:column;flex:1;min-height:calc(100vh - 40px);}
+  .screen.active{display:flex;}
+  /* shell */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    background:#fff;border-bottom:1px solid var(--line);padding:12px 16px;
+  }
+  .brand{font-weight:800;letter-spacing:.5px;font-size:15px;}
+  .brand .dot{color:var(--primary);}
+  .burger{font-size:18px;color:var(--muted);}
+  .influence{
+    background:#eff6ff;color:var(--primary-d);font-weight:700;font-size:13px;
+    padding:5px 10px;border-radius:999px;border:1px solid #dbeafe;
+  }
+  .appheader{
+    padding:10px 16px;font-size:12px;font-weight:700;letter-spacing:1px;
+    color:#fff;background:var(--primary);text-transform:uppercase;
+  }
+  .appheader.rrhh{background:var(--rrhh);}
+  .appheader.neutral{background:#475569;}
+  .content{padding:20px 16px;flex:1;}
+  .actionbar{padding:14px 16px;background:#fff;border-top:1px solid var(--line);}
+  /* piezas */
+  h1{font-size:20px;margin-bottom:6px;}
+  h2{font-size:16px;margin-bottom:10px;}
+  p{color:var(--muted);font-size:14px;margin-bottom:10px;}
+  .big{text-align:center;padding:24px 0;}
+  .big .label{font-size:12px;color:var(--muted);letter-spacing:1px;}
+  .big .value{font-size:30px;font-weight:800;}
+  .btn{
+    display:block;width:100%;padding:15px;border:0;border-radius:12px;
+    background:var(--primary);color:#fff;font-size:15px;font-weight:700;
+    cursor:pointer;text-align:center;
+  }
+  .btn:active{background:var(--primary-d);}
+  .btn.ghost{background:#f1f5f9;color:var(--ink);}
+  .btn.green{background:var(--green);}
+  .btn.red{background:var(--red);}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:14px;margin-bottom:10px;
+  }
+  .rule{
+    display:flex;justify-content:space-between;font-size:14px;
+    padding:7px 0;border-bottom:1px dashed var(--line);
+  }
+  .rule:last-child{border:0;}
+  .player{
+    display:flex;align-items:center;gap:10px;padding:10px 4px;
+    border-bottom:1px solid var(--line);font-size:15px;
+  }
+  .player:last-child{border:0;}
+  .av{
+    width:34px;height:34px;border-radius:50%;background:#e2e8f0;
+    display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
+  }
+  .player .nm{flex:1;font-weight:600;}
+  .player .st{font-size:12px;color:var(--muted);}
+  .ok{color:var(--green);}
+  .tag{
+    display:inline-block;background:#eff6ff;color:var(--primary-d);
+    font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;
+  }
+  /* cronómetro */
+  .timer{text-align:center;margin:18px 0;}
+  .timer .t{font-size:38px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .bar{height:8px;background:var(--line);border-radius:999px;overflow:hidden;margin-top:8px;}
+  .bar > i{display:block;height:100%;background:var(--primary);width:100%;}
+  /* decisión binaria */
+  .choices{display:flex;gap:12px;}
+  .choice{
+    flex:1;border:2px solid var(--line);border-radius:14px;padding:20px 8px;
+    text-align:center;cursor:pointer;background:#fff;
+  }
+  .choice .ic{font-size:30px;}
+  .choice .t1{font-weight:800;margin-top:6px;font-size:15px;}
+  .choice .t2{font-size:12px;color:var(--muted);}
+  .choice.sel-g{border-color:var(--green);background:#f0fdf4;}
+  .choice.sel-r{border-color:var(--red);background:#fef2f2;}
+  /* lista votación */
+  .vote{
+    display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);
+    border-radius:10px;margin-bottom:8px;cursor:pointer;background:#fff;
+  }
+  .vote.sel{border-color:var(--primary);background:#eff6ff;}
+  .vote .radio{
+    width:20px;height:20px;border-radius:50%;border:2px solid #cbd5e1;flex-shrink:0;
+  }
+  .vote.sel .radio{border-color:var(--primary);background:var(--primary);
+    box-shadow:inset 0 0 0 4px #fff;}
+  .avatars{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:14px 0;}
+  .avatars .pick{
+    width:48px;height:48px;border-radius:50%;background:#e2e8f0;font-size:24px;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    border:3px solid transparent;
+  }
+  .avatars .pick.sel{border-color:var(--primary);}
+  .field{margin-bottom:12px;}
+  .field label{font-size:12px;font-weight:700;color:var(--muted);}
+  .field input{
+    width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;
+    font-size:16px;margin-top:4px;
+  }
+  .muted-note{font-size:12px;color:var(--muted);text-align:center;margin-top:10px;}
+  .center{text-align:center;}
+  .rank{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--line);}
+  .rank .pos{font-weight:800;width:22px;color:var(--muted);}
+  .rank .pts{font-weight:800;}
+  .rank.you{background:#eff6ff;border-radius:8px;}
+  .trend{font-size:13px;width:18px;text-align:center;}
+  .up{color:var(--green);}.down{color:var(--red);}.eq{color:var(--muted);}
+  .crown{font-size:46px;}
+  .logo{
+    width:54px;height:54px;border-radius:14px;background:var(--primary);
+    color:#fff;display:flex;align-items:center;justify-content:center;
+    font-size:26px;font-weight:800;margin:0 auto 12px;
+  }
+</style>
+</head>
+<body>
+
+<div class="protobar">
+  <span>🧪 Prototipo</span>
+  <select id="nav" onchange="show(this.value)">
+    <optgroup label="Comunes">
+      <option value="s-ingreso">1 · Ingreso</option>
+      <option value="s-lobby">2 · Lobby</option>
+      <option value="s-ronda">3 · Intro de ronda</option>
+      <option value="s-marcador">14 · Marcador</option>
+      <option value="s-final">15 · Pantalla final</option>
+    </optgroup>
+    <optgroup label="Individual · El Botón del Bonus">
+      <option value="s-brief-i">4 · Briefing</option>
+      <option value="s-llamada">5 · Tarjeta de llamada</option>
+      <option value="s-enllamada">6 · En llamada</option>
+      <option value="s-decision">7 · Tu decisión</option>
+      <option value="s-res-i">8 · Resultado de llamada</option>
+      <option value="s-cierre">9 · Cierre del desafío</option>
+    </optgroup>
+    <optgroup label="Grupal · El Recorte">
+      <option value="s-brief-g">10 · Briefing</option>
+      <option value="s-espera">11 · Sala de espera</option>
+      <option value="s-debate">12 · Debate</option>
+      <option value="s-votacion">13 · Votación</option>
+      <option value="s-res-g">13b · Resultado</option>
+    </optgroup>
+  </select>
+</div>
+
+<div class="phone">
+
+  <!-- 1 · INGRESO -->
+  <section class="screen active" id="s-ingreso">
+    <div class="content" style="display:flex;flex-direction:column;justify-content:center;flex:1;">
+      <div class="logo">S</div>
+      <h1 class="center">SINERGIA <span style="color:var(--primary)">CORP</span></h1>
+      <p class="center">Acceso de personal · Traición en la Oficina</p>
+      <div style="height:14px"></div>
+      <div class="field">
+        <label>CÓDIGO DE SALA</label>
+        <input value="KPXZT" />
+      </div>
+      <div class="field">
+        <label>TU APODO</label>
+        <input placeholder="Cómo te ven los demás" value="Dani" />
+      </div>
+      <label style="font-size:12px;font-weight:700;color:var(--muted)">ELEGÍ TU AVATAR</label>
+      <div class="avatars">
+        <div class="pick sel" onclick="pickAv(this)">🧑‍💼</div>
+        <div class="pick" onclick="pickAv(this)">👩‍💼</div>
+        <div class="pick" onclick="pickAv(this)">🧑‍💻</div>
+        <div class="pick" onclick="pickAv(this)">👨‍💼</div>
+        <div class="pick" onclick="pickAv(this)">👩‍💻</div>
+        <div class="pick" onclick="pickAv(this)">🧔</div>
+      </div>
+    </div>
+    <div class="actionbar"><button class="btn" onclick="show('s-lobby')">INGRESAR</button></div>
+  </section>
+
+  <!-- 2 · LOBBY -->
+  <section class="screen" id="s-lobby">
+    <div class="topbar">
+      <span class="burger">☰</span>
+      <span class="brand">SINERGIA<span class="dot">·</span>CORP</span>
+      <span class="influence">Sala KPXZT</span>
+    </div>
+    <div class="appheader neutral">Intranet · Lobby</div>
+    <div class="content">
+      <h2>Bienvenido al equipo</h2>
+      <p>Plantilla 8 / 12 · el juego empieza cuando todos fichen.</p>
+      <div class="card" style="padding:4px 14px">
+        <div class="player"><div class="av">👩‍💼</div><span class="nm">Ana</span><span class="st ok">✓ operativo</span></div>
+        <div class="player"><div class="av">👨‍💼</div><span class="nm">Beto</span><span class="st ok">✓ operativo</span></div>
+        <div class="player"><div class="av">🧑‍💻</div><span class="nm">Caro</span><span class="st">· ingresando…</span></div>
+        <div class="player"><div class="av">🧑‍💼</div><span class="nm">Dani <span class="tag">vos</span></span><span class="st ok">✓ operativo</span></div>
+        <div class="player"><div class="av">👩‍💻</div><span class="nm">Elena</span><span class="st ok">✓ operativo</span></div>
+        <div class="player"><div class="av">🧔</div><span class="nm">Fede</span><span class="st">· conectando…</span></div>
+        <div class="player"><div class="av">👨‍💼</div><span class="nm">Gastón</span><span class="st ok">✓ operativo</span></div>
+        <div class="player"><div class="av">👩‍💼</div><span class="nm">Inés</span><span class="st ok">✓ operativo</span></div>
+      </div>
+    </div>
+    <div class="actionbar"><button class="btn" onclick="show('s-ronda')">FICHAR ENTRADA</button></div>
+  </section>
+
+  <!-- 3 · INTRO DE RONDA -->
+  <section class="screen" id="s-ronda">
+    <div class="topbar">
+      <span class="burger">☰</span>
+      <span class="brand">SINERGIA<span class="dot">·</span>CORP</span>
+      <span class="influence">💼 34</span>
+    </div>
+    <div class="appheader neutral">Ronda 2 de 5</div>
+    <div class="content center" style="display:flex;flex-direction:column;justify-content:center;flex:1;">
+      <div style="font-size:46px">📞</div>
+      <h1>Ronda Individual</h1>
+      <p>Vas a tener una serie de llamadas 1-a-1. Negociá, prometé… y traicioná
+         si te conviene.</p>
+      <div class="card"><strong>El Botón del Bonus</strong><br>
+        <span style="font-size:13px;color:var(--muted)">Sistema de Aprobaciones</span></div>
+    </div>
+    <div class="actionbar"><button class="btn" onclick="show('s-brief-i')">VER INSTRUCCIONES</button></div>
+  </section>
+
+  <!-- 4 · BRIEFING INDIVIDUAL -->
+  <section class="screen" id="s-brief-i">
+    <div class="topbar">
+      <span class="burger">☰</span>
+      <span class="brand">SINERGIA<span class="dot">·</span>CORP</span>
+      <span class="influence">💼 34</span>
+    </div>
+    <div class="appheader">Aprobaciones · Bono del Equipo</div>
+    <div class="content">
+      <h2>El Botón del Bonus</h2>
+      <p>Vas a revisar el bono con 5 colegas por llamada. Al cerrar cada
+         llamada, en secreto elegís:</p>
+      <div class="card">
+        <div class="rule"><span>🟢 Compartir + 🟢 Compartir</span><strong>+3 / +3</strong></div>
+        <div class="rule"><span>🔴 Quedárselo vs 🟢 Compartir</span><strong>+5 / 0</strong></div>
+        <div class="rule"><span>🔴 Quedárselo + 🔴 Quedárselo</span><strong>+1 / +1</strong></div>
+      </div>
+      <p class="muted-note">El otro no ve tu elección hasta el resultado.</p>
+    </div>
+    <div class="actionbar"><button class="btn" onclick="show('s-llamada')">COMENZAR</button></div>
+  </section>
+
+  <!-- 5 · TARJETA DE LLAMADA -->
+  <section class="screen" id="s-llamada">
+    <div class="topbar">
+      <span class="burger">☰</span>
+      <span class="brand">SINERGIA<span class="dot">·</span>CORP</span>
+      <span class="influence">💼 34</span>
+    </div>
+    <div class="appheader">Aprobaciones · Llamada 2 de 5</div>
+    <div class="content center" style="display:flex;flex-direction:column;justify-content:center;flex:1;">
+      <div style="font-size:34px">📞</div>
+      <h1>Llamá a Beto</h1>
+      <p>por Teams, ahora</p>
+      <div class="av" style="width:80px;height:80px;font-size:42px;margin:14px auto;">👨‍💼</div>
+      <p class="muted-note">A Beto le aparece: «te va a llamar Dani».<br>Solo uno inicia la llamada.</p>
+    </div>
+    <div class="actionbar"><button class="btn" onclick="show('s-enllamada')">ESTAMOS EN LLAMADA</button></div>
+  </section>
+
+  <!-- 6 · EN LLAMADA -->
+  <section class="screen" id="s-enllamada">
+    <div class="topbar">
+      <span class="burger">☰</span>
+      <span class="brand">SINERGIA<span class="dot">·</span>CORP</span>
+      <span class="influence">💼 34</span>
+    </div>
+    <div class="appheader">Aprobaciones · En llamada con Beto</div>
+    <div class="content center" style="display:flex;flex-direction:column;justify-content:center;flex:1;">
+      <div class="timer">
+        <div class="t" id="t1">01:00</div>
+        <div class="bar"><i id="b1"></i></div>
+      </div>
+      <h2>Negociá. Prometé. Mentí.</h2>
+      <p>Cuando termine el tiempo, vas a decidir en secreto.</p>
+    </div>
+    <div class="actionbar"><button class="btn ghost" onclick="show('s-decision')">Saltar al final del tiempo →</button></div>
+  </section>
+
+  <!-- 7 · DECISIÓN -->
+  <section class="screen" id="s-decision">
+    <div class="topbar">
+      <span class="burger">☰</span>
+      <span class="brand">SINERGIA<span class="dot">·</span>CORP</span>
+      <span class="influence">💼 34</span>
+    </div>
+    <div class="appheader">Aprobaciones · Dictamen</div>
+    <div class="content">
+      <h2>Bono de la llamada con Beto</h2>
+      <p>Elegí en secreto. Beto no ve tu elección.</p>
+      <div class="choices">
+        <div class="choice" onclick="pickChoice(this,'g')">
+          <div class="ic">🟢</div><div class="t1">COMPARTIR</div><div class="t2">Cooperar</div>
+        </div>
+        <div class="choice" onclick="pickChoice(this,'r')">
+          <div class="ic">🔴</div><div class="t1">QUEDÁRMELO</div><div class="t2">Traicionar</div>
+        </div>
+      </div>
+      <p class="muted-note" id="dwait">Elegí una opción para confirmar.</p>
+    </div>
+    <div class="actionbar"><button class="btn" onclick="show('s-res-i')">CONFIRMAR</button></div>
+  </section>
+
+  <!-- 8 · RESULTADO DE LLAMADA -->
+  <section class="screen" id="s-res-i">
+    <div class="topbar">
+      <span class="burger">☰</span>
+      <span class="brand">SINERGIA<span class="dot">·</span>CORP</span>
+      <span class="influence">💼 39</span>
+    </div>
+    <div class="appheader">Aprobaciones · Resultado</div>
+    <div class="content">
+      <h2>Resultado — llamada con Beto</h2>
+      <div class="big">
+        <div class="label">INFLUENCIA</div>
+        <div class="value">34 → 39 <span class="up">(+5)</span></div>
+      </div>
+      <div class="card">
+        Vos elegiste <strong>🔴 Quedártelo</strong>.<br>
+        <span style="color:var(--muted);font-size:13px">
+        No se muestra qué hizo Beto — el número te deja sacar conclusiones.</span>
+      </div>
+    </div>
+    <div class="actionbar"><button class="btn" onclick="show('s-cierre')">SIGUIENTE LLAMADA</button></div>
+  </section>
+
+  <!-- 9 · CIERRE DEL DESAFÍO -->
+  <section class="screen" id="s-cierre">
+    <div class="topbar">
+      <span class="burger">☰</span>
+      <span class="brand">SINERGIA<span class="dot">·</span>CORP</span>
+      <span class="influence">💼 46</span>
+    </div>
+    <div class="appheader">Aprobaciones · Cierre del bono</div>
+    <div class="content">
+      <h2>El Botón del Bonus — terminó</h2>
+      <div class="card">
+        <div class="rule"><span>vs Ana</span><strong class="up">+3</strong></div>
+        <div class="rule"><span>vs Beto</span><strong class="up">+5</strong></div>
+        <div class="rule"><span>vs Caro</span><strong class="eq">0</strong></div>
+        <div class="rule"><span>vs Elena</span><strong class="up">+1</strong></div>
+        <div class="rule"><span>vs Fede</span><strong class="up">+3</strong></div>
+      </div>
+      <div class="big">
+        <div class="label">TOTAL DEL DESAFÍO</div>
+        <div class="value up">+12</div>
+        <div class="label">Influencia 34 → 46</div>
+      </div>
+    </div>
+    <div class="actionbar"><button class="btn" onclick="show('s-brief-g')">CONTINUAR</button></div>
+  </section>
+
+  <!-- 10 · BRIEFING GRUPAL -->
+  <section class="screen" id="s-brief-g">
+    <div class="topbar">
+      <span class="burger">☰</span>
+      <span class="brand">SINERGIA<span class="dot">·</span>CORP</span>
+      <span class="influence">💼 46</span>
+    </div>
+    <div class="appheader rrhh">Portal RRHH · Comunicado</div>
+    <div class="content">
+      <h2>⚠ Ajuste de plantilla — Q3</h2>
+      <p>Dirección debe amonestar a un empleado. Sumate a la reunión grupal,
+         defendete, acusá y negociá tu voto. Después se vota.</p>
+      <div class="card" style="border-color:#fde68a;background:#fffbeb">
+        <strong>El más votado pierde Influencia.</strong><br>
+        <span style="font-size:13px;color:var(--muted)">No es eliminado: sigue jugando.</span>
+      </div>
+    </div>
+    <div class="actionbar"><button class="btn" style="background:var(--rrhh)" onclick="show('s-espera')">ENTRAR A LA REUNIÓN ▸ Teams</button></div>
+  </section>
+
+  <!-- 11 · SALA DE ESPERA -->
+  <section class="screen" id="s-espera">
+    <div class="topbar">
+      <span class="burger">☰</span>
+      <span class="brand">SINERGIA<span class="dot">·</span>CORP</span>
+      <span class="influence">💼 46</span>
+    </div>
+    <div class="appheader rrhh">Portal RRHH · Reunión</div>
+    <div class="content">
+      <button class="btn ghost" style="margin-bottom:14px">🎦 Abrir reunión en Teams</button>
+      <h2>En la sala — 6 / 8</h2>
+      <div class="card" style="padding:4px 14px">
+        <div class="player"><div class="av">👩‍💼</div><span class="nm">Ana</span><span class="st ok">✓</span></div>
+        <div class="player"><div class="av">👨‍💼</div><span class="nm">Beto</span><span class="st ok">✓</span></div>
+        <div class="player"><div class="av">🧑‍💼</div><span class="nm">Dani <span class="tag">vos</span></span><span class="st ok">✓</span></div>
+        <div class="player"><div class="av">👩‍💻</div><span class="nm">Elena</span><span class="st ok">✓</span></div>
+        <div class="player"><div class="av">👨‍💼</div><span class="nm">Gastón</span><span class="st ok">✓</span></div>
+        <div class="player"><div class="av">👩‍💼</div><span class="nm">Inés</span><span class="st ok">✓</span></div>
+        <div class="player"><div class="av">🧑‍💻</div><span class="nm">Caro</span><span class="st">· falta</span></div>
+        <div class="player"><div class="av">🧔</div><span class="nm">Fede</span><span class="st">· falta</span></div>
+      </div>
+      <p class="muted-note">El debate arranca cuando entren todos.</p>
+    </div>
+    <div class="actionbar"><button class="btn" style="background:var(--rrhh)" onclick="show('s-debate')">YA ESTOY EN LA SALA</button></div>
+  </section>
+
+  <!-- 12 · DEBATE -->
+  <section class="screen" id="s-debate">
+    <div class="topbar">
+      <span class="burger">☰</span>
+      <span class="brand">SINERGIA<span class="dot">·</span>CORP</span>
+      <span class="influence">💼 46</span>
+    </div>
+    <div class="appheader rrhh">Portal RRHH · Debate</div>
+    <div class="content center" style="display:flex;flex-direction:column;justify-content:center;flex:1;">
+      <div class="timer">
+        <div class="t" id="t2">03:12</div>
+        <div class="bar"><i id="b2" style="background:var(--rrhh)"></i></div>
+      </div>
+      <h2>Hablen en Teams</h2>
+      <p>Defendete y acusá. Cuando termine el tiempo, se vota.</p>
+    </div>
+    <div class="actionbar"><button class="btn ghost" onclick="show('s-votacion')">Saltar a la votación →</button></div>
+  </section>
+
+  <!-- 13 · VOTACIÓN -->
+  <section class="screen" id="s-votacion">
+    <div class="topbar">
+      <span class="burger">☰</span>
+      <span class="brand">SINERGIA<span class="dot">·</span>CORP</span>
+      <span class="influence">💼 46</span>
+    </div>
+    <div class="appheader rrhh">Portal RRHH · Voto confidencial</div>
+    <div class="content">
+      <h2>¿A quién amonestar?</h2>
+      <p>Voto secreto. Elegí un jugador.</p>
+      <div class="vote" onclick="pickVote(this)"><div class="radio"></div><div class="av">👩‍💼</div><span class="nm">Ana</span></div>
+      <div class="vote" onclick="pickVote(this)"><div class="radio"></div><div class="av">👨‍💼</div><span class="nm">Beto</span></div>
+      <div class="vote sel" onclick="pickVote(this)"><div class="radio"></div><div class="av">🧑‍💻</div><span class="nm">Caro</span></div>
+      <div class="vote" onclick="pickVote(this)"><div class="radio"></div><div class="av">👩‍💻</div><span class="nm">Elena</span></div>
+      <div class="vote" onclick="pickVote(this)"><div class="radio"></div><div class="av">🧔</div><span class="nm">Fede</span></div>
+      <div class="vote" onclick="pickVote(this)"><div class="radio"></div><div class="av">👨‍💼</div><span class="nm">Gastón</span></div>
+      <div class="vote" onclick="pickVote(this)"><div class="radio"></div><span class="nm" style="margin-left:30px">⊘ Abstenerse</span></div>
+      <p class="muted-note">Recibidos 5 / 8 · ⏱ 00:42</p>
+    </div>
+    <div class="actionbar"><button class="btn" style="background:var(--rrhh)" onclick="show('s-res-g')">ENVIAR DICTAMEN</button></div>
+  </section>
+
+  <!-- 13b · RESULTADO VOTACIÓN -->
+  <section class="screen" id="s-res-g">
+    <div class="topbar">
+      <span class="burger">☰</span>
+      <span class="brand">SINERGIA<span class="dot">·</span>CORP</span>
+      <span class="influence">💼 46</span>
+    </div>
+    <div class="appheader rrhh">Portal RRHH · Resolución</div>
+    <div class="content">
+      <h2>Resultado — El Recorte</h2>
+      <div class="card center" style="padding:22px">
+        <div class="av" style="width:64px;height:64px;font-size:34px;margin:0 auto 8px">👨‍💼</div>
+        <strong style="font-size:18px">Beto fue amonestado</strong><br>
+        <span style="color:var(--muted);font-size:14px">Beto pierde Influencia.</span>
+      </div>
+      <div class="big">
+        <div class="label">TU INFLUENCIA</div>
+        <div class="value">46 → 46</div>
+      </div>
+      <p class="muted-note">No se muestra quién votó a quién — eso queda para el chusmerío.</p>
+    </div>
+    <div class="actionbar"><button class="btn" onclick="show('s-marcador')">CONTINUAR</button></div>
+  </section>
+
+  <!-- 14 · MARCADOR -->
+  <section class="screen" id="s-marcador">
+    <div class="topbar">
+      <span class="burger">☰</span>
+      <span class="brand">SINERGIA<span class="dot">·</span>CORP</span>
+      <span class="influence">💼 46</span>
+    </div>
+    <div class="appheader neutral">Ranking · fin de la Ronda 3</div>
+    <div class="content">
+      <h2>Marcador</h2>
+      <div class="card" style="padding:4px 14px">
+        <div class="rank"><span class="pos">1</span><div class="av">👩‍💼</div><span class="nm">Ana</span><span class="trend up">▲</span><span class="pts">58</span></div>
+        <div class="rank you"><span class="pos">2</span><div class="av">🧑‍💼</div><span class="nm">Dani <span class="tag">vos</span></span><span class="trend up">▲</span><span class="pts">46</span></div>
+        <div class="rank"><span class="pos">3</span><div class="av">👨‍💼</div><span class="nm">Gastón</span><span class="trend eq">▬</span><span class="pts">44</span></div>
+        <div class="rank"><span class="pos">4</span><div class="av">👩‍💻</div><span class="nm">Elena</span><span class="trend up">▲</span><span class="pts">39</span></div>
+        <div class="rank"><span class="pos">5</span><div class="av">👩‍💼</div><span class="nm">Inés</span><span class="trend down">▼</span><span class="pts">33</span></div>
+        <div class="rank"><span class="pos">6</span><div class="av">👨‍💼</div><span class="nm">Beto</span><span class="trend down">▼</span><span class="pts">31</span></div>
+        <div class="rank"><span class="pos">7</span><div class="av">🧑‍💻</div><span class="nm">Caro</span><span class="trend eq">▬</span><span class="pts">28</span></div>
+        <div class="rank"><span class="pos">8</span><div class="av">🧔</div><span class="nm">Fede</span><span class="trend down">▼</span><span class="pts">25</span></div>
+      </div>
+    </div>
+    <div class="actionbar"><button class="btn" onclick="show('s-final')">SIGUIENTE RONDA</button></div>
+  </section>
+
+  <!-- 15 · PANTALLA FINAL -->
+  <section class="screen" id="s-final">
+    <div class="topbar">
+      <span class="burger">☰</span>
+      <span class="brand">SINERGIA<span class="dot">·</span>CORP</span>
+      <span class="influence">💼 final</span>
+    </div>
+    <div class="appheader neutral">Fin de la partida</div>
+    <div class="content center">
+      <div class="crown">👑</div>
+      <h1>Empleado del Mes</h1>
+      <div class="card" style="padding:22px;margin-top:6px">
+        <div class="av" style="width:64px;height:64px;font-size:34px;margin:0 auto 8px">👩‍💼</div>
+        <strong style="font-size:20px">Ana</strong><br>
+        <span style="color:var(--primary-d);font-weight:700">71 de Influencia</span>
+      </div>
+      <div class="card" style="padding:4px 14px;text-align:left">
+        <div class="rank"><span class="pos">2</span><div class="av">🧑‍💼</div><span class="nm">Dani <span class="tag">vos</span></span><span class="pts">63</span></div>
+        <div class="rank"><span class="pos">3</span><div class="av">👨‍💼</div><span class="nm">Gastón</span><span class="pts">59</span></div>
+        <div class="rank"><span class="pos">8</span><div class="av">🧔</div><span class="nm">Fede</span><span class="st" style="flex:0">En Proceso de Mejora</span></div>
+      </div>
+    </div>
+    <div class="actionbar"><button class="btn" onclick="show('s-ingreso')">VOLVER AL INICIO</button></div>
+  </section>
+
+</div>
+
+<script>
+  function show(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.getElementById('nav').value=id;
+    window.scrollTo(0,0);
+    if(id==='s-enllamada') runTimer('t1','b1',60);
+    if(id==='s-debate')    runTimer('t2','b2',192);
+  }
+  function pickAv(el){
+    document.querySelectorAll('.avatars .pick').forEach(p=>p.classList.remove('sel'));
+    el.classList.add('sel');
+  }
+  function pickChoice(el,k){
+    document.querySelectorAll('.choice').forEach(c=>c.classList.remove('sel-g','sel-r'));
+    el.classList.add(k==='g'?'sel-g':'sel-r');
+    document.getElementById('dwait').textContent='Elección registrada. Confirmá para enviar.';
+  }
+  function pickVote(el){
+    document.querySelectorAll('#s-votacion .vote').forEach(v=>v.classList.remove('sel'));
+    el.classList.add('sel');
+  }
+  let timer=null;
+  function runTimer(tId,bId,secs){
+    clearInterval(timer);
+    let left=secs;const total=secs;
+    const t=document.getElementById(tId),b=document.getElementById(bId);
+    function paint(){
+      const m=String(Math.floor(left/60)).padStart(2,'0');
+      const s=String(left%60).padStart(2,'0');
+      t.textContent=m+':'+s;
+      b.style.width=(left/total*100)+'%';
+    }
+    paint();
+    timer=setInterval(()=>{ left--; if(left<0){clearInterval(timer);return;} paint(); },1000);
+  }
+</script>
+</body>
+</html>

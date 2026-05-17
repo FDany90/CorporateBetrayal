@@ -20,6 +20,12 @@ donde cada jugador compite por el ascenso pisándose entre sí.
 - [Arquitectura e Infraestructura](docs/arquitectura.md) — tiempo real,
   reconexión, sesión recuperable y despliegue.
 
+## Prototipo
+
+[`prototipo/index.html`](prototipo/index.html) — prototipo HTML estático y
+clickable (Mobile First) de las pantallas comunes. Se abre directo en el
+navegador, sin instalar nada.
+
 ## Estado
 
 Fase 0 — Diseño. Todavía sin código.
