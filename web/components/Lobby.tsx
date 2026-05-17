@@ -9,6 +9,7 @@ export function Lobby() {
     ficharEntrada,
     agregarBots,
     limpiarBots,
+    empezarPartida,
     salir,
   } = useGame();
 
@@ -18,6 +19,7 @@ export function Lobby() {
   const listos = estado.players.filter((p) => p.ready).length;
   const total = estado.players.length;
   const hayBots = estado.players.some((p) => p.isBot);
+  const puedeEmpezar = total >= 2;
 
   return (
     <div className="screen">
@@ -38,7 +40,6 @@ export function Lobby() {
         <h2>
           Plantilla {total} / 12 · {listos} fichados
         </h2>
-        <p>El juego empieza cuando todos fichen entrada (Paso 2).</p>
 
         <div className="card pad0">
           {estado.players.map((p) => (
@@ -84,18 +85,24 @@ export function Lobby() {
       </div>
 
       <div className="actionbar">
-        {yo?.ready ? (
-          <button className="btn ghost" onClick={() => ficharEntrada(false)}>
-            Cancelar fichaje
-          </button>
-        ) : (
-          <button className="btn" onClick={() => ficharEntrada(true)}>
-            FICHAR ENTRADA
-          </button>
-        )}
-        <button className="btn danger sm" onClick={salir}>
-          Salir de la sala
+        <button
+          className="btn"
+          disabled={!puedeEmpezar}
+          onClick={empezarPartida}
+        >
+          {puedeEmpezar ? "EMPEZAR PARTIDA" : "Necesitás 2+ jugadores"}
         </button>
+        <div className="devrow">
+          <button
+            className="btn ghost sm"
+            onClick={() => ficharEntrada(!yo?.ready)}
+          >
+            {yo?.ready ? "Cancelar fichaje" : "Fichar entrada"}
+          </button>
+          <button className="btn danger sm" onClick={salir}>
+            Salir
+          </button>
+        </div>
       </div>
     </div>
   );

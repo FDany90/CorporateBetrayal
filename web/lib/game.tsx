@@ -37,12 +37,24 @@ export interface PlayerView {
   ready: boolean;
   isBot: boolean;
   connected: boolean;
+  influence: number;
+  decision: string;
+  acted: boolean;
+  lastDelta: number;
+}
+
+export interface PairingView {
+  aId: string;
+  bId: string;
 }
 
 export interface StateView {
   code: string;
   status: string;
+  phase: string;
+  challengeId: string;
   players: PlayerView[];
+  pairings: PairingView[];
 }
 
 interface GameContextValue {
@@ -57,6 +69,9 @@ interface GameContextValue {
   ficharEntrada: (valor: boolean) => void;
   agregarBots: (n: number) => void;
   limpiarBots: () => void;
+  empezarPartida: () => void;
+  confirmar: () => void;
+  decidir: (valor: "verde" | "rojo") => void;
   salir: () => void;
 }
 
@@ -88,13 +103,14 @@ function snapshot(room: Room): StateView {
     | {
         code?: string;
         status?: string;
+        phase?: string;
+        challengeId?: string;
         players?: { forEach: (cb: (p: PlayerView) => void) => void };
+        pairings?: { forEach: (cb: (p: PairingView) => void) => void };
       }
     | undefined;
+
   const players: PlayerView[] = [];
-  // El estado puede no estar sincronizado del todo en el primer instante
-  // tras crear/unirse: si todavía no llegó, devolvemos lista vacía y el
-  // onStateChange completará los datos enseguida.
   if (s?.players && typeof s.players.forEach === "function") {
     s.players.forEach((p) =>
       players.push({
@@ -104,10 +120,27 @@ function snapshot(room: Room): StateView {
         ready: p.ready,
         isBot: p.isBot,
         connected: p.connected,
+        influence: p.influence ?? 0,
+        decision: p.decision ?? "",
+        acted: p.acted ?? false,
+        lastDelta: p.lastDelta ?? 0,
       })
     );
   }
-  return { code: s?.code ?? "", status: s?.status ?? "lobby", players };
+
+  const pairings: PairingView[] = [];
+  if (s?.pairings && typeof s.pairings.forEach === "function") {
+    s.pairings.forEach((pr) => pairings.push({ aId: pr.aId, bId: pr.bId }));
+  }
+
+  return {
+    code: s?.code ?? "",
+    status: s?.status ?? "lobby",
+    phase: s?.phase ?? "lobby",
+    challengeId: s?.challengeId ?? "",
+    players,
+    pairings,
+  };
 }
 
 /* ---------- provider ---------- */
@@ -123,7 +156,6 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const [miId, setMiId] = useState<string | null>(null);
   const [servidorUrl, setServidorUrl] = useState("");
 
-  // Se resuelve en el cliente (necesita window) para mostrarlo y diagnosticar.
   useEffect(() => {
     setServidorUrl(resolverEndpoint());
   }, []);
@@ -245,6 +277,18 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     roomRef.current?.send("dev:clearBots");
   }, []);
 
+  const empezarPartida = useCallback(() => {
+    roomRef.current?.send("startGame");
+  }, []);
+
+  const confirmar = useCallback(() => {
+    roomRef.current?.send("ack");
+  }, []);
+
+  const decidir = useCallback((valor: "verde" | "rojo") => {
+    roomRef.current?.send("decidir", valor);
+  }, []);
+
   const salir = useCallback(() => {
     roomRef.current?.leave(true);
     roomRef.current = null;
@@ -272,6 +316,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         ficharEntrada,
         agregarBots,
         limpiarBots,
+        empezarPartida,
+        confirmar,
+        decidir,
         salir,
       }}
     >

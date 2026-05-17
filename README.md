@@ -59,6 +59,7 @@ Si el game server corre en otra URL, definila en `web/.env.local`:
 
 ## Estado
 
-**Paso 1 completo** — esqueleto Next.js + Colyseus, lobby en tiempo real
-(crear/unirse por código, lista de jugadores en vivo, fichar, reconexión) y
-modo desarrollo con bots. Próximo: motor de fases + primer minijuego.
+**Paso 2 completo** — motor de fases corriendo el primer minijuego, **El Botón
+del Bonus**. El bucle lobby → briefing → llamadas → resultado → marcador
+funciona de punta a punta, jugable con bots. Próximo: las 5 rondas intercaladas
+y más desafíos del catálogo.
