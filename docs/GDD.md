@@ -181,6 +181,7 @@ Catálogo **filtrado para el MVP**: 6 individuales + 6 grupales. Una partida usa
   tarjetas que te quedaron. *Traición: encajarle deuda técnica a otro.*
 - *Propuesta abierta: era "algo de PROD o tablero SCRUM"; este es el SCRUM. Una
   variante grupal de PROD ("El Deploy del Viernes") queda en el backlog.*
+> DANI: POdemos agregar juego. El Deploy del Viernes" donde se vote si se deploya o no. Cuanto mas voten alto ams chances hay de que eso suceda. pero si alguien vota lo contrario, da chances de que no suceda. Asi Acordando algo en grupo pero pensando que alguein ams va a votar diferente y traicionar al grupo. Esos votos dan chances de que esos suced. Ej: 7 votan SI 70% Deploy Exitoso. 3 Votos NO. 30% De fallo. Si falla. ganan los que votaron no el proporcional. Te parece?
 
 ### 6.B — MVP · Desafíos grupales (reunión de Teams)
 
