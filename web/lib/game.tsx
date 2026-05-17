@@ -23,6 +23,11 @@ function endpointPorDefecto(): string {
   return "ws://localhost:2567";
 }
 
+/** URL final del game server (variable de entorno, o el host de la web). */
+function resolverEndpoint(): string {
+  return process.env.NEXT_PUBLIC_GAME_SERVER || endpointPorDefecto();
+}
+
 /* ---------- vistas planas del estado (para React) ---------- */
 
 export interface PlayerView {
@@ -46,6 +51,7 @@ interface GameContextValue {
   error: string | null;
   estado: StateView | null;
   miId: string | null;
+  servidorUrl: string;
   crearSala: (nickname: string, avatar: string) => Promise<void>;
   unirseSala: (code: string, nickname: string, avatar: string) => Promise<void>;
   ficharEntrada: (valor: boolean) => void;
@@ -115,12 +121,16 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [estado, setEstado] = useState<StateView | null>(null);
   const [miId, setMiId] = useState<string | null>(null);
+  const [servidorUrl, setServidorUrl] = useState("");
+
+  // Se resuelve en el cliente (necesita window) para mostrarlo y diagnosticar.
+  useEffect(() => {
+    setServidorUrl(resolverEndpoint());
+  }, []);
 
   function getClient(): Client {
     if (!clientRef.current) {
-      const endpoint =
-        process.env.NEXT_PUBLIC_GAME_SERVER || endpointPorDefecto();
-      clientRef.current = new Client(endpoint);
+      clientRef.current = new Client(resolverEndpoint());
     }
     return clientRef.current;
   }
@@ -187,7 +197,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         });
         attach(room);
       } catch {
-        setError("No se pudo crear la sala. ¿El servidor está corriendo?");
+        setError(
+          `No se pudo conectar al servidor (${resolverEndpoint()}). ` +
+            `¿Está corriendo y accesible?`
+        );
       } finally {
         setCargando(false);
       }
@@ -209,7 +222,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         });
         attach(room);
       } catch {
-        setError(`No se encontró la sala «${limpio}».`);
+        setError(
+          `No se pudo unir a «${limpio}». Revisá el código y que el ` +
+            `servidor (${resolverEndpoint()}) esté accesible.`
+        );
       } finally {
         setCargando(false);
       }
@@ -250,6 +266,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         error,
         estado,
         miId,
+        servidorUrl,
         crearSala,
         unirseSala,
         ficharEntrada,

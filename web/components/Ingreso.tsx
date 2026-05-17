@@ -7,7 +7,7 @@ import { ThemeSwitcher } from "./ThemeSwitcher";
 const AVATARS = ["🧑‍💼", "👩‍💼", "🧑‍💻", "👨‍💼", "👩‍💻", "🧔"];
 
 export function Ingreso() {
-  const { crearSala, unirseSala, cargando, error } = useGame();
+  const { crearSala, unirseSala, cargando, error, servidorUrl } = useGame();
   const [modo, setModo] = useState<"crear" | "unirse">("crear");
   const [nickname, setNickname] = useState("");
   const [code, setCode] = useState("");
@@ -92,6 +92,10 @@ export function Ingreso() {
         </div>
 
         <ThemeSwitcher />
+
+        {servidorUrl && (
+          <p className="muted-note">Servidor: {servidorUrl}</p>
+        )}
       </div>
 
       <div className="actionbar">
