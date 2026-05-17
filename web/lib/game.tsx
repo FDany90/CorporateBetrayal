@@ -10,8 +10,18 @@ import {
 } from "react";
 import { Client, Room } from "colyseus.js";
 
-const ENDPOINT =
-  process.env.NEXT_PUBLIC_GAME_SERVER || "ws://localhost:2567";
+/**
+ * URL del game server. Por defecto usa el mismo host desde el que se abrió
+ * la web → anda igual en `localhost` o entrando por la IP de red (celular).
+ * Se puede forzar con la variable NEXT_PUBLIC_GAME_SERVER.
+ */
+function endpointPorDefecto(): string {
+  if (typeof window !== "undefined") {
+    const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
+    return `${proto}//${window.location.hostname}:2567`;
+  }
+  return "ws://localhost:2567";
+}
 
 /* ---------- vistas planas del estado (para React) ---------- */
 
@@ -68,23 +78,30 @@ function genCode(): string {
 }
 
 function snapshot(room: Room): StateView {
-  const s = room.state as unknown as {
-    code: string;
-    status: string;
-    players: Map<string, PlayerView>;
-  };
+  const s = room.state as unknown as
+    | {
+        code?: string;
+        status?: string;
+        players?: { forEach: (cb: (p: PlayerView) => void) => void };
+      }
+    | undefined;
   const players: PlayerView[] = [];
-  s.players.forEach((p) =>
-    players.push({
-      id: p.id,
-      nickname: p.nickname,
-      avatar: p.avatar,
-      ready: p.ready,
-      isBot: p.isBot,
-      connected: p.connected,
-    })
-  );
-  return { code: s.code ?? "", status: s.status ?? "lobby", players };
+  // El estado puede no estar sincronizado del todo en el primer instante
+  // tras crear/unirse: si todavía no llegó, devolvemos lista vacía y el
+  // onStateChange completará los datos enseguida.
+  if (s?.players && typeof s.players.forEach === "function") {
+    s.players.forEach((p) =>
+      players.push({
+        id: p.id,
+        nickname: p.nickname,
+        avatar: p.avatar,
+        ready: p.ready,
+        isBot: p.isBot,
+        connected: p.connected,
+      })
+    );
+  }
+  return { code: s?.code ?? "", status: s?.status ?? "lobby", players };
 }
 
 /* ---------- provider ---------- */
@@ -100,7 +117,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const [miId, setMiId] = useState<string | null>(null);
 
   function getClient(): Client {
-    if (!clientRef.current) clientRef.current = new Client(ENDPOINT);
+    if (!clientRef.current) {
+      const endpoint =
+        process.env.NEXT_PUBLIC_GAME_SERVER || endpointPorDefecto();
+      clientRef.current = new Client(endpoint);
+    }
     return clientRef.current;
   }
 
