@@ -19,7 +19,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es">
+    // suppressHydrationWarning: algunos navegadores (p. ej. Chrome en iOS)
+    // inyectan atributos en <html> antes de que React hidrate. Esto ignora
+    // esa diferencia — solo afecta a este elemento, no oculta bugs reales.
+    <html lang="es" suppressHydrationWarning>
       <body>{children}</body>
     </html>
   );
