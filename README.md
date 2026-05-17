@@ -17,6 +17,8 @@ donde cada jugador compite por el ascenso pisándose entre sí.
   pantallas: lobby, llamadas, votación y resultados.
 - [Modelo de Datos](docs/modelo-datos.md) — entidades, sistema de minijuegos
   enchufable y mapa estado → pantalla.
+- [Arquitectura e Infraestructura](docs/arquitectura.md) — tiempo real,
+  reconexión, sesión recuperable y despliegue.
 
 ## Estado
 
