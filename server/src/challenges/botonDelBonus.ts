@@ -1,3 +1,7 @@
+/* ============================================================
+   PASO 2 — primer minijuego. Aísla la lógica de El Botón del Bonus.
+   ============================================================ */
+
 /**
  * El Botón del Bonus — Dilema del Prisionero en versión 1-a-1.
  *

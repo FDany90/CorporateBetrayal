@@ -1,5 +1,7 @@
 "use client";
 
+/* PASO 2 — pantalla del desafío: a quién llamar + decisión Verde/Rojo. */
+
 import { useGame } from "@/lib/game";
 
 export function Desafio() {

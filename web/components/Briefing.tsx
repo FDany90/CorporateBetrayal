@@ -1,5 +1,7 @@
 "use client";
 
+/* PASO 2 — pantalla de briefing: explica el desafío antes de jugarlo. */
+
 import { useGame } from "@/lib/game";
 
 export function Briefing() {

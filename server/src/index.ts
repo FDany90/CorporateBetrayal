@@ -1,3 +1,7 @@
+/* ============================================================
+   Arranque del game server.
+   Introducido en el PASO 1 (esqueleto). Sin cambios en el Paso 2.
+   ============================================================ */
 import { Server } from "colyseus";
 import { WebSocketTransport } from "@colyseus/ws-transport";
 import { GameRoom } from "./rooms/GameRoom";

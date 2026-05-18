@@ -1,7 +1,14 @@
+/* ============================================================
+   Estado sincronizado de la partida.
+   PASO 1: lobby (code, status, players + campos de lobby de Player).
+   PASO 2: juego  (phase, challengeId, pairings, Pairing + campos de
+           juego de Player).
+   ============================================================ */
 import { Schema, type, MapSchema, ArraySchema } from "@colyseus/schema";
 
 /** Un jugador de la sala. */
 export class Player extends Schema {
+  // --- lobby · Paso 1 ---
   @type("string") id = "";        // sessionId actual de Colyseus
   @type("string") token = "";     // identidad persistente (reconexión)
   @type("string") nickname = "";
@@ -10,14 +17,14 @@ export class Player extends Schema {
   @type("boolean") isBot = false;
   @type("boolean") connected = true;
 
-  // --- estado de juego ---
+  // --- juego · Paso 2 ---
   @type("number") influence = 0;  // puntaje acumulado
   @type("string") decision = "";  // "" | "verde" | "rojo" (decisión del desafío actual)
   @type("boolean") acted = false; // ack de la fase actual (briefing / result)
   @type("number") lastDelta = 0;  // cambio de influencia del último desafío
 }
 
-/** Una pareja de llamada 1-a-1 dentro de un desafío. */
+/** Una pareja de llamada 1-a-1 dentro de un desafío. — Paso 2 */
 export class Pairing extends Schema {
   @type("string") aId = "";
   @type("string") bId = "";
@@ -29,10 +36,10 @@ export class Pairing extends Schema {
  * `phase` : lobby | briefing | calls | result
  */
 export class GameState extends Schema {
-  @type("string") code = "";
-  @type("string") status = "lobby";
-  @type("string") phase = "lobby";
-  @type("string") challengeId = "";
-  @type([Pairing]) pairings = new ArraySchema<Pairing>();
-  @type({ map: Player }) players = new MapSchema<Player>();
+  @type("string") code = "";                                 // Paso 1
+  @type("string") status = "lobby";                          // Paso 1
+  @type({ map: Player }) players = new MapSchema<Player>();   // Paso 1
+  @type("string") phase = "lobby";                           // Paso 2
+  @type("string") challengeId = "";                          // Paso 2
+  @type([Pairing]) pairings = new ArraySchema<Pairing>();     // Paso 2
 }

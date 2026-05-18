@@ -17,8 +17,9 @@ interface JoinOptions {
 
 /**
  * Sala = una partida.
- * Paso 2: lobby + motor de fases (briefing → calls → result) corriendo
- * El Botón del Bonus. Las fases avanzan cuando todos actuaron.
+ * PASO 1: lobby — ingreso, lista de jugadores en vivo, reconexión, bots.
+ * PASO 2: motor de fases (briefing → calls → result) corriendo El Botón
+ *         del Bonus; las fases avanzan cuando todos los jugadores actuaron.
  */
 export class GameRoom extends Room<GameState> {
   maxClients = 12;
@@ -28,7 +29,7 @@ export class GameRoom extends Room<GameState> {
     this.state.code = (options.code || genCode()).toUpperCase();
     this.setMetadata({ code: this.state.code });
 
-    // --- lobby ---
+    // --- mensajes de lobby · Paso 1 ---
     this.onMessage("ready", (client, value: boolean) => {
       const p = this.state.players.get(client.sessionId);
       if (p) p.ready = !!value;
@@ -45,7 +46,7 @@ export class GameRoom extends Room<GameState> {
       }
     });
 
-    // --- partida ---
+    // --- mensajes de partida · Paso 2 ---
     this.onMessage("startGame", () => this.iniciarPartida());
 
     this.onMessage("ack", (client) => {
@@ -69,6 +70,7 @@ export class GameRoom extends Room<GameState> {
     console.log(`[GameRoom] creada · código ${this.state.code}`);
   }
 
+  /* Ingreso y reconexión por token · Paso 1 */
   onJoin(client: Client, options: JoinOptions) {
     // Reconexión por token persistente.
     if (options.playerToken) {
@@ -112,7 +114,7 @@ export class GameRoom extends Room<GameState> {
     }
   }
 
-  /* ---------- motor de partida ---------- */
+  /* ---------- motor de partida · Paso 2 ---------- */
 
   private iniciarPartida() {
     if (this.state.status !== "lobby") return;
@@ -214,7 +216,7 @@ export class GameRoom extends Room<GameState> {
     }
   }
 
-  /* ---------- bots de desarrollo ---------- */
+  /* ---------- bots de desarrollo · Paso 1 ---------- */
 
   private addBots(count: number) {
     const usados = new Set(

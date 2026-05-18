@@ -1,5 +1,7 @@
 "use client";
 
+/* PASO 1 — pantalla de ingreso: crear o unirse a una sala. */
+
 import { useState } from "react";
 import { useGame } from "@/lib/game";
 import { ThemeSwitcher } from "./ThemeSwitcher";

@@ -1,5 +1,8 @@
 "use client";
 
+/* PASO 1 — lobby (lista de jugadores, fichar, bots).
+   El botón "Empezar partida" se agregó en el Paso 2. */
+
 import { useGame } from "@/lib/game";
 
 export function Lobby() {

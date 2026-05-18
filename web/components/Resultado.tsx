@@ -1,5 +1,7 @@
 "use client";
 
+/* PASO 2 — pantalla de resultado del desafío + marcador de Influencia. */
+
 import { useGame } from "@/lib/game";
 
 export function Resultado() {

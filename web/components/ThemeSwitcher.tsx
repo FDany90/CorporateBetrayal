@@ -1,5 +1,7 @@
 "use client";
 
+/* PASO 1 — conmutador de paleta (preview de las 2 propuestas de estilo). */
+
 import { useEffect, useState } from "react";
 
 /** Conmutador de paleta para previsualizar las 2 propuestas de estilo. */

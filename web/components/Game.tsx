@@ -1,5 +1,8 @@
 "use client";
 
+/* PASO 1: ruteo base (ingreso / lobby).
+   PASO 2: además rutea a las pantallas de desafío según la fase. */
+
 import { useGame } from "@/lib/game";
 import { Ingreso } from "./Ingreso";
 import { Lobby } from "./Lobby";

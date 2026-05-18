@@ -1,5 +1,12 @@
 "use client";
 
+/* ============================================================
+   Capa de conexión a Colyseus + estado del juego (React Context).
+   PASO 1: conexión, lobby (crear/unirse, fichar, bots, reconexión).
+   PASO 2: acciones de partida (empezarPartida, confirmar, decidir) y
+           los campos de juego en PlayerView / StateView.
+   ============================================================ */
+
 import {
   createContext,
   useCallback,
@@ -37,6 +44,7 @@ export interface PlayerView {
   ready: boolean;
   isBot: boolean;
   connected: boolean;
+  // --- campos de juego · Paso 2 ---
   influence: number;
   decision: string;
   acted: boolean;
@@ -64,11 +72,13 @@ interface GameContextValue {
   estado: StateView | null;
   miId: string | null;
   servidorUrl: string;
+  // --- conexión y lobby · Paso 1 ---
   crearSala: (nickname: string, avatar: string) => Promise<void>;
   unirseSala: (code: string, nickname: string, avatar: string) => Promise<void>;
   ficharEntrada: (valor: boolean) => void;
   agregarBots: (n: number) => void;
   limpiarBots: () => void;
+  // --- partida · Paso 2 ---
   empezarPartida: () => void;
   confirmar: () => void;
   decidir: (valor: "verde" | "rojo") => void;
