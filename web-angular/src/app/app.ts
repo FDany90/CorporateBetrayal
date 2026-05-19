@@ -2,6 +2,9 @@ import { Component, inject } from '@angular/core';
 import { GameService } from './game.service';
 import { Ingreso } from './ingreso/ingreso';
 import { Lobby } from './lobby/lobby';
+import { Briefing } from './briefing/briefing';
+import { Desafio } from './desafio/desafio';
+import { Resultado } from './resultado/resultado';
 
 /*
  * Componente raíz — equivale al <main> de Game.tsx en la versión React.
@@ -12,7 +15,7 @@ import { Lobby } from './lobby/lobby';
  */
 @Component({
   selector: 'app-root',
-  imports: [Ingreso, Lobby],
+  imports: [Ingreso, Lobby, Briefing, Desafio, Resultado],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })

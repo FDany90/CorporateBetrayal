@@ -1,0 +1,64 @@
+<!-- La "cáscara" (topbar + appheader) envuelve las dos ramas posibles:
+     con pareja y sin pareja. El contenido cambia según partner(). -->
+<div class="screen">
+  <div class="topbar">
+    <span class="brand">
+      SINERGIA<span class="dot">·</span>CORP
+    </span>
+    <span class="pill">💼 {{ yo()?.influence ?? 0 }}</span>
+  </div>
+  <div class="appheader">Aprobaciones · El Botón del Bonus</div>
+
+  @if (partner(); as colega) {
+    <!-- Caso normal: me tocó un colega. -->
+    <div class="content center">
+      <p class="muted-note">📞 Llamá a tu colega por Teams</p>
+      <div class="av-xl">{{ colega.avatar }}</div>
+      <h2>{{ colega.nickname }}</h2>
+      <p>Tras la llamada, decidí en secreto qué hacer con el bono:</p>
+
+      <div class="choices">
+        <!-- sel-g / sel-r resaltan la opción elegida. -->
+        <button
+          class="choice"
+          [class.sel-g]="miDecision() === 'verde'"
+          (click)="decidir('verde')"
+        >
+          <div class="ic">🟢</div>
+          <div class="t1">COMPARTIR</div>
+          <div class="t2">Cooperar</div>
+        </button>
+        <button
+          class="choice"
+          [class.sel-r]="miDecision() === 'rojo'"
+          (click)="decidir('rojo')"
+        >
+          <div class="ic">🔴</div>
+          <div class="t1">QUEDÁRMELO</div>
+          <div class="t2">Traicionar</div>
+        </button>
+      </div>
+
+      @if (miDecision()) {
+        <p class="muted-note">
+          Decisión enviada. Podés cambiarla hasta que decidan todos.
+        </p>
+      } @else {
+        <p class="muted-note">Tu elección es secreta.</p>
+      }
+    </div>
+  } @else {
+    <!-- Número impar de jugadores: esta ronda quedé sin pareja. -->
+    <div class="content center">
+      <div class="av-xl">🤷</div>
+      <h2>Te quedaste sin pareja</h2>
+      <p>Esta ronda no te tocó nadie. Esperá a que los demás terminen.</p>
+    </div>
+  }
+
+  <div class="actionbar">
+    <p class="muted-note">
+      Decidiendo… ({{ decididos() }}/{{ total() }})
+    </p>
+  </div>
+</div>

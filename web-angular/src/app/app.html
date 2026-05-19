@@ -1,21 +1,18 @@
 <!-- Ruteo por estado del juego.
-     `as estado` ata el valor no-nulo del signal a una variable local. -->
+     `as estado` ata el valor no-nulo del signal a una variable local.
+     Si hay sala: según status/phase elegimos la pantalla. Si no: Ingreso. -->
 <main class="app">
   @if (juego.estado(); as estado) {
     @if (estado.status === 'lobby') {
       <app-lobby />
+    } @else if (estado.phase === 'briefing') {
+      <app-briefing />
+    } @else if (estado.phase === 'calls') {
+      <app-desafio />
+    } @else if (estado.phase === 'result') {
+      <app-resultado />
     } @else {
-      <!-- Incremento 3: pantallas de partida (briefing / calls / result). -->
-      <div class="screen">
-        <div class="content center">
-          <div class="logo">S</div>
-          <h1>Partida en curso</h1>
-          <p class="muted-note">
-            Fase: {{ estado.phase }}. Las pantallas de partida llegan en el
-            Incremento 3 de la migración.
-          </p>
-        </div>
-      </div>
+      <app-lobby />
     }
   } @else {
     <app-ingreso />

@@ -1,0 +1,53 @@
+<div class="screen">
+  <div class="topbar">
+    <span class="brand">
+      SINERGIA<span class="dot">·</span>CORP
+    </span>
+    <span class="pill">💼 {{ yo()?.influence ?? 0 }}</span>
+  </div>
+  <div class="appheader">Aprobaciones · Resultado</div>
+
+  <div class="content">
+    <h2>El Botón del Bonus — terminó</h2>
+
+    <div class="big">
+      <div class="lbl">TU INFLUENCIA</div>
+      <div class="val">
+        {{ yo()?.influence ?? 0 }}
+        <!-- up/down colorea el delta según sea ganancia o pérdida. -->
+        <span [class.up]="delta() >= 0" [class.down]="delta() < 0">
+          ({{ signo() }}{{ delta() }})
+        </span>
+      </div>
+    </div>
+
+    <p class="muted-note">
+      El número te deja sacar conclusiones de tu colega. 😏
+    </p>
+
+    <h2 style="margin-top:18px">Marcador</h2>
+    <div class="card pad0">
+      @for (p of ranking(); track p.id; let i = $index) {
+        <div class="player">
+          <span class="pos">{{ i + 1 }}</span>
+          <div class="av">{{ p.avatar }}</div>
+          <span class="nm">
+            {{ p.nickname }}
+            @if (p.id === miId()) { <span class="tag">vos</span> }
+          </span>
+          <span class="st">💼 {{ p.influence }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="actionbar">
+    @if (yo()?.acted) {
+      <p class="muted-note">
+        Esperando a los demás… ({{ acks() }}/{{ total() }})
+      </p>
+    } @else {
+      <button class="btn" (click)="confirmar()">CONTINUAR</button>
+    }
+  </div>
+</div>
