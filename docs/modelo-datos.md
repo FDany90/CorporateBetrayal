@@ -1,10 +1,10 @@
-# Traición en la Oficina — Modelo de Datos (v0.1)
+# Traición en la Oficina — Modelo de Datos (v0.2)
 
 > Versión inicial para iterar. Pensado para **agregar/quitar minijuegos sin
 > tocar el motor** y para construir prototipos parciales. Acompaña al
 > [GDD](GDD.md) y a los [Borradores de UI](UI-borradores.md).
 
-**Versión:** 0.1 · **Fecha:** 2026-05-17 · **Stack:** TypeScript
+**Versión:** 0.2 · **Fecha:** 2026-05-18 · **Stack:** TypeScript
 
 ---
 
@@ -239,6 +239,9 @@ interface PhaseSpec {
   type: PhaseType;
   durationSec?: number;                        // timer fijo (opcional)
   callMode?: 'parallel' | 'sequential';        // solo 'call-round'
+  callRounds?: number;                         // solo 'call-round': cuántas
+                                               // tandas de llamadas (default 1).
+                                               // Se topea al máximo posible — §4.5
   decision?: DecisionSpec;                     // solo 'decision'
   config?: Record<string, unknown>;            // extras libres del minijuego
 }
@@ -275,13 +278,12 @@ const botonDelBonus: ChallengeDefinition = {
   minPlayers: 4, maxPlayers: 12,
   phases: [
     { type: 'briefing' },
-    { type: 'call-round', callMode: 'parallel', durationSec: 60,
+    { type: 'call-round', callMode: 'parallel', callRounds: 3, durationSec: 60,
       decision: { kind: 'binary',
         options: [ { id: 'verde', label: 'Cooperar' },
                    { id: 'rojo',  label: 'Traicionar' } ] } },
     { type: 'result' },
   ],
-  buildPairings: roundRobin,            // helper reutilizable
   resolve: ({ decisions, pairings }) => prisonersDilemmaScore(decisions, pairings),
 };
 ```
@@ -296,6 +298,72 @@ const botonDelBonus: ChallengeDefinition = {
 
 Esto permite prototipos parciales: se puede tener 2–3 minijuegos funcionando y
 el juego es jugable; el resto se agregan después.
+
+---
+
+## 4.5 Tandas de llamadas y emparejamiento sin repetición
+
+Un minijuego de llamadas no es **una** llamada: es una **serie de tandas**. En
+cada tanda todos se emparejan a la vez, hablan y deciden; luego se re-emparejan
+para la siguiente. Lo controla `callRounds` en la fase `call-round`.
+
+### Encadenado de tandas
+
+El motor expande una fase `call-round` con `callRounds: N` en N ciclos:
+
+```
+briefing → [ tanda de llamadas → resultado parcial ] × N → resultado final
+```
+
+Cada tanda acumula su puntaje en el `influenceLedger` (§3.9). El "resultado
+parcial" muestra el marcador corriente entre tanda y tanda; el "resultado final"
+cierra el minijuego.
+
+### Regla: ninguna pareja se repite
+
+Entre tandas, **dos jugadores no se emparejan dos veces**. Cada uno habla con
+colegas distintos en cada tanda. Esto se resuelve con un **calendario
+round-robin** (método del círculo): se fija un jugador y se rota al resto.
+
+El emparejador es un **servicio único reutilizable** —no uno por minijuego—:
+
+```ts
+// devuelve el calendario completo: una lista de parejas por tanda
+roundRobinSchedule(jugadores: PlayerId[], tandas: number): CallPairing[][]
+```
+
+Para que las parejas sean aleatorias pero el calendario siga sin repeticiones,
+se **baraja el orden de los jugadores una sola vez** al inicio y después se
+aplica el round-robin sobre ese orden.
+
+### Tope: `callRounds` no puede superar las combinaciones posibles
+
+Con N jugadores hay un **máximo de tandas distintas** sin repetir parejas:
+
+| Nº de jugadores (N) | Máx. de tandas |
+|---|---|
+| **N par**   | **N − 1** |
+| **N impar** | **N** (en cada tanda descansa uno distinto) |
+
+> Ej.: 4 jugadores → 3 tandas como máximo. 5 jugadores → 5. 6 → 5.
+
+El motor calcula las **tandas efectivas** así:
+
+```ts
+const maxTandas = (n % 2 === 0) ? n - 1 : n;
+const tandasEfectivas = Math.min(phase.callRounds ?? 1, maxTandas);
+```
+
+Si un minijuego pide más tandas de las posibles (`callRounds: 5` con 4
+jugadores), el motor usa el tope (3) en silencio — nunca repite parejas ni se
+cuelga. Subir `callRounds` alarga el minijuego solo mientras haya combinaciones
+nuevas disponibles.
+
+### Número impar de jugadores
+
+Con N impar, en cada tanda **uno queda sin pareja** (descansa esa ronda). El
+round-robin garantiza que el que descansa es distinto en cada tanda. La UI ya
+contempla el caso "te quedaste sin pareja".
 
 ---
 
@@ -347,7 +415,7 @@ Regla: el cliente recibe una **vista** del estado, no el estado completo.
 
 ### Decisiones abiertas
 - [ ] ¿`challengesPerRound` fijo o variable según nº de jugadores?
-- [ ] ¿El emparejador (`buildPairings`) es por minijuego o un servicio único
-      configurable? (hoy: helper reutilizable `roundRobin`).
+- [x] El emparejador es un **servicio único** reutilizable
+      (`roundRobinSchedule`), no uno por minijuego — ver §4.5.
 - [ ] Reglas de reconexión: qué pasa con una `Decision` no enviada si un jugador
       se cae.

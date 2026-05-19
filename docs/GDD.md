@@ -140,6 +140,8 @@ Una partida usa 2 individuales y 3 grupales (§4.1), rotando del pool.
 - **Formato:** serie de llamadas 1-a-1 en paralelo · **6–8 min** · Marcador público
 - **Dinámica:** la web te guía a quién llamar. En cada llamada (~60 s) negociás;
   al colgar, cada uno pulsa en secreto **Compartir** (verde) o **Quedárselo** (rojo).
+  Son **3 tandas** de llamadas (parametrizable), sin repetir pareja — ver
+  [modelo-datos §4.5](modelo-datos.md).
 - **Puntuación:** Verde/Verde → +3 ambos · Rojo vs Verde → +5 / 0 · Rojo/Rojo → +1.
 
 #### Compañero de Proyecto *(Parejas)*
