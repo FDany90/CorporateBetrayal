@@ -12,6 +12,7 @@ export function Lobby() {
     ficharEntrada,
     agregarBots,
     limpiarBots,
+    expulsar,
     empezarPartida,
     salir,
   } = useGame();
@@ -22,7 +23,14 @@ export function Lobby() {
   const listos = estado.players.filter((p) => p.ready).length;
   const total = estado.players.length;
   const hayBots = estado.players.some((p) => p.isBot);
-  const puedeEmpezar = total >= 2;
+  const soyHost = !!yo && yo.id === estado.hostId;
+  const todosFichados = total > 0 && estado.players.every((p) => p.ready);
+  const puedeEmpezar = total >= 2 && todosFichados;
+
+  // Texto del botón "Empezar" según qué falta.
+  let textoEmpezar = "EMPEZAR PARTIDA";
+  if (total < 2) textoEmpezar = "Necesitás 2+ jugadores";
+  else if (!todosFichados) textoEmpezar = `Faltan fichar (${listos}/${total})`;
 
   return (
     <div className="screen">
@@ -54,6 +62,9 @@ export function Lobby() {
               <span className="nm">
                 {p.nickname}
                 {p.id === miId && <span className="tag">vos</span>}
+                {p.id === estado.hostId && (
+                  <span className="tag">anfitrión</span>
+                )}
                 {p.isBot && <span className="tag bot">bot</span>}
               </span>
               <span className={"st" + (p.ready ? " ready" : "")}>
@@ -63,6 +74,15 @@ export function Lobby() {
                     ? "✓ fichado"
                     : "· sin fichar"}
               </span>
+              {soyHost && p.id !== miId && (
+                <button
+                  className="kick"
+                  title={`Expulsar a ${p.nickname}`}
+                  onClick={() => expulsar(p.id)}
+                >
+                  ✕
+                </button>
+              )}
             </div>
           ))}
         </div>
@@ -88,13 +108,19 @@ export function Lobby() {
       </div>
 
       <div className="actionbar">
-        <button
-          className="btn"
-          disabled={!puedeEmpezar}
-          onClick={empezarPartida}
-        >
-          {puedeEmpezar ? "EMPEZAR PARTIDA" : "Necesitás 2+ jugadores"}
-        </button>
+        {soyHost ? (
+          <button
+            className="btn"
+            disabled={!puedeEmpezar}
+            onClick={empezarPartida}
+          >
+            {textoEmpezar}
+          </button>
+        ) : (
+          <p className="muted-note">
+            Esperando a que el anfitrión empiece la partida…
+          </p>
+        )}
         <div className="devrow">
           <button
             className="btn ghost sm"

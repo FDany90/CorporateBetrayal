@@ -59,6 +59,7 @@ export interface PairingView {
 export interface StateView {
   code: string;
   status: string;
+  hostId: string;
   phase: string;
   challengeId: string;
   players: PlayerView[];
@@ -78,6 +79,7 @@ interface GameContextValue {
   ficharEntrada: (valor: boolean) => void;
   agregarBots: (n: number) => void;
   limpiarBots: () => void;
+  expulsar: (id: string) => void;
   // --- partida · Paso 2 ---
   empezarPartida: () => void;
   confirmar: () => void;
@@ -113,6 +115,7 @@ function snapshot(room: Room): StateView {
     | {
         code?: string;
         status?: string;
+        hostId?: string;
         phase?: string;
         challengeId?: string;
         players?: { forEach: (cb: (p: PlayerView) => void) => void };
@@ -146,6 +149,7 @@ function snapshot(room: Room): StateView {
   return {
     code: s?.code ?? "",
     status: s?.status ?? "lobby",
+    hostId: s?.hostId ?? "",
     phase: s?.phase ?? "lobby",
     challengeId: s?.challengeId ?? "",
     players,
@@ -287,6 +291,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     roomRef.current?.send("dev:clearBots");
   }, []);
 
+  const expulsar = useCallback((id: string) => {
+    roomRef.current?.send("kick", id);
+  }, []);
+
   const empezarPartida = useCallback(() => {
     roomRef.current?.send("startGame");
   }, []);
@@ -326,6 +334,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         ficharEntrada,
         agregarBots,
         limpiarBots,
+        expulsar,
         empezarPartida,
         confirmar,
         decidir,

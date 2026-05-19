@@ -46,8 +46,24 @@ export class GameRoom extends Room<GameState> {
       }
     });
 
+    // El anfitrión puede expulsar a un jugador del lobby (p. ej. si se cayó
+    // y no queremos esperar el plazo de reconexión para empezar).
+    this.onMessage("kick", (client, targetId: string) => {
+      if (this.state.status !== "lobby") return;
+      if (client.sessionId !== this.state.hostId) return;
+      if (targetId === this.state.hostId) return; // el anfitrión no se autoexpulsa
+      if (!this.state.players.has(targetId)) return;
+
+      this.state.players.delete(targetId);
+      // Si sigue conectado, cerrarle la conexión.
+      const c = this.clients.find((cl) => cl.sessionId === targetId);
+      if (c) c.leave(4000); // 4000 = expulsado por el anfitrión
+      console.log(`[GameRoom] ${targetId} expulsado por el anfitrión`);
+    });
+
     // --- mensajes de partida · Paso 2 ---
-    this.onMessage("startGame", () => this.iniciarPartida());
+    // Solo el anfitrión puede empezar la partida.
+    this.onMessage("startGame", (client) => this.iniciarPartida(client));
 
     this.onMessage("ack", (client) => {
       const p = this.state.players.get(client.sessionId);
@@ -80,6 +96,8 @@ export class GameRoom extends Room<GameState> {
           p.id = client.sessionId;
           p.connected = true;
           this.state.players.set(client.sessionId, p);
+          // El sessionId cambió: si era el anfitrión, traspasar el rol.
+          if (this.state.hostId === oldId) this.state.hostId = client.sessionId;
           console.log(`[GameRoom] ${p.nickname} reingresó`);
           return;
         }
@@ -92,6 +110,10 @@ export class GameRoom extends Room<GameState> {
     p.nickname = (options.nickname || "Sin nombre").slice(0, 20);
     p.avatar = options.avatar || AVATARS[0];
     this.state.players.set(client.sessionId, p);
+    // El primer jugador real en entrar (el que creó la sala) es el anfitrión.
+    if (!this.state.players.has(this.state.hostId)) {
+      this.state.hostId = client.sessionId;
+    }
     console.log(`[GameRoom] ${p.nickname} ingresó (${this.state.players.size})`);
   }
 
@@ -101,6 +123,7 @@ export class GameRoom extends Room<GameState> {
 
     if (consented) {
       this.state.players.delete(client.sessionId);
+      this.reasignarHost();
       this.chequearAvance();
       return;
     }
@@ -110,15 +133,34 @@ export class GameRoom extends Room<GameState> {
       if (back) back.connected = true;
     } catch {
       this.state.players.delete(client.sessionId);
+      this.reasignarHost();
       this.chequearAvance();
     }
   }
 
+  /** Si el anfitrión ya no está en la sala, se lo pasa a otro jugador real. */
+  private reasignarHost() {
+    if (this.state.players.has(this.state.hostId)) return;
+    for (const [id, p] of this.state.players) {
+      if (!p.isBot) {
+        this.state.hostId = id;
+        return;
+      }
+    }
+    this.state.hostId = "";
+  }
+
   /* ---------- motor de partida · Paso 2 ---------- */
 
-  private iniciarPartida() {
+  private iniciarPartida(client: Client) {
     if (this.state.status !== "lobby") return;
+    // Solo el anfitrión puede empezar.
+    if (client.sessionId !== this.state.hostId) return;
     if (this.state.players.size < 2) return;
+    // Todos los jugadores deben haber fichado entrada (los bots ya lo están).
+    for (const [, p] of this.state.players) {
+      if (!p.ready) return;
+    }
     this.state.status = "playing";
     this.state.challengeId = BOTON_DEL_BONUS.id;
     this.iniciarFase("briefing");

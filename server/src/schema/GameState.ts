@@ -38,6 +38,7 @@ export class Pairing extends Schema {
 export class GameState extends Schema {
   @type("string") code = "";                                 // Paso 1
   @type("string") status = "lobby";                          // Paso 1
+  @type("string") hostId = "";                               // Paso 1 — anfitrión: único que puede empezar
   @type({ map: Player }) players = new MapSchema<Player>();   // Paso 1
   @type("string") phase = "lobby";                           // Paso 2
   @type("string") challengeId = "";                          // Paso 2
