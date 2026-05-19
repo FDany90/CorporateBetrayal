@@ -34,9 +34,9 @@ donde cada jugador compite por el ascenso pisándose entre sí.
 Monorepo con dos partes:
 
 - [`server/`](server/) — game server en **Colyseus** (Node + TypeScript).
-- [`web/`](web/) — cliente en **Next.js + React** (TypeScript).
+- [`web-angular/`](web-angular/) — cliente en **Angular** (TypeScript).
 
-### Cómo correr el Paso 1 — esqueleto + lobby (local)
+### Cómo correr el proyecto (local)
 
 Requiere **Node 20+**. En dos terminales:
 
@@ -47,21 +47,24 @@ npm install
 npm run dev          # ws://localhost:2567
 
 # Terminal 2 — app web
-cd web
+cd web-angular
 npm install
-npm run dev          # http://localhost:3000
+npm start            # http://localhost:4200
 ```
 
-Abrí `http://localhost:3000`: creá una sala y, desde otra pestaña o dispositivo,
+Abrí `http://localhost:4200`: creá una sala y, desde otra pestaña o dispositivo,
 unite con el código. En el lobby, el panel **Modo desarrollo** agrega *bots*
 (jugadores de mentira) para probar la partida solo.
 
-Si el game server corre en otra URL, definila en `web/.env.local`:
-`NEXT_PUBLIC_GAME_SERVER=ws://mi-servidor:2567`
+El cliente deduce la URL del game server del host desde el que se abrió la web
+(`ws://<host>:2567`), así que funciona igual en `localhost` o por la IP de red.
 
 ## Estado
 
 **Paso 2 completo** — motor de fases corriendo el primer minijuego, **El Botón
 del Bonus**. El bucle lobby → briefing → llamadas → resultado → marcador
-funciona de punta a punta, jugable con bots. Próximo: las 5 rondas intercaladas
-y más desafíos del catálogo.
+funciona de punta a punta, jugable con bots.
+
+El cliente web fue **migrado de Next.js/React a Angular** (ver
+[docs/migracion-angular.md](docs/migracion-angular.md)). Próximo: las 5 rondas
+intercaladas y más desafíos del catálogo.

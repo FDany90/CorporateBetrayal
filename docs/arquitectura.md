@@ -1,10 +1,10 @@
-# Traición en la Oficina — Arquitectura e Infraestructura (v0.1)
+# Traición en la Oficina — Arquitectura e Infraestructura (v0.2)
 
 > Cómo se comunica el juego en tiempo real, cómo sobrevive a que un jugador
 > cierre el navegador, y dónde corre todo. Acompaña al [GDD](GDD.md) y al
 > [Modelo de Datos](modelo-datos.md).
 
-**Versión:** 0.1 · **Fecha:** 2026-05-17
+**Versión:** 0.2 · **Fecha:** 2026-05-18
 
 ---
 
@@ -26,13 +26,13 @@
 
 ```
         [ Celular del jugador ]
-        Navegador · App Next.js (React)
+        Navegador · App Angular (SPA)
                 │
                 │   1) descarga la web         2) WebSocket (WSS, 443)
                 ▼                                  │
         ┌─────────────────┐                        ▼
-        │  Vercel         │              ┌────────────────────────┐
-        │  (hosting web)  │              │  Game Server · Colyseus │
+        │  Hosting web    │              ┌────────────────────────┐
+        │  estático       │              │  Game Server · Colyseus │
         └─────────────────┘              │  Room = 1 partida       │
                                          │  estado autoritativo    │
                                          └────────────────────────┘
@@ -40,7 +40,7 @@
                                             (futuro) Redis / Postgres
 ```
 
-- **La web** (Next.js) se sirve estática desde Vercel y corre en el celular.
+- **La web** (Angular) es una SPA estática que corre en el celular.
 - **El game server** (Colyseus, Node) mantiene una **Room** por partida con el
   estado autoritativo y lo sincroniza por WebSocket.
 - En paralelo, **Microsoft Teams** corre aparte (las llamadas reales). La web
@@ -52,11 +52,11 @@
 
 | Capa | Tecnología | Por qué |
 |---|---|---|
-| Web / UI | **Next.js + React + TypeScript** | SPA reactiva, Mobile First |
+| Web / UI | **Angular + TypeScript** | SPA reactiva (standalone + signals), Mobile First |
 | Cliente tiempo real | **`colyseus.js`** | SDK que sincroniza el estado por WS |
 | Game server | **Colyseus (Node + TypeScript)** | `Room` = partida; sync de estado, timers, reconexión de fábrica |
 | Estado de partida | **En memoria** (Colyseus `Schema`) | Partidas cortas; sin BD para jugar |
-| Hosting web | **Vercel** | Despliegue trivial de Next.js |
+| Hosting web | **Hosting estático** (Vercel / Netlify / etc.) | La SPA Angular es un build estático |
 | Hosting game server | **Railway / Fly.io / Render** | Proceso Node persistente con WebSockets |
 | Persistencia (futuro) | **Postgres** | Solo estadísticas de partidas terminadas |
 | Presencia multi-proceso (futuro) | **Redis** | Solo si se escala a varios procesos |
@@ -71,12 +71,12 @@
 ### 4.1 Sincronización de estado (el "sin recargar")
 Colyseus mantiene el estado de la Room como un `Schema`. Cuando el servidor lo
 modifica, Colyseus envía **solo el delta** (lo que cambió) por WebSocket a todos
-los clientes. El cliente actualiza su copia local y React **re-renderiza** la
-parte afectada.
+los clientes. El cliente actualiza su copia local y Angular **re-renderiza** la
+parte afectada (el estado se guarda en *signals* y la UI reacciona sola).
 
 ```
 Servidor cambia round.phase  ──delta──▶  todos los clientes
-                                         React pinta la nueva fase
+                                         Angular pinta la nueva fase
 ```
 
 No hay recarga de página: la web es una SPA suscrita al estado. Cambiar de fase,
@@ -183,7 +183,8 @@ nueva se "engancha" al Player existente por token.
 ## 7. Infraestructura y despliegue
 
 ### 7.1 Componentes
-- **Web (Next.js) → Vercel.** Build automático desde Git. Dominio con HTTPS.
+- **Web (Angular SPA) → hosting estático** (Vercel, Netlify, etc.). El
+  `ng build` genera archivos estáticos. Dominio con HTTPS.
 - **Game server (Colyseus) → Railway o Fly.io.** Proceso Node siempre activo,
   con WebSocket sobre **WSS en el puerto 443**.
 

@@ -3,7 +3,8 @@
 > Documento de traspaso. Si abrís el proyecto en otra PC o en una sesión
 > nueva (de Claude o tuya), **empezá por acá**.
 
-**Última actualización:** 2026-05-17 · **Hito actual:** Paso 2 completo
+**Última actualización:** 2026-05-18 · **Hito actual:** Paso 2 completo ·
+cliente migrado a Angular
 
 ---
 
@@ -41,6 +42,7 @@ El detalle completo está en el [GDD](GDD.md).
 | `docs/arquitectura.md` | Tiempo real, reconexión, infraestructura |
 | `docs/UI-borradores.md` | Concepto visual (suite de apps), wireframes |
 | `docs/codigo.md` | Guía del código del server y la web |
+| `docs/migracion-angular.md` | Plan y registro de la migración React → Angular |
 | `docs/handoff.md` | Este documento |
 | `prototipo/index.html` | Prototipo HTML estático (descartable) |
 
@@ -70,14 +72,14 @@ Bonus*, jugable solo con bots.
 ## 5. El código
 
 ```
-server/   game server — Colyseus (Node + TypeScript)
-web/      cliente — Next.js + React (TypeScript)
+server/        game server — Colyseus (Node + TypeScript)
+web-angular/   cliente — Angular (TypeScript)
 ```
 
 Correrlo (Node 20+, dos terminales):
 ```bash
-cd server && npm install && npm run dev   # ws://localhost:2567
-cd web    && npm install && npm run dev   # http://localhost:3000
+cd server      && npm install && npm run dev   # ws://localhost:2567
+cd web-angular && npm install && npm start     # http://localhost:4200
 ```
 
 Detalle de cada archivo: [codigo.md](codigo.md).
@@ -107,8 +109,9 @@ Detalle de cada archivo: [codigo.md](codigo.md).
 
 ## 7. Decisiones clave ya cerradas (no re-litigar)
 
-- **Stack:** Next.js + React + Colyseus; estado en memoria; deploy previsto en
-  Vercel (web) + Railway/Fly (server).
+- **Stack:** Angular + Colyseus; estado en memoria; deploy previsto en hosting
+  estático (web) + Railway/Fly (server). El cliente fue migrado de Next.js/React
+  a Angular — ver [migracion-angular.md](migracion-angular.md).
 - **Juego:** todos contra todos, sin eliminación; gana más Influencia.
 - **MVP:** catálogo de 6 individuales + 7 grupales; 5 rondas (3 grupales +
   2 individuales, intercaladas); **un solo recurso** (Influencia); **sin**

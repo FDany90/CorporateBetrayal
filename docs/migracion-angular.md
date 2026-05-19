@@ -1,7 +1,9 @@
 # Migración del front-end: React/Next.js → Angular
 
-> Documento de diseño. Versión 0.1 · 2026-05-18
-> Se escribe **antes** de tocar código, según la forma de trabajo del proyecto.
+> Documento de diseño y registro. Versión 1.0 · 2026-05-18
+> **Estado: migración completada** (Incrementos 0–4). El cliente vive en
+> `web-angular/` y `web/` fue eliminada. Los logs de depuración (`dlog`) se
+> mantienen a propósito mientras dure el desarrollo activo.
 
 ---
 

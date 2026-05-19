@@ -1,9 +1,10 @@
 # Traición en la Oficina — Guía del Código
 
-> Documentación del código del **Paso 1** (esqueleto + lobby). Acompaña a la
-> [Arquitectura](arquitectura.md) y al [Modelo de Datos](modelo-datos.md).
+> Documentación del código. Acompaña a la [Arquitectura](arquitectura.md) y al
+> [Modelo de Datos](modelo-datos.md). El cliente web está en **Angular** (ver
+> [migracion-angular.md](migracion-angular.md) para el detalle de la migración).
 
-**Versión:** 0.1 · **Fecha:** 2026-05-17
+**Versión:** 0.2 · **Fecha:** 2026-05-18
 
 ---
 
@@ -14,12 +15,12 @@ traicionenlaoficina/
 ├── docs/          documentos de diseño
 ├── prototipo/     prototipo HTML estático (descartable)
 ├── server/        game server — Colyseus (Node + TypeScript)
-└── web/           cliente — Next.js + React (TypeScript)
+└── web-angular/   cliente — Angular (TypeScript)
 ```
 
-`server/` y `web/` son **dos proyectos independientes**, cada uno con su
+`server/` y `web-angular/` son **dos proyectos independientes**, cada uno con su
 `package.json`. Se ejecutan a la vez: el server mantiene el estado, la web es la
-interfaz.
+interfaz. No comparten código; lo único en común es el protocolo WebSocket.
 
 ---
 
@@ -32,9 +33,10 @@ server/
 ├── package.json
 ├── tsconfig.json
 └── src/
-    ├── index.ts            arranque del servidor
+    ├── index.ts             arranque del servidor
     ├── schema/GameState.ts  estructura del estado sincronizado
-    └── rooms/GameRoom.ts    lógica de la sala
+    ├── rooms/GameRoom.ts     lógica de la sala
+    └── challenges/           lógica de cada minijuego
 ```
 
 ### 2.1 `src/index.ts`
@@ -47,40 +49,37 @@ Arranca Colyseus:
 
 ### 2.2 `src/schema/GameState.ts`
 Define el estado **sincronizado** con `@colyseus/schema`. Solo lo que está
-marcado con `@type` viaja a los clientes.
+marcado con `@type` viaja a los clientes. Los campos están comentados como
+`Paso 1` (lobby) o `Paso 2` (juego).
 
-**`Player`** — un jugador de la sala:
-| Campo | Para qué |
-|---|---|
-| `id` | sessionId actual de Colyseus |
-| `token` | identidad **persistente** — sobrevive a reconexiones |
-| `nickname`, `avatar` | datos visibles |
-| `ready` | fichó entrada o no |
-| `isBot` | jugador de mentira (modo desarrollo) |
-| `connected` | si su conexión está viva |
+**`Player`** — un jugador de la sala: `id`, `token` (identidad persistente),
+`nickname`, `avatar`, `ready`, `isBot`, `connected` (Paso 1); `influence`,
+`decision`, `acted`, `lastDelta` (Paso 2).
 
-**`GameState`** — el estado de la partida: `code`, `status` (`lobby` /
-`in-game` / `finished`) y `players` (un `MapSchema<Player>`).
+**`Pairing`** — una pareja de llamada 1-a-1 (`aId`, `bId`).
 
-> En el Paso 1 el estado solo modela el lobby. Rondas y desafíos se suman después.
+**`GameState`** — `code`, `status`, `hostId`, `players` (Paso 1); `phase`,
+`challengeId`, `pairings` (Paso 2).
 
 ### 2.3 `src/rooms/GameRoom.ts`
 La clase `GameRoom extends Room<GameState>` — una instancia = una partida.
 
-- **`onCreate(options)`** — inicializa el estado, fija el `code`, lo publica en
-  la metadata (para el `filterBy`) y registra los **mensajes** que acepta:
-  - `"ready"` → marca al jugador como fichado / sin fichar.
-  - `"dev:addBots"` → agrega N bots.
-  - `"dev:clearBots"` → quita todos los bots.
-- **`onJoin(client, options)`** — si llega un `playerToken` que ya existe,
-  **reasocia** ese jugador a la nueva conexión (reconexión); si no, crea un
-  `Player` nuevo.
-- **`onLeave(client, consented)`** — si la caída fue inesperada, reserva el
-  lugar 60 s con `allowReconnection`; si el jugador no vuelve, lo elimina.
-- **`addBots(n)`** — crea jugadores `isBot` ya fichados, con nombres y avatares.
-- **`genCode()`** — genera el código de 5 letras (sin letras ambiguas).
+- **`onCreate`** — inicializa el estado y registra los **mensajes**: lobby
+  (`ready`, `dev:addBots`, `dev:clearBots`, `kick`) y partida (`startGame`,
+  `ack`, `decidir`).
+- **`onJoin`** — reconexión por `playerToken`, o alta de un `Player` nuevo. El
+  primer jugador real queda como **anfitrión** (`hostId`).
+- **`onLeave`** — reserva el lugar 60 s con `allowReconnection`; reasigna el
+  anfitrión si éste se va.
+- **Motor de partida (Paso 2)** — `iniciarPartida`, `iniciarFase`,
+  `armarParejas`, `chequearAvance`, `resolver`, `volverLobby`.
+- **`addBots`** — crea jugadores `isBot` ya fichados.
 
-### 2.4 Scripts
+### 2.4 `src/challenges/`
+La lógica de cada minijuego, separada del motor. Hoy: `botonDelBonus.ts` (la
+definición y la función de puntaje de *El Botón del Bonus*).
+
+### 2.5 Scripts
 | Comando | Qué hace |
 |---|---|
 | `npm run dev` | corre el server con recarga en caliente (`tsx watch`) |
@@ -89,99 +88,104 @@ La clase `GameRoom extends Room<GameState>` — una instancia = una partida.
 
 ---
 
-## 3. El cliente web (`web/`)
+## 3. El cliente web (`web-angular/`)
 
-App Next.js (App Router). Toda la lógica de juego es **del lado del cliente**
-(`"use client"`), porque depende de la conexión en tiempo real.
+App **Angular** (standalone, *zoneless*, SPA — sin servidor de renderizado).
+Toda la lógica de juego vive en el cliente, porque depende de la conexión en
+tiempo real.
 
 ```
-web/
-├── app/
-│   ├── layout.tsx     HTML raíz, metadata, viewport
-│   ├── page.tsx       monta <GameProvider> + <Game>
-│   └── globals.css    sistema de estilo (tokens + 2 temas)
-├── components/
-│   ├── Game.tsx       decide qué pantalla mostrar
-│   ├── Ingreso.tsx    crear / unirse a una sala
-│   ├── Lobby.tsx      lobby en vivo + modo desarrollo
-│   └── ThemeSwitcher.tsx   conmutador de paleta
-└── lib/
-    └── game.tsx       conexión a Colyseus + estado (React Context)
+web-angular/
+├── angular.json
+├── package.json
+└── src/
+    ├── index.html        HTML raíz (idioma, viewport, tema por defecto)
+    ├── main.ts           arranque (bootstrapApplication)
+    ├── styles.css        sistema de estilo (tokens + 2 temas)
+    └── app/
+        ├── app.ts / app.html   componente raíz: ruteo por fase
+        ├── app.config.ts        configuración de la app
+        ├── models.ts            PlayerView / StateView / PairingView
+        ├── game.service.ts      conexión a Colyseus + estado (signals)
+        ├── dlog.ts              logs de depuración temporales
+        ├── ingreso/             crear / unirse a una sala
+        ├── lobby/               lobby en vivo + modo desarrollo
+        ├── theme-switcher/      conmutador de paleta
+        ├── briefing/            explicación del desafío
+        ├── desafio/             decisión Verde / Rojo
+        └── resultado/           resultado + marcador
 ```
 
-### 3.1 `lib/game.tsx` — el corazón del cliente
-Es la **capa de conexión**. Expone un Context con todo lo que las pantallas
-necesitan; ninguna pantalla habla con Colyseus directo.
+### 3.1 `game.service.ts` — el corazón del cliente
+Un **servicio** Angular (`@Injectable({ providedIn: 'root' })`): una única
+instancia para toda la app. Es la capa de conexión; ninguna pantalla habla con
+Colyseus directo.
 
-**Tipos planos para React** — `PlayerView` y `StateView` son copias simples del
-estado del server. La función `snapshot(room)` convierte el `Schema` de Colyseus
-en estos objetos comunes, para que React los pueda renderizar.
+**Estado como signals.** Expone `estado`, `miId`, `conectado`, `cargando` y
+`error` como *signals* de **solo lectura**. Internamente hay un signal privado
+por cada uno que solo el servicio escribe — así la UI nunca muta el estado.
 
-**`<GameProvider>`** mantiene:
-- `client` / `room` — la conexión Colyseus (en `useRef`).
-- `estado` — el `StateView` actual; se actualiza en cada `room.onStateChange`.
-- `conectado`, `cargando`, `error`, `miId`.
+**El puente con el server.** `room.onStateChange` toma un `snapshot()` (convierte
+el `Schema` de Colyseus en los objetos planos de `models.ts`) y lo guarda en el
+signal `estado`. Como el signal cambió, Angular repinta solo lo que lo usa.
 
-Acciones expuestas:
-| Función | Qué hace |
-|---|---|
-| `crearSala(nickname, avatar)` | genera un código y crea la sala |
-| `unirseSala(code, nickname, avatar)` | se une a una sala por código |
-| `ficharEntrada(valor)` | envía el mensaje `"ready"` |
-| `agregarBots(n)` / `limpiarBots()` | mensajes de modo desarrollo |
-| `salir()` | abandona la sala |
+**Acciones:** `crearSala`, `unirseSala`, `ficharEntrada`, `agregarBots`,
+`limpiarBots`, `expulsar`, `empezarPartida`, `confirmar`, `decidir`, `salir`.
 
-**Identidad y reconexión:**
-- `getPlayerToken()` — genera un UUID y lo guarda en `localStorage`; es la
-  identidad persistente del jugador. Se envía en cada `join`.
-- Al conectar, se guarda el `reconnectionToken` en `localStorage`.
-- Un `useEffect` al montar intenta **reconectar solo** con ese token: si
-  recargás o cerrás la pestaña, volvés a tu sala sin hacer nada.
+**Identidad y reconexión.** `getPlayerToken()` genera un UUID persistente en
+`localStorage`. Al conectar guarda el `reconnectionToken`; en el constructor del
+servicio intenta reconectar solo con ese token (sobrevive a recargar la página).
+Si llega un `onLeave` con código `4000` (expulsado por el anfitrión), limpia el
+estado y vuelve a la pantalla de Ingreso.
 
-**`useGame()`** — hook para que cualquier componente acceda al Context.
+### 3.2 Las pantallas (`app/*/`)
+Cada una es un **componente standalone**: una clase `.ts` con la lógica y un
+`.html` con la plantilla. Todas obtienen el `GameService` con `inject()` y
+derivan lo que muestran con `computed()`.
 
-### 3.2 Las pantallas (`components/`)
-- **`Game.tsx`** — si hay `estado`, muestra `<Lobby>`; si no, `<Ingreso>`.
-- **`Ingreso.tsx`** — segmento Crear / Unirse, apodo, avatar y (para unirse)
-  código. Valida y llama a `crearSala` / `unirseSala`.
-- **`Lobby.tsx`** — barra superior, código de sala, **lista de jugadores en
-  vivo**, botón de fichar, panel **Modo Desarrollo** (bots) y salir.
-- **`ThemeSwitcher.tsx`** — cambia el atributo `data-theme` del `<html>` entre
-  las 2 paletas y lo recuerda en `localStorage`.
+- **`app`** — componente raíz; rutea con `@if`/`@else if` según `status` y
+  `phase`: Ingreso → Lobby → Briefing → Desafío → Resultado.
+- **`ingreso`** — crear / unirse: apodo, avatar y (para unirse) código.
+- **`lobby`** — código de sala, lista de jugadores en vivo, fichaje, anfitrión,
+  expulsar, panel **Modo Desarrollo** (bots).
+- **`theme-switcher`** — cambia el atributo `data-theme` del `<html>`.
+- **`briefing`** — reglas del desafío antes de jugarlo.
+- **`desafio`** — a qué colega llamar + decisión secreta Verde / Rojo.
+- **`resultado`** — Influencia ganada/perdida + marcador.
 
-### 3.3 Estilo (`app/globals.css`)
-Un sistema basado en **tokens** (variables CSS). Hay 2 paletas:
+### 3.3 `dlog.ts` — logs de depuración (temporal)
+Helper que imprime en consola qué función se invoca y con qué datos, con un
+prefijo de color. Es **temporal**: se quita junto con sus usos (`dlog(`) cuando
+la fase de desarrollo activo termine.
+
+### 3.4 Estilo (`src/styles.css`)
+Un sistema basado en **tokens** (variables CSS) con 2 paletas:
 - `[data-theme="azul"]` — *Sinergia Azul* (default).
-- `[data-theme="verde"]` — *Verde Acción* (acento verde, estilo del screenshot).
+- `[data-theme="verde"]` — *Verde Acción*.
 
-Cambiar de tema = cambiar un atributo. Cuando se construya el resto de la UI,
-**estos mismos tokens se reutilizan** — no se rehace el estilo.
+Cambiar de tema = cambiar un atributo del `<html>`.
 
 ---
 
 ## 4. Cómo se comunican web y server
 
 ```
-web (navegador)  ──WebSocket──▶  server (Colyseus)
-   useGame()                        GameRoom
+web-angular (navegador)  ──WebSocket──▶  server (Colyseus)
+   GameService                             GameRoom
 ```
 
-**Del cliente al server** — mensajes con `room.send(tipo, datos)`:
-| Mensaje | Datos | Efecto |
-|---|---|---|
-| `ready` | `boolean` | fichar / desfichar |
-| `dev:addBots` | `number` | agregar bots |
-| `dev:clearBots` | — | quitar bots |
+**Del cliente al server** — mensajes con `room.send(tipo, datos)`: `ready`,
+`dev:addBots`, `dev:clearBots`, `kick`, `startGame`, `ack`, `decidir`.
 
 Opciones al unirse (`create` / `join`): `{ code, nickname, avatar, playerToken }`.
 
 **Del server al cliente** — Colyseus sincroniza el `GameState` automáticamente.
-Cada cambio dispara `room.onStateChange`, el cliente toma un `snapshot` y React
-re-renderiza. **No hay recarga de página.**
+Cada cambio dispara `room.onStateChange`, el `GameService` toma un `snapshot` y
+lo guarda en un signal; Angular repinta. **No hay recarga de página.**
 
 > Hoy el cliente recibe el estado completo. Cuando haya información secreta
 > (decisiones, roles por desafío) se aplicará **estado filtrado** — ver
-> [arquitectura.md §6](arquitectura.md).
+> [arquitectura.md §4.2](arquitectura.md).
 
 ---
 
@@ -190,18 +194,19 @@ re-renderiza. **No hay recarga de página.**
 Requiere Node 20+. En dos terminales:
 
 ```bash
-cd server && npm install && npm run dev   # ws://localhost:2567
-cd web    && npm install && npm run dev   # http://localhost:3000
+cd server      && npm install && npm run dev   # ws://localhost:2567
+cd web-angular && npm install && npm start     # http://localhost:4200
 ```
 
-La URL del server se puede cambiar con la variable
-`NEXT_PUBLIC_GAME_SERVER` en `web/.env.local`.
+El cliente deduce la URL del game server del host desde el que se abrió la web
+(`ws://<host>:2567`).
 
 ---
 
 ## 6. Estado y próximos pasos
 
-**Hecho (Paso 1):** esqueleto, lobby en tiempo real, reconexión, bots, 2 paletas.
+**Hecho:** lobby en tiempo real, reconexión, bots, 2 paletas (Paso 1); motor de
+fases + *El Botón del Bonus* (Paso 2); cliente web migrado a Angular.
 
-**Siguiente (Paso 2):** motor de fases enchufable + primer minijuego (El Botón
-del Bonus) — ver el roadmap en el [GDD §10](GDD.md).
+**Siguiente (Paso 3):** las 5 rondas intercaladas + pantalla final — ver el
+roadmap en el [GDD §10](GDD.md).
