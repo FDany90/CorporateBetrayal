@@ -3,8 +3,8 @@
 > Documento de traspaso. Si abrís el proyecto en otra PC o en una sesión
 > nueva (de Claude o tuya), **empezá por acá**.
 
-**Última actualización:** 2026-05-18 · **Hito actual:** Paso 2 completo ·
-cliente migrado a Angular
+**Última actualización:** 2026-05-18 · **Hito actual:** Paso 3 (motor de
+rondas) completo · 2 minijuegos · cliente en Angular
 
 ---
 
@@ -56,16 +56,24 @@ Roadmap del [GDD §10](GDD.md):
 |---|---|
 | 0 — Diseño | ✅ completo |
 | 1 — Esqueleto (lobby en tiempo real) | ✅ completo |
-| **2 — Bucle base (El Botón del Bonus)** | ✅ **completo (hito actual)** |
-| 3 — Ronda completa (5 rondas + pantalla final) | ⏭️ siguiente |
-| 4 — Resto del catálogo (13 desafíos) | pendiente |
+| 2 — Bucle base (El Botón del Bonus) | ✅ completo |
+| **3 — Motor de rondas + marcador + pantalla final** | ✅ **completo (hito actual)** |
+| 4 — Resto del catálogo de minijuegos | 🔄 en curso (2 de 13) |
 | 5 — Pulido (estética, onboarding) | pendiente |
 | 6 — Deploy y post-MVP | pendiente |
 
-**Qué funciona hoy:** lobby (crear/unirse por código, lista en vivo,
-reconexión, bots de desarrollo) y el bucle completo de un desafío —
-`lobby → briefing → llamadas → resultado → marcador` — corriendo *El Botón del
-Bonus*, jugable solo con bots.
+> Además del roadmap, entre el Paso 2 y el 3 se migró el cliente web de
+> Next.js/React a Angular (ver [migracion-angular.md](migracion-angular.md)).
+
+**Qué funciona hoy:** la partida corre de punta a punta:
+- **Lobby:** crear/unirse por código, lista en vivo, reconexión, anfitrión,
+  expulsar jugadores, bots de desarrollo.
+- **Motor de rondas:** 4 rondas con patrón I-G-I-G (parametrizable en
+  `server/src/config.ts`), marcador entre rondas y pantalla final.
+- **2 minijuegos:** *El Botón del Bonus* (individual, llamadas 1-a-1 en
+  tandas sin repetir pareja) y *El Recorte* (grupal, votación).
+
+Todo jugable solo con bots.
 
 ---
 
@@ -113,28 +121,30 @@ Detalle de cada archivo: [codigo.md](codigo.md).
   estático (web) + Railway/Fly (server). El cliente fue migrado de Next.js/React
   a Angular — ver [migracion-angular.md](migracion-angular.md).
 - **Juego:** todos contra todos, sin eliminación; gana más Influencia.
-- **MVP:** catálogo de 6 individuales + 7 grupales; 5 rondas (3 grupales +
-  2 individuales, intercaladas); **un solo recurso** (Influencia); **sin**
-  Misión Personal ni Sospecha (post-MVP).
+- **MVP:** catálogo de 6 individuales + 7 grupales; estructura de rondas
+  **parametrizable** (`config.ts`) — por defecto 4 rondas I-G-I-G; **un solo
+  recurso** (Influencia); **sin** Misión Personal ni Sospecha (post-MVP).
 - **Visual:** "suite de apps corporativas" (empresa ficticia *SINERGIA CORP*),
   **Mobile First**; hay 2 paletas conmutables (Sinergia Azul / Verde Acción) —
   la definitiva aún no se eligió.
 - **Teams:** integración solo por **instrucciones manuales** (la web dice a
   quién llamar; sin API de Teams).
-- **Minijuegos enchufables:** el motor no conoce ningún minijuego en particular
-  (ver modelo-datos.md). En el Paso 2 esto está parcialmente aplicado (la lógica
-  de El Botón del Bonus está en `server/src/challenges/`).
+- **Minijuegos enchufables:** implementado. Cada minijuego es una
+  `ChallengeDefinition` en `server/src/challenges/` registrada en `registry.ts`.
+  El motor no conoce minijuegos concretos: solo *kinds* (`llamadas`, `votacion`).
+  Ver [modelo-datos §4.6](modelo-datos.md).
 
 ---
 
 ## 8. Cómo se testea
 
-- **Server:** `npx tsc --noEmit` (typecheck).
-- **Web:** `npm run build` (compila + typecheck).
-- **Integración:** se escriben smoke tests temporales con `colyseus.js` que
-  simulan un cliente (crear sala, bots, recorrer fases) y se borran después.
+- **Server:** `npm run check` (typecheck con `tsc --noEmit`).
+- **Web:** `npm run build` / `ng build` (compila + typecheck).
 - **Manual:** en la PC, con `F12 → emulación mobile` para el layout, y **varias
   pestañas** (normal + incógnito) para simular multijugador.
+- **Logs de depuración:** el cliente Angular tiene logs temporales (`dlog`,
+  prefijo `[traición·…]` en consola) activos durante el desarrollo. Se quitan
+  borrando `web-angular/src/app/dlog.ts` y sus usos.
 - **Problema conocido:** probar en un **celular real por la red local NO
   funciona** (lo bloquea el Firewall de Windows / la red corporativa). **No es
   un bug** — desaparece al deployar (URLs públicas, `wss`/443). Mientras tanto
@@ -144,14 +154,14 @@ Detalle de cada archivo: [codigo.md](codigo.md).
 
 ## 9. Próximos pasos
 
-1. **Paso 3** — Las 5 rondas intercaladas (G-I-G-I-G) + marcador entre rondas +
-   pantalla final ("Empleado del Mes") + desempate por votación directa.
-2. **Paso 4** — Resto del catálogo MVP: implementar los otros 12 desafíos como
-   `ChallengeDefinition`. Conviene primero formalizar el registro de minijuegos
-   enchufables del [modelo-datos.md](modelo-datos.md).
+1. **Paso 4** — Resto del catálogo: más minijuegos, **uno por incremento**.
+   Quedan 5 individuales y 6 grupales. Un minijuego de un *kind* ya existente
+   (`llamadas` / `votacion`) no toca el motor.
+2. **Pendiente del Paso 3** — desempate por **votación directa** en la pantalla
+   final (hoy, si hay empate en el #1, comparten puesto).
 3. **Paso 5** — Pulido visual (elegir paleta definitiva), onboarding/guía.
-4. **Deploy** — Vercel + Railway; habilita probar en celulares reales. Se puede
-   adelantar cuando se quiera mostrar a otros.
+4. **Deploy** — hosting estático (web) + Railway/Fly (server); habilita probar
+   en celulares reales. Se puede adelantar cuando se quiera mostrar a otros.
 
 **Decisiones abiertas** pendientes: ver la sección 11 del [GDD](GDD.md)
 (balance de puntajes, sets de palabras/tarjetas, etc.).
