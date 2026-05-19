@@ -85,21 +85,27 @@ MVP **minimalista: un solo recurso**.
 ## 4. Flujo de partida y ritmo
 
 ```
-LOBBY → INTRO → [ 5 RONDAS ] → PANTALLA FINAL
+LOBBY → INTRO → [ RONDAS ] → PANTALLA FINAL
 ```
 
 ### 4.1 Estructura de rondas
-**5 rondas: 3 grupales + 2 individuales**, intercaladas:
+La estructura es **parametrizable**: una lista de rondas, cada una con su tipo
+(individual / grupal) y los minijuegos candidatos. Por defecto, **4 rondas con
+patrón I-G-I-G**:
 
 ```
-Ronda 1   Ronda 2     Ronda 3   Ronda 4     Ronda 5
-GRUPAL  → INDIVIDUAL → GRUPAL  → INDIVIDUAL → GRUPAL
+Ronda 1      Ronda 2   Ronda 3      Ronda 4
+INDIVIDUAL → GRUPAL  → INDIVIDUAL → GRUPAL
 ```
 
 El intercalado es intencional: **cada desafío grupal "cobra" lo que pasó en el
 individual anterior** — los jugadores se echan en cara traiciones, piden favores,
 se reprochan y se vengan. Los individuales generan las deudas; los grupales las
 saldan en público.
+
+> La cantidad de rondas, el patrón y qué minijuegos entran en cada una se
+> definen en `GameConfig` (ver [modelo-datos §3.2](modelo-datos.md)). No es
+> aleatorio: se configura ronda por ronda.
 
 ### 4.2 Formatos de desafío
 - **1-a-1** — intro + instrucciones y luego una **serie de llamadas 1-a-1**.
@@ -132,7 +138,8 @@ entre los empatados.
 ## 6. Catálogo de desafíos
 
 Catálogo **filtrado para el MVP**: 6 individuales + 7 grupales (13 desafíos).
-Una partida usa 2 individuales y 3 grupales (§4.1), rotando del pool.
+Qué minijuegos juega una partida lo define `GameConfig.rounds` (parametrizable,
+§4.1): por defecto 4 rondas I-G-I-G.
 
 ### 6.A — MVP · Desafíos individuales (llamadas 1-a-1)
 

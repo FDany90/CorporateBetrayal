@@ -5,6 +5,8 @@ import { Lobby } from './lobby/lobby';
 import { Briefing } from './briefing/briefing';
 import { Desafio } from './desafio/desafio';
 import { Resultado } from './resultado/resultado';
+import { Marcador } from './marcador/marcador';
+import { Final } from './final/final';
 
 /*
  * Componente raíz — equivale al <main> de Game.tsx en la versión React.
@@ -15,7 +17,7 @@ import { Resultado } from './resultado/resultado';
  */
 @Component({
   selector: 'app-root',
-  imports: [Ingreso, Lobby, Briefing, Desafio, Resultado],
+  imports: [Ingreso, Lobby, Briefing, Desafio, Resultado, Marcador, Final],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })

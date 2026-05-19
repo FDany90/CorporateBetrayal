@@ -5,33 +5,45 @@
     </span>
     <span class="pill">💼 {{ yo()?.influence ?? 0 }}</span>
   </div>
-  <div class="appheader">Aprobaciones · Bono del Equipo</div>
+  <div class="appheader">
+    Aprobaciones · Ronda {{ ronda() }} de {{ rondasTotal() }}
+  </div>
 
   <div class="content">
-    <h1>El Botón del Bonus</h1>
-    <p>
-      Vas a hablar 1-a-1 con un colega por Teams. Al cerrar la llamada,
-      en secreto elegís Compartir el bono o Quedártelo.
-    </p>
-    <div class="card">
-      <div class="rule">
-        <span>🟢 Compartir + 🟢 Compartir</span>
-        <strong>+3 / +3</strong>
+    @if (esPlaceholder()) {
+      <!-- Ronda grupal sin minijuego implementado todavía. -->
+      <h1>Ronda grupal</h1>
+      <p>
+        Los desafíos grupales todavía no están implementados. Esta ronda es
+        un placeholder: se saltea hasta sumar el primer minijuego grupal.
+      </p>
+      <p class="muted-note">Tocá «ENTENDIDO» para continuar.</p>
+    } @else {
+      <!-- El Botón del Bonus. -->
+      <h1>El Botón del Bonus</h1>
+      <p>
+        Vas a hablar 1-a-1 con un colega por Teams. Al cerrar la llamada,
+        en secreto elegís Compartir el bono o Quedártelo.
+      </p>
+      <div class="card">
+        <div class="rule">
+          <span>🟢 Compartir + 🟢 Compartir</span>
+          <strong>+3 / +3</strong>
+        </div>
+        <div class="rule">
+          <span>🔴 Quedárselo vs 🟢 Compartir</span>
+          <strong>+5 / 0</strong>
+        </div>
+        <div class="rule">
+          <span>🔴 Quedárselo + 🔴 Quedárselo</span>
+          <strong>+1 / +1</strong>
+        </div>
       </div>
-      <div class="rule">
-        <span>🔴 Quedárselo vs 🟢 Compartir</span>
-        <strong>+5 / 0</strong>
-      </div>
-      <div class="rule">
-        <span>🔴 Quedárselo + 🔴 Quedárselo</span>
-        <strong>+1 / +1</strong>
-      </div>
-    </div>
-    <p class="muted-note">El otro no ve tu elección hasta el resultado.</p>
+      <p class="muted-note">El otro no ve tu elección hasta el resultado.</p>
+    }
   </div>
 
   <div class="actionbar">
-    <!-- Ya confirmé: espero al resto. Si no, muestro el botón. -->
     @if (yo()?.acted) {
       <p class="muted-note">
         Esperando a los demás… ({{ listos() }}/{{ total() }})

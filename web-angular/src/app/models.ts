@@ -38,4 +38,11 @@ export interface StateView {
   challengeId: string;
   players: PlayerView[];
   pairings: PairingView[];
+  // --- tandas de llamadas (Paso 2.5) ---
+  tanda: number;        // tanda actual (1-based; 0 = no empezó)
+  tandasTotal: number;  // total de tandas del desafío
+  // --- rondas (Paso 3) ---
+  ronda: number;        // ronda actual (1-based; 0 = no empezó)
+  rondasTotal: number;  // total de rondas de la partida
+  rondaTipo: string;    // "individual" | "grupal"
 }

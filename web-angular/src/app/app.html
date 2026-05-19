@@ -11,6 +11,10 @@
       <app-desafio />
     } @else if (estado.phase === 'result') {
       <app-resultado />
+    } @else if (estado.phase === 'marcador') {
+      <app-marcador />
+    } @else if (estado.phase === 'final') {
+      <app-final />
     } @else {
       <app-lobby />
     }

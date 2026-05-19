@@ -77,17 +77,43 @@ interface Room {
 }
 ```
 
-### 3.2 GameConfig — dónde se arman los minijuegos de la partida
+### 3.2 GameConfig — la estructura parametrizable de la partida
+
+La partida es una **lista explícita de rondas**. Cada `RoundSpec` define el tipo
+de la ronda y de qué minijuegos puede salir:
 
 ```ts
+interface RoundSpec {
+  tipo: 'individual' | 'grupal';
+  challengePool: ChallengeId[];   // candidatos; uno se elige al jugar la ronda
+}                                 // pool de 1 = ronda fija y determinista
+
 interface GameConfig {
-  challengePool: ChallengeId[];   // ← AGREGAR/QUITAR MINIJUEGOS ACÁ
-  roundsPerGame: number;          // ej. 5
-  challengesPerRound: number;     // ej. 2
+  rounds: RoundSpec[];            // la estructura; rounds.length = nº de rondas
   modoAnonimo: boolean;           // futuro; en MVP = false
 }
 ```
-Cambiar qué minijuegos se juegan = cambiar `challengePool`. El motor toma de ahí.
+
+- **Parametrizable:** cambiar el patrón, la cantidad de rondas o qué minijuegos
+  entran = editar la lista `rounds`. **Nada es aleatorio.**
+- **Por ronda:** el motor elige un minijuego del `challengePool` de esa ronda
+  (sin repetir minijuegos en la partida; un pool de 1 fija la ronda).
+- **Validación:** el `format` del minijuego (de su `ChallengeDefinition`, §4.1)
+  debe coincidir con el `tipo` de la ronda.
+
+Config por defecto — **4 rondas I-G-I-G**:
+
+```ts
+const CONFIG_DEFECTO: GameConfig = {
+  rounds: [
+    { tipo: 'individual', challengePool: ['boton-del-bonus'] },
+    { tipo: 'grupal',      challengePool: [/* grupales (aún sin implementar) */] },
+    { tipo: 'individual', challengePool: ['boton-del-bonus'] },
+    { tipo: 'grupal',      challengePool: [/* grupales (aún sin implementar) */] },
+  ],
+  modoAnonimo: false,
+};
+```
 
 ### 3.3 Player (Jugador)
 

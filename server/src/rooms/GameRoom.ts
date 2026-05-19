@@ -1,6 +1,8 @@
 import { Room, Client } from "colyseus";
 import { GameState, Player, Pairing } from "../schema/GameState";
-import { BOTON_DEL_BONUS, puntuarBoton } from "../challenges/botonDelBonus";
+import { roundRobinSchedule, ParejaPlana } from "../emparejador";
+import { CONFIG_DEFECTO, GameConfig } from "../config";
+import { CHALLENGE_REGISTRY, ChallengeDefinition } from "../challenges/registry";
 
 const AVATARS = ["🧑‍💼", "👩‍💼", "🧑‍💻", "👨‍💼", "👩‍💻", "🧔"];
 const BOT_NAMES = [
@@ -18,11 +20,24 @@ interface JoinOptions {
 /**
  * Sala = una partida.
  * PASO 1: lobby — ingreso, lista de jugadores en vivo, reconexión, bots.
- * PASO 2: motor de fases (briefing → calls → result) corriendo El Botón
- *         del Bonus; las fases avanzan cuando todos los jugadores actuaron.
+ * PASO 2: motor de fases corriendo El Botón del Bonus. Tras el briefing,
+ *         el desafío encadena varias tandas de llamadas:
+ *         briefing → [ calls → result ] × N tandas → lobby.
+ *         Las fases avanzan cuando todos los jugadores actuaron.
  */
 export class GameRoom extends Room<GameState> {
   maxClients = 12;
+
+  /* Estado del motor que vive solo en memoria del servidor (no se
+     sincroniza con los clientes). Paso 3. */
+  /** Configuración de la partida (estructura de rondas). */
+  private config: GameConfig = CONFIG_DEFECTO;
+  /** Minijuego de la ronda en curso (null en una ronda placeholder). */
+  private challengeActual: ChallengeDefinition | null = null;
+  /** Minijuegos ya usados en esta partida (para no repetir si se puede). */
+  private usados = new Set<string>();
+  /** Calendario de parejas por tanda (round-robin, sin repetir). Paso 2.5. */
+  private schedule: ParejaPlana[][] = [];
 
   onCreate(options: JoinOptions) {
     this.state = new GameState();
@@ -150,7 +165,7 @@ export class GameRoom extends Room<GameState> {
     this.state.hostId = "";
   }
 
-  /* ---------- motor de partida · Paso 2 ---------- */
+  /* ---------- motor de partida · Paso 3 ---------- */
 
   private iniciarPartida(client: Client) {
     if (this.state.status !== "lobby") return;
@@ -161,43 +176,104 @@ export class GameRoom extends Room<GameState> {
     for (const [, p] of this.state.players) {
       if (!p.ready) return;
     }
+
     this.state.status = "playing";
-    this.state.challengeId = BOTON_DEL_BONUS.id;
-    this.iniciarFase("briefing");
-    console.log("[GameRoom] partida iniciada");
+    this.config = CONFIG_DEFECTO;
+    this.usados.clear();
+    this.state.rondasTotal = this.config.rounds.length;
+    this.state.ronda = 0;
+
+    // Reiniciar puntajes para la partida nueva.
+    for (const [, p] of this.state.players) {
+      p.influence = 0;
+      p.lastDelta = 0;
+    }
+
+    this.iniciarRonda(1);
+    console.log(
+      `[GameRoom] partida iniciada · ${this.state.rondasTotal} rondas`
+    );
   }
 
-  /** Entra a una fase y prepara a los bots para que actúen solos. */
+  /**
+   * Arranca la ronda `n`: elige su minijuego del pool configurado y entra
+   * al briefing. Si la ronda no tiene un minijuego implementado (ej. ronda
+   * grupal por ahora), `challengeActual` queda en null y se juega como
+   * placeholder.
+   */
+  private iniciarRonda(n: number) {
+    this.state.ronda = n;
+    const spec = this.config.rounds[n - 1];
+    this.state.rondaTipo = spec ? spec.tipo : "";
+
+    // Candidatos: minijuegos del pool que existen y coinciden con el tipo.
+    const candidatos = spec
+      ? spec.challengePool.filter((id) => {
+          const def = CHALLENGE_REGISTRY[id];
+          return !!def && def.format === spec.tipo;
+        })
+      : [];
+    // Preferir uno no usado; si no hay, reusar (con 1 solo minijuego, reusa).
+    const elegido =
+      candidatos.find((id) => !this.usados.has(id)) ?? candidatos[0] ?? "";
+
+    this.challengeActual = elegido ? CHALLENGE_REGISTRY[elegido] : null;
+    this.state.challengeId = elegido;
+    if (elegido) this.usados.add(elegido);
+
+    // Si el minijuego es de llamadas, armar el calendario de tandas.
+    this.schedule = [];
+    this.state.tanda = 0;
+    this.state.tandasTotal = 0;
+    if (this.challengeActual && this.challengeActual.callRounds > 0) {
+      const ids = [...this.state.players.keys()];
+      this.schedule = roundRobinSchedule(ids, this.challengeActual.callRounds);
+      this.state.tandasTotal = this.schedule.length;
+    }
+
+    this.iniciarFase("briefing");
+  }
+
+  /** Entra a una fase de "ack" (briefing/result/marcador/final): resetea
+   *  `acted` y deja a los bots ya confirmados. */
   private iniciarFase(fase: string) {
     this.state.phase = fase;
-    for (const [, p] of this.state.players) p.acted = false;
-
-    if (fase === "briefing" || fase === "result") {
-      for (const [, p] of this.state.players) if (p.isBot) p.acted = true;
-    }
-
-    if (fase === "calls") {
-      this.armarParejas();
-      for (const [, p] of this.state.players) {
-        p.decision = "";
-        if (p.isBot) p.decision = Math.random() < 0.5 ? "verde" : "rojo";
-      }
+    for (const [, p] of this.state.players) {
+      p.acted = false;
+      if (p.isBot) p.acted = true;
     }
   }
 
-  /** Empareja a los jugadores al azar (de a dos). Si son impares, uno queda libre. */
-  private armarParejas() {
+  /**
+   * Arranca la tanda `n` (1-based): toma las parejas del calendario, entra
+   * a la fase 'calls' y resetea las decisiones (los bots deciden al azar).
+   */
+  private iniciarTanda(n: number) {
+    this.state.tanda = n;
+    this.state.phase = "calls";
+
     this.state.pairings.clear();
-    const ids = [...this.state.players.keys()];
-    for (let i = ids.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [ids[i], ids[j]] = [ids[j], ids[i]];
-    }
-    for (let i = 0; i + 1 < ids.length; i += 2) {
+    for (const pareja of this.schedule[n - 1] ?? []) {
       const pr = new Pairing();
-      pr.aId = ids[i];
-      pr.bId = ids[i + 1];
+      pr.aId = pareja.aId;
+      pr.bId = pareja.bId;
       this.state.pairings.push(pr);
+    }
+
+    for (const [, p] of this.state.players) {
+      p.acted = false;
+      p.decision = "";
+      if (p.isBot) p.decision = Math.random() < 0.5 ? "verde" : "rojo";
+    }
+  }
+
+  /** Cierra la ronda actual: marcador entre rondas, o pantalla final. */
+  private terminarRonda() {
+    this.state.pairings.clear();
+    if (this.state.ronda < this.state.rondasTotal) {
+      this.iniciarFase("marcador");
+    } else {
+      this.iniciarFase("final");
     }
   }
 
@@ -205,12 +281,36 @@ export class GameRoom extends Room<GameState> {
   private chequearAvance() {
     const fase = this.state.phase;
 
-    if (fase === "briefing" || fase === "result") {
+    // Fases de "ack": avanzan cuando todos los conectados confirmaron.
+    if (
+      fase === "briefing" ||
+      fase === "result" ||
+      fase === "marcador" ||
+      fase === "final"
+    ) {
       for (const [, p] of this.state.players) {
         if (p.connected && !p.acted) return;
       }
-      if (fase === "briefing") this.iniciarFase("calls");
-      else this.volverLobby();
+      if (fase === "briefing") {
+        // Del briefing a la primera tanda; si la ronda no tiene minijuego
+        // de llamadas (placeholder), se cierra la ronda directamente.
+        if (this.challengeActual && this.state.tandasTotal > 0) {
+          this.iniciarTanda(1);
+        } else {
+          this.terminarRonda();
+        }
+      } else if (fase === "result") {
+        // ¿Quedan tandas en este minijuego? → siguiente; si no, fin de ronda.
+        if (this.state.tanda < this.state.tandasTotal) {
+          this.iniciarTanda(this.state.tanda + 1);
+        } else {
+          this.terminarRonda();
+        }
+      } else if (fase === "marcador") {
+        this.iniciarRonda(this.state.ronda + 1);
+      } else {
+        this.volverLobby(); // fin de la pantalla final
+      }
       return;
     }
 
@@ -228,22 +328,25 @@ export class GameRoom extends Room<GameState> {
     }
   }
 
-  /** Aplica el puntaje de El Botón del Bonus y pasa a la fase de resultado. */
+  /** Aplica el puntaje del minijuego actual y pasa a la fase de resultado. */
   private resolver() {
     for (const [, p] of this.state.players) p.lastDelta = 0;
 
-    for (const pr of this.state.pairings) {
-      const a = this.state.players.get(pr.aId);
-      const b = this.state.players.get(pr.bId);
-      if (!a || !b) continue;
-      const [da, db] = puntuarBoton(a.decision, b.decision);
-      a.influence += da;
-      a.lastDelta = da;
-      b.influence += db;
-      b.lastDelta = db;
+    const puntuar = this.challengeActual?.puntuarPareja;
+    if (puntuar) {
+      for (const pr of this.state.pairings) {
+        const a = this.state.players.get(pr.aId);
+        const b = this.state.players.get(pr.bId);
+        if (!a || !b) continue;
+        const [da, db] = puntuar(a.decision, b.decision);
+        a.influence += da;
+        a.lastDelta = da;
+        b.influence += db;
+        b.lastDelta = db;
+      }
     }
     this.iniciarFase("result");
-    console.log("[GameRoom] desafío resuelto");
+    console.log("[GameRoom] tanda resuelta");
   }
 
   private volverLobby() {
@@ -251,6 +354,14 @@ export class GameRoom extends Room<GameState> {
     this.state.phase = "lobby";
     this.state.challengeId = "";
     this.state.pairings.clear();
+    this.state.tanda = 0;
+    this.state.tandasTotal = 0;
+    this.state.ronda = 0;
+    this.state.rondasTotal = 0;
+    this.state.rondaTipo = "";
+    this.schedule = [];
+    this.challengeActual = null;
+    this.usados.clear();
     for (const [, p] of this.state.players) {
       p.ready = false;
       p.decision = "";

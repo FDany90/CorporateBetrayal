@@ -33,7 +33,7 @@ export class Pairing extends Schema {
 /**
  * Estado de una partida.
  * `status`: lobby | playing
- * `phase` : lobby | briefing | calls | result
+ * `phase` : lobby | briefing | calls | result | marcador | final
  */
 export class GameState extends Schema {
   @type("string") code = "";                                 // Paso 1
@@ -41,6 +41,11 @@ export class GameState extends Schema {
   @type("string") hostId = "";                               // Paso 1 — anfitrión: único que puede empezar
   @type({ map: Player }) players = new MapSchema<Player>();   // Paso 1
   @type("string") phase = "lobby";                           // Paso 2
-  @type("string") challengeId = "";                          // Paso 2
+  @type("string") challengeId = "";                          // Paso 2 — minijuego de la ronda actual ("" = placeholder)
   @type([Pairing]) pairings = new ArraySchema<Pairing>();     // Paso 2
+  @type("number") tanda = 0;       // Paso 2.5 — tanda de llamadas actual (1-based)
+  @type("number") tandasTotal = 0; // Paso 2.5 — total de tandas del desafío
+  @type("number") ronda = 0;       // Paso 3 — ronda actual (1-based)
+  @type("number") rondasTotal = 0; // Paso 3 — total de rondas de la partida
+  @type("string") rondaTipo = "";  // Paso 3 — "individual" | "grupal"
 }

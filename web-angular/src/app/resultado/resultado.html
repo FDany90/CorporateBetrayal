@@ -8,7 +8,12 @@
   <div class="appheader">Aprobaciones · Resultado</div>
 
   <div class="content">
-    <h2>El Botón del Bonus — terminó</h2>
+    <!-- Título según sea un resultado parcial (entre tandas) o el final. -->
+    @if (esFinal()) {
+      <h2>El Botón del Bonus — terminó</h2>
+    } @else {
+      <h2>Tanda {{ tanda() }} de {{ tandasTotal() }} — resultado</h2>
+    }
 
     <div class="big">
       <div class="lbl">TU INFLUENCIA</div>
@@ -47,7 +52,9 @@
         Esperando a los demás… ({{ acks() }}/{{ total() }})
       </p>
     } @else {
-      <button class="btn" (click)="confirmar()">CONTINUAR</button>
+      <button class="btn" (click)="confirmar()">
+        {{ esFinal() ? 'CONTINUAR' : 'SIGUIENTE LLAMADA' }}
+      </button>
     }
   </div>
 </div>

@@ -34,6 +34,12 @@ export class Resultado {
   /** Signo a mostrar delante del delta ("+" si fue positivo). */
   readonly signo = computed(() => (this.delta() > 0 ? '+' : ''));
 
+  /** Tanda actual y total de tandas del desafío. */
+  readonly tanda = computed(() => this.juego.estado()?.tanda ?? 0);
+  readonly tandasTotal = computed(() => this.juego.estado()?.tandasTotal ?? 0);
+  /** ¿Es el resultado final del desafío, o uno parcial entre tandas? */
+  readonly esFinal = computed(() => this.tanda() >= this.tandasTotal());
+
   /** Confirma el resultado. Cuando confirman todos, vuelve al lobby. */
   confirmar(): void {
     dlog('Resultado.confirmar');

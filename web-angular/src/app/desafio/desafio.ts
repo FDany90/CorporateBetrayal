@@ -19,6 +19,13 @@ export class Desafio {
   readonly miId = this.juego.miId;
   readonly jugadores = computed(() => this.juego.estado()?.players ?? []);
   readonly pairings = computed(() => this.juego.estado()?.pairings ?? []);
+
+  /** Tanda de llamadas actual y total — para el indicador "Tanda 2 de 3". */
+  readonly tanda = computed(() => this.juego.estado()?.tanda ?? 0);
+  readonly tandasTotal = computed(() => this.juego.estado()?.tandasTotal ?? 0);
+  /** Ronda actual y total — para la cabecera. */
+  readonly ronda = computed(() => this.juego.estado()?.ronda ?? 0);
+  readonly rondasTotal = computed(() => this.juego.estado()?.rondasTotal ?? 0);
   readonly yo = computed(() =>
     this.jugadores().find((p) => p.id === this.miId()),
   );
@@ -40,6 +47,15 @@ export class Desafio {
     const id = this.partnerId();
     if (!id) return null;
     return this.jugadores().find((p) => p.id === id) ?? null;
+  });
+
+  /**
+   * Soy el lado que INICIA la llamada. Por convención, el `aId` del pairing
+   * llama y el `bId` espera — así nunca hay llamadas cruzadas (GDD §5).
+   */
+  readonly soyQuienLlama = computed(() => {
+    const pr = this.pairing();
+    return !!pr && pr.aId === this.miId();
   });
 
   /** Set con los ids de todos los jugadores emparejados esta ronda. */

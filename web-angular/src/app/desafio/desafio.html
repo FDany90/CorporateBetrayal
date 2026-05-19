@@ -7,12 +7,20 @@
     </span>
     <span class="pill">💼 {{ yo()?.influence ?? 0 }}</span>
   </div>
-  <div class="appheader">Aprobaciones · El Botón del Bonus</div>
+  <div class="appheader">
+    Ronda {{ ronda() }}/{{ rondasTotal() }} · El Botón del Bonus ·
+    Tanda {{ tanda() }}/{{ tandasTotal() }}
+  </div>
 
   @if (partner(); as colega) {
     <!-- Caso normal: me tocó un colega. -->
     <div class="content center">
-      <p class="muted-note">📞 Llamá a tu colega por Teams</p>
+      <!-- Solo un lado inicia la llamada: evita llamadas cruzadas (GDD §5). -->
+      @if (soyQuienLlama()) {
+        <p class="muted-note">📞 Llamá vos a tu colega por Teams</p>
+      } @else {
+        <p class="muted-note">⏳ Tu colega te va a llamar — esperá</p>
+      }
       <div class="av-xl">{{ colega.avatar }}</div>
       <h2>{{ colega.nickname }}</h2>
       <p>Tras la llamada, decidí en secreto qué hacer con el bono:</p>

@@ -1,0 +1,38 @@
+<div class="screen">
+  <div class="topbar">
+    <span class="brand">
+      SINERGIA<span class="dot">·</span>CORP
+    </span>
+    <span class="pill">💼 {{ yo()?.influence ?? 0 }}</span>
+  </div>
+  <div class="appheader">Aprobaciones · Marcador</div>
+
+  <div class="content">
+    <h2>Ronda {{ ronda() }} de {{ rondasTotal() }} — terminada</h2>
+    <p class="muted-note">Así va el marcador antes de la próxima ronda.</p>
+
+    <div class="card pad0">
+      @for (p of ranking(); track p.id; let i = $index) {
+        <div class="player">
+          <span class="pos">{{ i + 1 }}</span>
+          <div class="av">{{ p.avatar }}</div>
+          <span class="nm">
+            {{ p.nickname }}
+            @if (p.id === miId()) { <span class="tag">vos</span> }
+          </span>
+          <span class="st">💼 {{ p.influence }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="actionbar">
+    @if (yo()?.acted) {
+      <p class="muted-note">
+        Esperando a los demás… ({{ listos() }}/{{ total() }})
+      </p>
+    } @else {
+      <button class="btn" (click)="continuar()">CONTINUAR</button>
+    }
+  </div>
+</div>

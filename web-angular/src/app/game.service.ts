@@ -286,6 +286,11 @@ export class GameService {
           hostId?: string;
           phase?: string;
           challengeId?: string;
+          tanda?: number;
+          tandasTotal?: number;
+          ronda?: number;
+          rondasTotal?: number;
+          rondaTipo?: string;
           players?: { forEach: (cb: (p: PlayerView) => void) => void };
           pairings?: { forEach: (cb: (p: PairingView) => void) => void };
         }
@@ -320,6 +325,11 @@ export class GameService {
       hostId: s?.hostId ?? '',
       phase: s?.phase ?? 'lobby',
       challengeId: s?.challengeId ?? '',
+      tanda: s?.tanda ?? 0,
+      tandasTotal: s?.tandasTotal ?? 0,
+      ronda: s?.ronda ?? 0,
+      rondasTotal: s?.rondasTotal ?? 0,
+      rondaTipo: s?.rondaTipo ?? '',
       players,
       pairings,
     };

@@ -1,0 +1,39 @@
+<div class="screen">
+  <div class="topbar">
+    <span class="brand">
+      SINERGIA<span class="dot">·</span>CORP
+    </span>
+    <span class="pill">💼 {{ yo()?.influence ?? 0 }}</span>
+  </div>
+  <div class="appheader">Aprobaciones · Evaluación de Desempeño</div>
+
+  <div class="content">
+    <h1>Resultados finales</h1>
+    <p class="muted-note">Terminó la jornada. Así quedó el escalafón.</p>
+
+    <div class="card pad0">
+      @for (p of ranking(); track p.id; let i = $index) {
+        <div class="player">
+          <span class="pos">{{ i + 1 }}</span>
+          <div class="av">{{ p.avatar }}</div>
+          <span class="nm">
+            {{ p.nickname }}
+            @if (p.id === miId()) { <span class="tag">vos</span> }
+            <span class="tag">{{ titulo(i) }}</span>
+          </span>
+          <span class="st">💼 {{ p.influence }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="actionbar">
+    @if (yo()?.acted) {
+      <p class="muted-note">
+        Esperando a los demás… ({{ listos() }}/{{ total() }})
+      </p>
+    } @else {
+      <button class="btn" (click)="volver()">VOLVER AL LOBBY</button>
+    }
+  </div>
+</div>
