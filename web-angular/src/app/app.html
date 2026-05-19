@@ -1,12 +1,23 @@
-<!-- Incremento 0: placeholder. En el Incremento 1 esto rutea por fase. -->
+<!-- Ruteo por estado del juego.
+     `as estado` ata el valor no-nulo del signal a una variable local. -->
 <main class="app">
-  <div class="screen">
-    <div class="content center">
-      <div class="logo">S</div>
-      <h1>Base Angular lista</h1>
-      <p class="muted-note">
-        Incremento 0 — el cliente Angular arranca y los estilos cargan.
-      </p>
-    </div>
-  </div>
+  @if (juego.estado(); as estado) {
+    @if (estado.status === 'lobby') {
+      <app-lobby />
+    } @else {
+      <!-- Incremento 3: pantallas de partida (briefing / calls / result). -->
+      <div class="screen">
+        <div class="content center">
+          <div class="logo">S</div>
+          <h1>Partida en curso</h1>
+          <p class="muted-note">
+            Fase: {{ estado.phase }}. Las pantallas de partida llegan en el
+            Incremento 3 de la migración.
+          </p>
+        </div>
+      </div>
+    }
+  } @else {
+    <app-ingreso />
+  }
 </main>

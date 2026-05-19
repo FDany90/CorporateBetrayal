@@ -1,0 +1,11 @@
+<!-- [class.on]="..." pone/saca la clase CSS 'on' según el booleano.
+     (click)="..." escucha el evento. tema() lee el valor del signal. -->
+<div class="themebar">
+  <span>Estilo:</span>
+  <button [class.on]="tema() === 'azul'" (click)="cambiar('azul')">
+    Sinergia Azul
+  </button>
+  <button [class.on]="tema() === 'verde'" (click)="cambiar('verde')">
+    Verde Acción
+  </button>
+</div>

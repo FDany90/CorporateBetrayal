@@ -1,0 +1,83 @@
+<div class="screen">
+  <div class="content">
+    <div class="logo">S</div>
+    <h1 class="center">
+      SINERGIA <span style="color:var(--primary)">CORP</span>
+    </h1>
+    <p class="center">Acceso de personal · Traición en la Oficina</p>
+
+    <div style="height:14px"></div>
+
+    <!-- Selector de modo. [class.on] marca el botón activo. -->
+    <div class="seg">
+      <button [class.on]="modo() === 'crear'" (click)="modo.set('crear')">
+        Crear sala
+      </button>
+      <button [class.on]="modo() === 'unirse'" (click)="modo.set('unirse')">
+        Unirse
+      </button>
+    </div>
+
+    <!-- @if: muestra el bloque solo si hay error. -->
+    @if (error()) {
+      <div class="error">{{ error() }}</div>
+    }
+
+    <!-- El campo de código solo aparece en modo "unirse". -->
+    @if (modo() === 'unirse') {
+      <div class="field">
+        <label>CÓDIGO DE SALA</label>
+        <!-- [ngModel] escribe el input; (ngModelChange) avisa el cambio.
+             Lo separamos en vez de [(ngModel)] para pasar por setCode(). -->
+        <input
+          class="code"
+          maxlength="5"
+          placeholder="ABCDE"
+          [ngModel]="code()"
+          (ngModelChange)="setCode($event)"
+        />
+      </div>
+    }
+
+    <div class="field">
+      <label>TU APODO</label>
+      <input
+        maxlength="20"
+        placeholder="Cómo te ven los demás"
+        [ngModel]="nickname()"
+        (ngModelChange)="nickname.set($event)"
+      />
+    </div>
+
+    <label style="font-size:12px;font-weight:700;color:var(--muted)">
+      ELEGÍ TU AVATAR
+    </label>
+    <!-- @for repite un botón por avatar. track: identifica cada ítem. -->
+    <div class="avatars">
+      @for (a of avatares; track a) {
+        <button [class.on]="avatar() === a" (click)="avatar.set(a)">
+          {{ a }}
+        </button>
+      }
+    </div>
+
+    <!-- Otro componente embebido. Self-closing, como en JSX. -->
+    <app-theme-switcher />
+
+    @if (servidorUrl) {
+      <p class="muted-note">Servidor: {{ servidorUrl }}</p>
+    }
+  </div>
+
+  <div class="actionbar">
+    <button class="btn" [disabled]="!puede() || cargando()" (click)="enviar()">
+      @if (cargando()) {
+        Conectando…
+      } @else if (modo() === 'crear') {
+        CREAR SALA
+      } @else {
+        INGRESAR
+      }
+    </button>
+  </div>
+</div>

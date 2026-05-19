@@ -1,18 +1,22 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { GameService } from './game.service';
+import { Ingreso } from './ingreso/ingreso';
+import { Lobby } from './lobby/lobby';
 
 /*
- * Componente raíz de la app — equivale al <main> de Game.tsx en la versión
- * React. En el Incremento 1 va a rutear a las pantallas según la fase del
- * juego; por ahora muestra solo un placeholder para verificar la base.
+ * Componente raíz — equivale al <main> de Game.tsx en la versión React.
  *
- * - selector: la etiqueta con la que se monta (<app-root> en index.html).
- * - templateUrl: el HTML que dibuja.
- * - styleUrl: estilos propios del componente (vacío: usamos styles.css global).
+ * Rutea según el estado del juego: si no estoy en una sala, muestra la
+ * pantalla de Ingreso. En los próximos incrementos sumará el Lobby y las
+ * pantallas de partida.
  */
 @Component({
   selector: 'app-root',
-  imports: [],
+  imports: [Ingreso, Lobby],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
-export class App {}
+export class App {
+  /** protected: lo usa el template, no hace falta exponerlo más. */
+  protected readonly juego = inject(GameService);
+}
