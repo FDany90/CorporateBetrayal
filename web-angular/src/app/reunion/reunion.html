@@ -1,0 +1,32 @@
+<div class="screen">
+  <div class="topbar">
+    <span class="brand">
+      SINERGIA<span class="dot">·</span>CORP
+    </span>
+    <span class="pill">💼 {{ yo()?.influence ?? 0 }}</span>
+  </div>
+  <div class="appheader">
+    Reunión · Ronda {{ ronda() }} de {{ rondasTotal() }}
+  </div>
+
+  <div class="content">
+    <h1>Reunión en curso</h1>
+    <p>
+      ⚠️ <strong>Crisis anunciada.</strong> Entren todos a la reunión de
+      Teams y debatan: defiéndanse, acúsense, negocien.
+    </p>
+    <p class="muted-note">
+      Cuando estén listos para votar, tocá «IR A VOTAR».
+    </p>
+  </div>
+
+  <div class="actionbar">
+    @if (yo()?.acted) {
+      <p class="muted-note">
+        Esperando a los demás… ({{ listos() }}/{{ total() }})
+      </p>
+    } @else {
+      <button class="btn" (click)="irAVotar()">IR A VOTAR</button>
+    }
+  </div>
+</div>

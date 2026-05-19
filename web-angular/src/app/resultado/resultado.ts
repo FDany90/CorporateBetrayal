@@ -1,5 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { GameService } from '../game.service';
+import { NOMBRE_CHALLENGE } from '../models';
 import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
 
 /**
@@ -39,6 +40,12 @@ export class Resultado {
   readonly tandasTotal = computed(() => this.juego.estado()?.tandasTotal ?? 0);
   /** ¿Es el resultado final del desafío, o uno parcial entre tandas? */
   readonly esFinal = computed(() => this.tanda() >= this.tandasTotal());
+
+  /** Nombre del minijuego de la ronda, para el título. */
+  readonly nombre = computed(() => {
+    const id = this.juego.estado()?.challengeId ?? '';
+    return NOMBRE_CHALLENGE[id] ?? 'La ronda';
+  });
 
   /** Confirma el resultado. Cuando confirman todos, vuelve al lobby. */
   confirmar(): void {

@@ -33,7 +33,7 @@ export class Pairing extends Schema {
 /**
  * Estado de una partida.
  * `status`: lobby | playing
- * `phase` : lobby | briefing | calls | result | marcador | final
+ * `phase` : lobby | briefing | calls | result | meeting | vote | marcador | final
  */
 export class GameState extends Schema {
   @type("string") code = "";                                 // Paso 1

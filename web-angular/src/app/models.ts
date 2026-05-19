@@ -29,6 +29,12 @@ export interface PairingView {
   bId: string;
 }
 
+/** Nombre legible de cada minijuego, por su id (para títulos de la UI). */
+export const NOMBRE_CHALLENGE: Record<string, string> = {
+  'boton-del-bonus': 'El Botón del Bonus',
+  'el-recorte': 'El Recorte',
+};
+
 /** El estado completo de la partida que ve la UI. */
 export interface StateView {
   code: string;

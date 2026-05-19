@@ -88,11 +88,20 @@ export class GameRoom extends Room<GameState> {
       }
     });
 
+    // 'decidir' cubre dos cosas según la fase:
+    //  - en 'calls' (El Botón): el valor es "verde" | "rojo".
+    //  - en 'vote'  (El Recorte): el valor es el id del jugador votado.
     this.onMessage("decidir", (client, value: string) => {
-      if (this.state.phase !== "calls") return;
-      if (value !== "verde" && value !== "rojo") return;
       const p = this.state.players.get(client.sessionId);
-      if (p) {
+      if (!p) return;
+
+      if (this.state.phase === "calls") {
+        if (value !== "verde" && value !== "rojo") return;
+        p.decision = value;
+        this.chequearAvance();
+      } else if (this.state.phase === "vote") {
+        if (value === client.sessionId) return; // no se puede autovotar
+        if (!this.state.players.has(value)) return;
         p.decision = value;
         this.chequearAvance();
       }
@@ -225,12 +234,16 @@ export class GameRoom extends Room<GameState> {
     this.schedule = [];
     this.state.tanda = 0;
     this.state.tandasTotal = 0;
-    if (this.challengeActual && this.challengeActual.callRounds > 0) {
+    if (
+      this.challengeActual?.kind === "llamadas" &&
+      this.challengeActual.callRounds > 0
+    ) {
       const ids = [...this.state.players.keys()];
       this.schedule = roundRobinSchedule(ids, this.challengeActual.callRounds);
       this.state.tandasTotal = this.schedule.length;
     }
 
+    // Toda ronda arranca con el briefing del minijuego (su explicación).
     this.iniciarFase("briefing");
   }
 
@@ -284,6 +297,7 @@ export class GameRoom extends Room<GameState> {
     // Fases de "ack": avanzan cuando todos los conectados confirmaron.
     if (
       fase === "briefing" ||
+      fase === "meeting" ||
       fase === "result" ||
       fase === "marcador" ||
       fase === "final"
@@ -292,13 +306,17 @@ export class GameRoom extends Room<GameState> {
         if (p.connected && !p.acted) return;
       }
       if (fase === "briefing") {
-        // Del briefing a la primera tanda; si la ronda no tiene minijuego
-        // de llamadas (placeholder), se cierra la ronda directamente.
-        if (this.challengeActual && this.state.tandasTotal > 0) {
+        // Del briefing a la primera fase del minijuego, según su kind.
+        const kind = this.challengeActual?.kind;
+        if (kind === "llamadas" && this.state.tandasTotal > 0) {
           this.iniciarTanda(1);
+        } else if (kind === "votacion") {
+          this.iniciarFase("meeting");
         } else {
-          this.terminarRonda();
+          this.terminarRonda(); // ronda placeholder, sin minijuego
         }
+      } else if (fase === "meeting") {
+        this.iniciarVotacion(); // de la reunión al voto
       } else if (fase === "result") {
         // ¿Quedan tandas en este minijuego? → siguiente; si no, fin de ronda.
         if (this.state.tanda < this.state.tandasTotal) {
@@ -325,6 +343,15 @@ export class GameRoom extends Room<GameState> {
         if (p && p.connected && !p.decision) return;
       }
       this.resolver();
+      return;
+    }
+
+    if (fase === "vote") {
+      // El voto avanza cuando todos los conectados votaron.
+      for (const [, p] of this.state.players) {
+        if (p.connected && !p.decision) return;
+      }
+      this.resolverVotacion();
     }
   }
 
@@ -347,6 +374,49 @@ export class GameRoom extends Room<GameState> {
     }
     this.iniciarFase("result");
     console.log("[GameRoom] tanda resuelta");
+  }
+
+  /** Entra a la fase de voto: resetea decisiones; los bots votan al azar. */
+  private iniciarVotacion() {
+    this.state.phase = "vote";
+    this.state.pairings.clear();
+    const ids = [...this.state.players.keys()];
+    for (const [, p] of this.state.players) {
+      p.acted = false;
+      p.decision = "";
+      if (p.isBot) {
+        const otros = ids.filter((id) => id !== p.id);
+        p.decision =
+          otros[Math.floor(Math.random() * otros.length)] ?? "";
+      }
+    }
+  }
+
+  /** Cuenta los votos: el más votado recibe `voteDelta` (negativo en El
+   *  Recorte). Si hay empate, lo reciben todos los empatados. */
+  private resolverVotacion() {
+    for (const [, p] of this.state.players) p.lastDelta = 0;
+
+    const votos = new Map<string, number>();
+    for (const [, p] of this.state.players) {
+      if (p.decision) {
+        votos.set(p.decision, (votos.get(p.decision) ?? 0) + 1);
+      }
+    }
+    let max = 0;
+    for (const n of votos.values()) if (n > max) max = n;
+
+    const delta = this.challengeActual?.voteDelta ?? 0;
+    if (max > 0 && delta !== 0) {
+      for (const [, p] of this.state.players) {
+        if ((votos.get(p.id) ?? 0) === max) {
+          p.influence += delta;
+          p.lastDelta = delta;
+        }
+      }
+    }
+    this.iniciarFase("result");
+    console.log("[GameRoom] votación resuelta");
   }
 
   private volverLobby() {

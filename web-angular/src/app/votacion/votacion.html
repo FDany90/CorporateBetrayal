@@ -1,0 +1,46 @@
+<div class="screen">
+  <div class="topbar">
+    <span class="brand">
+      SINERGIA<span class="dot">·</span>CORP
+    </span>
+    <span class="pill">💼 {{ yo()?.influence ?? 0 }}</span>
+  </div>
+  <div class="appheader">
+    Votación · Ronda {{ ronda() }} de {{ rondasTotal() }}
+  </div>
+
+  <div class="content">
+    <h2>¿A quién recortás?</h2>
+    <p class="muted-note">
+      Tu voto es secreto. Podés cambiarlo hasta que voten todos.
+    </p>
+
+    <!-- Cada candidato es un botón; el votado queda resaltado. -->
+    <div class="card pad0">
+      @for (p of candidatos(); track p.id) {
+        <button
+          class="voto-op"
+          [class.voto-sel]="miVoto() === p.id"
+          (click)="votar(p.id)"
+        >
+          <div class="av">{{ p.avatar }}</div>
+          <span class="nm">{{ p.nickname }}</span>
+          @if (miVoto() === p.id) {
+            <span class="st ready">✓ tu voto</span>
+          }
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="actionbar">
+    <p class="muted-note">
+      @if (miVoto()) {
+        Voto enviado.
+      } @else {
+        Elegí a quién recortar.
+      }
+      ({{ votaron() }}/{{ total() }})
+    </p>
+  </div>
+</div>

@@ -23,9 +23,10 @@ export class Briefing {
   /** Ronda actual y total — para la cabecera "Ronda 2 de 4". */
   readonly ronda = computed(() => this.juego.estado()?.ronda ?? 0);
   readonly rondasTotal = computed(() => this.juego.estado()?.rondasTotal ?? 0);
-  /** challengeId vacío = ronda sin minijuego implementado (placeholder). */
-  readonly esPlaceholder = computed(
-    () => !this.juego.estado()?.challengeId,
+  /** Id del minijuego de la ronda: decide qué briefing mostrar.
+   *  "" = ronda sin minijuego implementado (placeholder). */
+  readonly challengeId = computed(
+    () => this.juego.estado()?.challengeId ?? '',
   );
   /** Cuántos jugadores ya confirmaron (campo `acted`). */
   readonly listos = computed(

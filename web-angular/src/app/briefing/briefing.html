@@ -10,36 +10,54 @@
   </div>
 
   <div class="content">
-    @if (esPlaceholder()) {
-      <!-- Ronda grupal sin minijuego implementado todavía. -->
-      <h1>Ronda grupal</h1>
-      <p>
-        Los desafíos grupales todavía no están implementados. Esta ronda es
-        un placeholder: se saltea hasta sumar el primer minijuego grupal.
-      </p>
-      <p class="muted-note">Tocá «ENTENDIDO» para continuar.</p>
-    } @else {
-      <!-- El Botón del Bonus. -->
-      <h1>El Botón del Bonus</h1>
-      <p>
-        Vas a hablar 1-a-1 con un colega por Teams. Al cerrar la llamada,
-        en secreto elegís Compartir el bono o Quedártelo.
-      </p>
-      <div class="card">
-        <div class="rule">
-          <span>🟢 Compartir + 🟢 Compartir</span>
-          <strong>+3 / +3</strong>
+    <!-- Cada minijuego tiene su propio briefing. @switch elige cuál. -->
+    @switch (challengeId()) {
+      @case ('boton-del-bonus') {
+        <h1>El Botón del Bonus</h1>
+        <p>
+          Vas a hablar 1-a-1 con un colega por Teams. Al cerrar la llamada,
+          en secreto elegís Compartir el bono o Quedártelo.
+        </p>
+        <div class="card">
+          <div class="rule">
+            <span>🟢 Compartir + 🟢 Compartir</span>
+            <strong>+3 / +3</strong>
+          </div>
+          <div class="rule">
+            <span>🔴 Quedárselo vs 🟢 Compartir</span>
+            <strong>+5 / 0</strong>
+          </div>
+          <div class="rule">
+            <span>🔴 Quedárselo + 🔴 Quedárselo</span>
+            <strong>+1 / +1</strong>
+          </div>
         </div>
-        <div class="rule">
-          <span>🔴 Quedárselo vs 🟢 Compartir</span>
-          <strong>+5 / 0</strong>
-        </div>
-        <div class="rule">
-          <span>🔴 Quedárselo + 🔴 Quedárselo</span>
-          <strong>+1 / +1</strong>
-        </div>
-      </div>
-      <p class="muted-note">El otro no ve tu elección hasta el resultado.</p>
+        <p class="muted-note">El otro no ve tu elección hasta el resultado.</p>
+      }
+      @case ('el-recorte') {
+        <h1>El Recorte</h1>
+        <p>
+          La empresa anuncia un recorte y hay que elegir a quién. Es un
+          desafío grupal: se juega en la reunión de Teams.
+        </p>
+        <p>
+          Van a debatir todos juntos —defenderse, acusar, negociar— y después
+          cada uno vota en secreto a quién recortar.
+        </p>
+        <p class="muted-note">
+          El más votado pierde Influencia. Nadie queda eliminado: se sigue
+          jugando.
+        </p>
+      }
+      @default {
+        <!-- Ronda sin minijuego implementado todavía (placeholder). -->
+        <h1>Ronda grupal</h1>
+        <p>
+          Este desafío grupal todavía no está implementado. Esta ronda es un
+          placeholder: se saltea hasta sumar el minijuego.
+        </p>
+        <p class="muted-note">Tocá «ENTENDIDO» para continuar.</p>
+      }
     }
   </div>
 

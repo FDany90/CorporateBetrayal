@@ -20,15 +20,13 @@ export interface GameConfig {
 
 /**
  * Config por defecto: 4 rondas con patrón I-G-I-G.
- * Las rondas grupales tienen el pool vacío porque todavía no hay
- * minijuegos grupales — esas rondas se juegan como placeholder hasta
- * que se implemente el primer desafío grupal.
+ *   I → El Botón del Bonus   ·   G → El Recorte
  */
 export const CONFIG_DEFECTO: GameConfig = {
   rounds: [
     { tipo: "individual", challengePool: ["boton-del-bonus"] },
-    { tipo: "grupal", challengePool: [] },
+    { tipo: "grupal", challengePool: ["el-recorte"] },
     { tipo: "individual", challengePool: ["boton-del-bonus"] },
-    { tipo: "grupal", challengePool: [] },
+    { tipo: "grupal", challengePool: ["el-recorte"] },
   ],
 };

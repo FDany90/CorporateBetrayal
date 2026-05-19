@@ -233,6 +233,11 @@ export class GameService {
     dlog('enviar', 'decidir', valor);
     this.room?.send('decidir', valor);
   }
+  /** Voto de un minijuego de votación (El Recorte): manda el id del votado. */
+  votar(idVotado: string): void {
+    dlog('enviar', 'decidir(voto)', idVotado);
+    this.room?.send('decidir', idVotado);
+  }
 
   /** Sale de la sala y limpia todo el estado local. */
   salir(): void {

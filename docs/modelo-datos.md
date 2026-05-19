@@ -393,6 +393,32 @@ contempla el caso "te quedaste sin pareja".
 
 ---
 
+## 4.6 Implementación actual: minijuegos por `kind`
+
+La versión implementada del registro es un subconjunto pragmático de §4.1. En
+vez del `phases: PhaseSpec[]` totalmente genérico, cada `ChallengeDefinition`
+declara un **`kind`** que define su flujo de fases:
+
+| `kind`     | Flujo de fases                        | Ejemplo |
+|------------|---------------------------------------|---------|
+| `llamadas` | briefing → [calls → result] × tandas  | El Botón del Bonus |
+| `votacion` | briefing → meeting → vote → result    | El Recorte |
+
+El motor conoce *kinds*, no minijuegos concretos: sumar un minijuego de un kind
+ya existente no toca el motor; sumar un kind nuevo es una rama nueva. Cuando el
+catálogo crezca se puede migrar al `phases` totalmente genérico.
+
+Campos de `ChallengeDefinition` (implementados): `id`, `nombre`, `format`
+(individual/grupal), `kind`, `callRounds` y `puntuarPareja` (kind `llamadas`),
+`voteDelta` (kind `votacion`: influencia que gana/pierde el más votado —
+negativo en El Recorte).
+
+**Voto.** En un minijuego `votacion` cada jugador vota a otro; el voto se guarda
+reusando el campo `Player.decision` (el id del votado). El más votado recibe
+`voteDelta` (empates: lo reciben todos los empatados).
+
+---
+
 ## 5. Mapa estado → pantalla (UI reutilizable)
 
 Cada **tipo de fase** se renderiza con una pantalla genérica. No hay pantallas

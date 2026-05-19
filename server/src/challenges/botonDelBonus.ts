@@ -33,6 +33,7 @@ export const BOTON_DEL_BONUS: ChallengeDefinition = {
   id: "boton-del-bonus",
   nombre: "El Botón del Bonus",
   format: "individual",
+  kind: "llamadas",
   callRounds: 3,
   puntuarPareja: puntuarBoton,
 };

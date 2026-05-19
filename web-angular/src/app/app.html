@@ -9,6 +9,10 @@
       <app-briefing />
     } @else if (estado.phase === 'calls') {
       <app-desafio />
+    } @else if (estado.phase === 'meeting') {
+      <app-reunion />
+    } @else if (estado.phase === 'vote') {
+      <app-votacion />
     } @else if (estado.phase === 'result') {
       <app-resultado />
     } @else if (estado.phase === 'marcador') {

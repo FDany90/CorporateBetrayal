@@ -131,6 +131,16 @@ p{color:var(--muted);font-size:14px;margin-bottom:10px;}
   font-size:12px;font-weight:800;cursor:pointer;
 }
 
+/* opción de voto (pantalla de Votación) */
+.voto-op{
+  display:flex;align-items:center;gap:10px;width:100%;
+  padding:11px 4px;font:inherit;color:inherit;text-align:left;
+  background:transparent;border:0;border-bottom:1px solid var(--line);
+  cursor:pointer;
+}
+.voto-op:last-child{border-bottom:0;}
+.voto-op.voto-sel{background:var(--primary-soft);}
+
 .tag{
   display:inline-block;background:var(--primary-soft);color:var(--primary-d);
   font-size:10px;font-weight:800;padding:2px 6px;border-radius:5px;

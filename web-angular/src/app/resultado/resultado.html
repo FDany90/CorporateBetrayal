@@ -10,7 +10,7 @@
   <div class="content">
     <!-- Título según sea un resultado parcial (entre tandas) o el final. -->
     @if (esFinal()) {
-      <h2>El Botón del Bonus — terminó</h2>
+      <h2>{{ nombre() }} — terminó</h2>
     } @else {
       <h2>Tanda {{ tanda() }} de {{ tandasTotal() }} — resultado</h2>
     }
