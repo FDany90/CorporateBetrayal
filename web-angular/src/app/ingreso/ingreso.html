@@ -24,10 +24,16 @@
 
     @if (modo() === 'unirse') {
       <div class="field">
-        <label>Código de sala</label>
+        <label for="code-input">Código de sala</label>
         <input
+          id="code-input"
           class="code"
+          type="text"
           maxlength="5"
+          inputmode="text"
+          autocomplete="off"
+          autocapitalize="characters"
+          spellcheck="false"
           placeholder="ABCDE"
           [ngModel]="code()"
           (ngModelChange)="setCode($event)"
@@ -36,23 +42,27 @@
     }
 
     <div class="field">
-      <label>Tu apodo</label>
+      <label for="nickname-input">Tu apodo</label>
       <input
+        id="nickname-input"
+        type="text"
         maxlength="20"
+        autocomplete="nickname"
+        spellcheck="false"
         placeholder="Cómo te ven los demás"
         [ngModel]="nickname()"
         (ngModelChange)="nickname.set($event)"
       />
     </div>
 
-    <!-- Selección de avatar: ya no es una grilla inline. Es un preview
-         GRANDE clickeable; al tocarlo se abre el modal pantalla-completa
-         con los 16 avatares y la preview ampliada. -->
+    <!-- Selección de avatar: el botón abre el modal pantalla-completa.
+         aria-labelledby asocia el label visible para screen readers. -->
     <div class="field">
-      <label>Tu identidad</label>
+      <label id="lbl-identidad">Tu identidad</label>
       <button
         class="avatar-current"
         type="button"
+        aria-labelledby="lbl-identidad"
         (click)="abrirPicker()"
       >
         <app-avatar [id]="avatar()" [size]="96" />

@@ -28,7 +28,7 @@
 
   <div class="actionbar">
     @if (yo()?.acted) {
-      <p class="muted-note">
+      <p class="muted-note" aria-live="polite" aria-atomic="true">
         Esperando a los demás… ({{ listos() }}/{{ total() }})
       </p>
     } @else {

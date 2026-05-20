@@ -100,7 +100,7 @@
          El botón es el último beat — un beat más después de la firma. -->
     <div class="actionbar">
       @if (yo()?.acted) {
-        <p class="muted-note">
+        <p class="muted-note" aria-live="polite" aria-atomic="true">
           Esperando a los demás… ({{ listos() }}/{{ total() }})
         </p>
       } @else {

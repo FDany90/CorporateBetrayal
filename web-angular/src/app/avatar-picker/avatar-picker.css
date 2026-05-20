@@ -131,6 +131,10 @@
   overflow-y: auto;
   padding: 18px 18px 16px;
   min-height: 0;
+  /* overscroll-behavior:contain evita que el scroll del modal "arrastre"
+     el body de la página de fondo cuando se llega al borde — UX típica
+     de modales en mobile (Vercel guidelines). */
+  overscroll-behavior: contain;
 }
 .picker-grid {
   display: grid;

@@ -1,14 +1,28 @@
 <!-- Backdrop: ocupa toda la ventana, oscurece el fondo. Tap = cerrar.
-     stopPropagation en el modal evita que un click adentro burbuje a acá. -->
+     stopPropagation en el modal evita que un click adentro burbuje a acá.
+     role="dialog" + aria-modal hace que los screen readers anuncien el
+     modal como tal. aria-labelledby apunta al h2 del título. -->
 <div class="picker-backdrop" (click)="cancelar()">
-  <div class="picker-modal" (click)="$event.stopPropagation()">
+  <div
+    class="picker-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="picker-title"
+    (click)="$event.stopPropagation()"
+  >
 
     <header class="picker-head">
       <div>
         <p class="picker-kicker">SINERGIA·CORP · Asignación de identidad</p>
-        <h2 class="picker-title">¿Quién sos?</h2>
+        <h2 id="picker-title" class="picker-title">¿Quién sos?</h2>
       </div>
-      <button class="picker-close" (click)="cancelar()" title="Cerrar">✕</button>
+      <button
+        class="picker-close"
+        type="button"
+        aria-label="Cerrar selección de avatar"
+        title="Cerrar"
+        (click)="cancelar()"
+      >✕</button>
     </header>
 
     <!-- Preview grande de la selección actual: avatar enorme + puesto. -->
@@ -27,9 +41,12 @@
         @for (a of avatares; track a.id) {
           <button
             class="picker-cell"
+            type="button"
             [class.on]="seleccion() === a.id"
-            (click)="elegir(a.id)"
+            [attr.aria-label]="a.puesto"
+            [attr.aria-pressed]="seleccion() === a.id"
             [title]="a.puesto"
+            (click)="elegir(a.id)"
           >
             <app-avatar [id]="a.id" [size]="70" />
           </button>

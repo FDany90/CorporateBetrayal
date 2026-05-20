@@ -64,6 +64,13 @@
 }
 
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+
+/* touch-action:manipulation en TODO lo interactivo — evita el delay de
+   300ms de doble-tap en mobile (regla de Web Interface Guidelines). */
+button, a, [role="button"], input, select, textarea, label{
+  touch-action:manipulation;
+}
+
 html,body{height:100%;}
 body{
   font-family:var(--font-body);
@@ -125,6 +132,7 @@ app-marcador, app-final, app-reunion, app-votacion, app-comunicado{
   border-radius:2px;
   background:var(--paper-soft);
   white-space:nowrap;
+  font-variant-numeric:tabular-nums;
 }
 .appheader{
   flex-shrink:0;
@@ -169,6 +177,7 @@ h1{
   color:var(--ink);
   margin-bottom:8px;
   font-variation-settings:'opsz' 96;
+  text-wrap:balance;
 }
 h2{
   font-family:var(--font-display);
@@ -177,6 +186,7 @@ h2{
   color:var(--ink);
   margin-bottom:10px;
   font-variation-settings:'opsz' 24;
+  text-wrap:balance;
 }
 p{
   color:var(--ink);
@@ -241,6 +251,7 @@ p{
   font-weight:700;color:var(--ink-soft);
   font-size:12px;letter-spacing:1px;
   min-width:22px;
+  font-variant-numeric:tabular-nums;
 }
 .row-av{
   font-size:20px;line-height:1;
@@ -268,6 +279,7 @@ p{
   font-family:var(--font-mono);
   font-weight:700;color:var(--ink);
   font-size:13px;
+  font-variant-numeric:tabular-nums;
 }
 .row-status{
   font-family:var(--font-mono);
@@ -278,11 +290,12 @@ p{
 .row-status.ready{color:var(--approved);}
 .row-status.danger{color:var(--stamp);}
 .row .kick{
-  width:24px;height:24px;border-radius:2px;flex-shrink:0;line-height:1;
+  width:40px;height:40px;border-radius:2px;flex-shrink:0;line-height:1;
   background:var(--stamp-soft);color:var(--stamp);
   border:1px solid var(--stamp);
-  font-size:10px;font-weight:800;cursor:pointer;
+  font-size:13px;font-weight:800;cursor:pointer;
   font-family:var(--font-mono);
+  display:flex;align-items:center;justify-content:center;
 }
 
 /* Etiqueta chica tipo "tag" — para anfitrión, bot, vos, etc. */
@@ -379,6 +392,17 @@ p{
     0 1px 0 var(--accent),
     0 2px 6px rgba(26,22,18,.20);
 }
+/* Hover SOLO en dispositivos con puntero fino (desktop). En mobile,
+   un :hover puede "pegarse" después del tap; @media (hover: hover)
+   limita el efecto a mouse/trackpad — guideline estándar de Vercel. */
+@media (hover: hover){
+  .btn:hover:not(:active):not(:disabled){
+    transform:translateY(-1px);
+    box-shadow:
+      0 5px 0 var(--accent),
+      0 8px 16px rgba(26,22,18,.22);
+  }
+}
 .btn:disabled{
   opacity:.45;cursor:not-allowed;
   box-shadow:0 2px 0 var(--accent);
@@ -399,7 +423,8 @@ p{
   box-shadow:0 0 0 1.5px var(--stamp) inset;
 }
 .btn.sm{
-  padding:9px 12px;font-size:11px;letter-spacing:2px;
+  padding:13px 12px;font-size:11px;letter-spacing:2px;
+  min-height:44px;
   box-shadow:
     0 2px 0 var(--accent),
     0 3px 6px rgba(26,22,18,.12);
@@ -450,13 +475,14 @@ p{
   overflow:hidden;
 }
 .seg button{
-  flex:1;padding:10px 8px;border:0;
+  flex:1;padding:14px 8px;border:0;
   background:var(--paper);color:var(--ink-soft);
   font-family:var(--font-mono);
   font-size:10px;font-weight:700;
   letter-spacing:2px;
   cursor:pointer;
   text-transform:uppercase;
+  min-height:44px;
 }
 .seg button.on{background:var(--ink);color:var(--paper);}
 .seg button+button{border-left:1.5px solid var(--ink);}
@@ -581,6 +607,7 @@ p{
   font-family:var(--font-display);
   font-size:36px;font-weight:900;
   color:var(--ink);
+  font-variant-numeric:tabular-nums;
 }
 .up{color:var(--approved);}
 .down{color:var(--stamp);}
@@ -675,9 +702,10 @@ p{
 .player .st.ready{color:var(--approved);font-weight:700;}
 .player.off{opacity:.45;}
 .player .kick{
-  width:24px;height:24px;border-radius:2px;flex-shrink:0;line-height:1;
+  width:40px;height:40px;border-radius:2px;flex-shrink:0;line-height:1;
   background:var(--stamp-soft);color:var(--stamp);border:1px solid var(--stamp);
-  font-size:10px;font-weight:800;cursor:pointer;font-family:var(--font-mono);
+  font-size:13px;font-weight:800;cursor:pointer;font-family:var(--font-mono);
+  display:flex;align-items:center;justify-content:center;
 }
 .player .pos{
   font-weight:800;width:20px;text-align:center;color:var(--ink-soft);
@@ -729,4 +757,42 @@ app-intro.intro{
   0%   { opacity:0; transform:scale(.92); filter:blur(8px); }
   60%  { opacity:1; }
   100% { opacity:1; transform:scale(1);   filter:blur(0); }
+}
+
+/* ============================================================
+   Accesibilidad — focus visible + reduced motion
+   ============================================================ */
+
+/* Outline visible al navegar con teclado (Tab). :focus-visible solo
+   activa el outline cuando el navegador detecta "intención teclado",
+   no en clicks de mouse — evita el outline molesto en uso táctil. */
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+.voto-op:focus-visible,
+.avatar-btn:focus-visible,
+.avatar-current:focus-visible,
+.picker-cell:focus-visible,
+.row .kick:focus-visible{
+  outline:3px solid var(--accent);
+  outline-offset:3px;
+}
+.field input:focus,
+.field input:focus-visible{
+  outline:0;
+  border-bottom-color:var(--accent);
+  background:var(--accent-soft);
+}
+
+/* prefers-reduced-motion — neutraliza animaciones largas para usuarios
+   con vestibular issues (importante para los reveals dramáticos del
+   Comunicado/Final y los keyframes del sello). Mantiene transiciones
+   muy cortas para preservar feedback básico (botón apretado, etc.). */
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation-duration:0.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:0.01ms !important;
+    scroll-behavior:auto !important;
+  }
 }

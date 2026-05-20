@@ -3,10 +3,11 @@
 > Documento de traspaso. Si abrís el proyecto en otra PC o en una sesión
 > nueva (de Claude o tuya), **empezá por acá**.
 
-**Última actualización:** 2026-05-20 · **Hito actual:** Paso 3 (motor de
-rondas) completo · 2 minijuegos · cliente en Angular · lenguaje visual
-editorial aplicado a Ingreso/Lobby/Final · sistema de avatars con 15
-SVGs y modal de selección
+**Última actualización:** 2026-05-20 · **Hito actual:** Paso 3 completo ·
+2 minijuegos · cliente Angular con lenguaje visual editorial aplicado a
+Ingreso / Lobby / Comunicado / Final · sistema de avatars (15 SVGs +
+modal pantalla-completa) · pasada completa de a11y/UX mobile-first
+(Tandas 1-4 de Web Interface Guidelines de Vercel)
 
 ---
 
@@ -75,11 +76,14 @@ Roadmap del [GDD §10](GDD.md):
 - **2 minijuegos:** *El Botón del Bonus* (individual, llamadas 1-a-1 en
   tandas sin repetir pareja) y *El Recorte* (grupal, votación).
 
-**Lenguaje visual "Editorial Sinergia"** aplicado a tres pantallas:
+**Lenguaje visual "Editorial Sinergia"** aplicado a cuatro pantallas:
 - **Ingreso** — formulario con tipografía editorial (Fraunces + JetBrains Mono),
   selector de avatar grande clickeable que abre un modal pantalla-completa.
 - **Lobby** — "memorándum interno" con folio, expediente (código de sala
   grande), planilla de convocados con puntos guía, anexo técnico para bots.
+- **Comunicado** — premisa narrativa del juego (nueva pantalla, fase
+  `'comunicado'` del server): plan de optimización con 1 ascenso + 1
+  desvinculación en juego. Sello "CONFIDENCIAL" cayendo diagonal.
 - **Final** — "circular oficial" con papel crema, grano, sombra dramática,
   sello rojo "ASCENSO APROBADO" cayendo al final con scale+rotate.
 - **Briefing** — sistema de "intro dramática" con beats escalonados (350ms
@@ -90,6 +94,20 @@ corto, marco redondo) con personalidades reconocibles (Dirección, Sistemas,
 RR.HH., Seguridad, Coach, Visionario, Quemado, Jefe, Nerd, Viejo, Hippie,
 Remera, Finanzas, Legales, Diseño). Componente `<app-avatar>` reusable +
 modal `<app-avatar-picker>` pantalla-completa.
+
+**Accesibilidad y UX mobile-first** (auditado contra Vercel Web Interface
+Guidelines, ver el skill `/web-design-guidelines`):
+- Zoom de usuario habilitado, `touch-action: manipulation` global, sin
+  delay de 300ms en doble-tap.
+- `:focus-visible` champagne en todos los interactivos (teclado).
+- `prefers-reduced-motion` neutraliza animaciones para usuarios sensibles.
+- Tap targets ≥40-44px en todos los botones.
+- Labels asociados a inputs (`for`/`id`), `autocomplete`/`inputmode` en
+  inputs, `aria-label` en icon-only buttons.
+- Modal del picker: `role="dialog" aria-modal`, cerrar con ESC, focus trap,
+  autofocus al abrir, restaurar foco al cerrar.
+- `aria-live="polite"` en zonas async ("Esperando a los demás…").
+- `tabular-nums` en columnas numéricas, `text-wrap: balance` en headings.
 
 Todo jugable solo con bots.
 
@@ -176,17 +194,23 @@ Detalle de cada archivo: [codigo.md](codigo.md).
 
 ## 9. Próximos pasos
 
-1. **Migrar el resto de pantallas al lenguaje editorial.** Aplicar el sistema
-   a Briefing (texto), Votación, Desafío, Resultado, Marcador, Reunión. Las
+1. **Temporizadores en pantalla** — implementar **desde cero** (no existen
+   aún en server). Cada fase de juego (briefing, votación, reunión, etc.)
+   debería tener un tiempo límite y un contador visible en la UI. Plan:
+   primero el server (timestamp de fin de fase en el `GameState` +
+   `setTimeout` para forzar avance si vence), después la UI (componente
+   `<app-timer>` reusable con cuenta regresiva visual).
+2. **Migrar el resto de pantallas al lenguaje editorial.** Aplicar el sistema
+   a Briefing, Votación, Desafío, Resultado, Marcador, Reunión. Las
    primitivas globales (`.doc-head`, `.row`, `.expediente`, `.section-head`,
    `.vos-tag`) ya están en `styles.css`. Hoy se ven coherentes pero no
-   tan distintivas como Ingreso/Lobby/Final.
-2. **Paso 4** — Resto del catálogo: más minijuegos, **uno por incremento**.
+   tan distintivas como Ingreso/Lobby/Comunicado/Final.
+3. **Paso 4** — Resto del catálogo: más minijuegos, **uno por incremento**.
    Quedan 5 individuales y 6 grupales. Un minijuego de un *kind* ya existente
    (`llamadas` / `votacion`) no toca el motor.
-3. **Pendiente del Paso 3** — desempate por **votación directa** en la pantalla
+4. **Pendiente del Paso 3** — desempate por **votación directa** en la pantalla
    final (hoy, si hay empate en el #1, comparten puesto).
-4. **Deploy** — hosting estático (web) + Railway/Fly (server); habilita probar
+5. **Deploy** — hosting estático (web) + Railway/Fly (server); habilita probar
    en celulares reales. Se puede adelantar cuando se quiera mostrar a otros.
 
 **Decisiones abiertas** pendientes: ver la sección 11 del [GDD](GDD.md)

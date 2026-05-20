@@ -57,6 +57,7 @@
           @if (soyHost() && p.id !== miId()) {
             <button
               class="kick"
+              [attr.aria-label]="'Expulsar a ' + p.nickname"
               [title]="'Expulsar a ' + p.nickname"
               (click)="expulsar(p.id)"
             >
@@ -90,7 +91,7 @@
         {{ textoEmpezar() }}
       </button>
     } @else {
-      <p class="muted-note">
+      <p class="muted-note" aria-live="polite">
         Esperando a que el anfitrión inicie la sesión…
       </p>
     }
