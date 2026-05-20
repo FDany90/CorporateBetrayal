@@ -1,7 +1,8 @@
 <!-- Pantalla Comunicado · "COMUNICADO OFICIAL" de RR.HH.
      Premisa narrativa del juego. Sin shell (topbar/appheader): la
-     pantalla es 100% documento — refuerza el dramatismo y libera
-     espacio vertical para que el botón ENTENDIDO siempre se vea. -->
+     pantalla es 100% documento — refuerza el dramatismo. El botón
+     ENTENDIDO vive DENTRO del .doc (no como actionbar flotante)
+     para que el papel se sienta como una pieza única. -->
 <div class="screen comunicado-screen">
   <app-intro class="intro-slow" [totalMs]="totalMs()">
     <div class="content doc-scroll">
@@ -67,24 +68,25 @@
             Por dudas, comunicarse al interno 0042. Estricta confidencialidad.
           </p>
         </footer>
-      </article>
-    </div>
 
-    <!-- ACTIONBAR -->
-    <div class="actionbar">
-      @if (yo()?.acted) {
-        <p class="muted-note" aria-live="polite" aria-atomic="true">
-          Esperando a los demás… ({{ listos() }}/{{ total() }})
-        </p>
-      } @else {
-        <button
-          class="btn comunicado-btn beat"
-          [style.--i]="beatBoton()"
-          (click)="confirmar()"
-        >
-          ENTENDIDO
-        </button>
-      }
+        <!-- ACCIÓN dentro del documento — separador de pliegue + bloque
+             oscuro como "pie de recibido". Va con el papel, no flota. -->
+        <div class="doc-action">
+          @if (yo()?.acted) {
+            <p class="doc-action-waiting" aria-live="polite" aria-atomic="true">
+              Esperando a los demás… ({{ listos() }}/{{ total() }})
+            </p>
+          } @else {
+            <button
+              class="comunicado-btn beat"
+              [style.--i]="beatBoton()"
+              (click)="confirmar()"
+            >
+              ENTENDIDO
+            </button>
+          }
+        </div>
+      </article>
     </div>
   </app-intro>
 </div>

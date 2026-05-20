@@ -94,10 +94,14 @@ export class GameRoom extends Room<GameState> {
 
     this.onMessage("ack", (client) => {
       const p = this.state.players.get(client.sessionId);
-      if (p) {
-        p.acted = true;
-        this.chequearAvance();
-      }
+      if (!p) return;
+      // En la fase de voto, "ack" significa "confirmo mi voto y ya no lo
+      // cambio" — solo es válido si efectivamente voté a alguien. Sin
+      // esta validación, alguien podría confirmar sin votar y bloquear
+      // el avance (el server seguiría esperando que vote).
+      if (this.state.phase === "vote" && !p.decision) return;
+      p.acted = true;
+      this.chequearAvance();
     });
 
     // 'decidir' cubre dos cosas según la fase:
@@ -112,10 +116,15 @@ export class GameRoom extends Room<GameState> {
         p.decision = value;
         this.chequearAvance();
       } else if (this.state.phase === "vote") {
+        // En vote, el voto se puede cambiar libremente hasta que el
+        // jugador confirme (`ack`). Una vez confirmado, queda firme:
+        // bloqueamos cambios para que no se altere el conteo en vivo
+        // luego del compromiso público de "ya voté".
+        if (p.acted) return;
         if (value === client.sessionId) return; // no se puede autovotar
         if (!this.state.players.has(value)) return;
         p.decision = value;
-        this.chequearAvance();
+        // No tocamos `acted`: el avance lo dispara el handler "ack".
       }
     });
 
@@ -366,9 +375,13 @@ export class GameRoom extends Room<GameState> {
     }
 
     if (fase === "vote") {
-      // El voto avanza cuando todos los conectados votaron.
+      // El voto avanza cuando todos los conectados CONFIRMARON
+      // (`acted`). El campo `decision` se propaga en vivo a todos
+      // los clientes durante la deliberación, pero el motor solo
+      // mira `acted` para resolver — así un jugador puede cambiar
+      // su voto sin disparar la resolución hasta que oprima Confirmar.
       for (const [, p] of this.state.players) {
-        if (p.connected && !p.decision) return;
+        if (p.connected && !p.acted) return;
       }
       this.resolverVotacion();
     }
@@ -395,7 +408,10 @@ export class GameRoom extends Room<GameState> {
     console.log("[GameRoom] tanda resuelta");
   }
 
-  /** Entra a la fase de voto: resetea decisiones; los bots votan al azar. */
+  /** Entra a la fase de voto: resetea decisiones; los bots votan al azar
+   *  Y confirman al instante (acted=true), porque no participan de la
+   *  deliberación social. Los humanos quedan con acted=false hasta que
+   *  oprimen Confirmar Voto en el cliente. */
   private iniciarVotacion() {
     this.state.phase = "vote";
     this.state.pairings.clear();
@@ -407,6 +423,7 @@ export class GameRoom extends Room<GameState> {
         const otros = ids.filter((id) => id !== p.id);
         p.decision =
           otros[Math.floor(Math.random() * otros.length)] ?? "";
+        p.acted = true; // los bots votan y confirman al instante
       }
     }
   }

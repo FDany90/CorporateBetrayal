@@ -1,19 +1,25 @@
 import { Component, computed, inject } from '@angular/core';
 import { GameService } from '../game.service';
 import { Avatar } from '../avatar/avatar';
+import { temaDelDia } from '../challenge-meta';
 import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
 
 /**
  * Pantalla del Desafío (fase "calls"): muestra a qué colega llamar y la
  * decisión secreta Compartir (verde) / Quedárselo (rojo).
  *
- * Si el número de jugadores es impar, uno queda sin pareja esa ronda: para
- * ese caso hay una rama aparte en el template.
+ * Lenguaje editorial: el appheader usa la nomenclatura "Día X de Y ·
+ * Tema · Llamada A de B" (no "Ronda" ni "Tanda") — coherente con el
+ * resto de las pantallas migradas (Briefing, Resultado, Marcador).
+ *
+ * Si el número de jugadores es impar, uno queda sin pareja esa ronda:
+ * para ese caso hay una rama aparte en el template.
  */
 @Component({
   selector: 'app-desafio',
   imports: [Avatar],
   templateUrl: './desafio.html',
+  styleUrl: './desafio.css',
 })
 export class Desafio {
   private readonly juego = inject(GameService);
@@ -22,12 +28,23 @@ export class Desafio {
   readonly jugadores = computed(() => this.juego.estado()?.players ?? []);
   readonly pairings = computed(() => this.juego.estado()?.pairings ?? []);
 
-  /** Tanda de llamadas actual y total — para el indicador "Tanda 2 de 3". */
+  /** Tanda de llamadas actual y total — para el indicador "Llamada 2 de 3". */
   readonly tanda = computed(() => this.juego.estado()?.tanda ?? 0);
   readonly tandasTotal = computed(() => this.juego.estado()?.tandasTotal ?? 0);
+  /** Alias semántico editorial: en el appheader la llamamos "Llamada". */
+  readonly llamada = this.tanda;
+  readonly llamadasTotal = this.tandasTotal;
+
   /** Ronda actual y total — para la cabecera. */
   readonly ronda = computed(() => this.juego.estado()?.ronda ?? 0);
   readonly rondasTotal = computed(() => this.juego.estado()?.rondasTotal ?? 0);
+  /** Alias semántico editorial: el appheader dice "Día X de Y". */
+  readonly dia = this.ronda;
+  readonly diasTotal = this.rondasTotal;
+  /** Tema editorial del día — viene del mapa challenge-meta. */
+  readonly tema = computed(() =>
+    temaDelDia(this.juego.estado()?.challengeId ?? ''),
+  );
   readonly yo = computed(() =>
     this.jugadores().find((p) => p.id === this.miId()),
   );

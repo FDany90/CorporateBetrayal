@@ -1,0 +1,306 @@
+/* ============================================================
+   Pantalla Desafío · "Dictamen secreto" del Botón del Bonus
+   ============================================================
+   Gramática editorial: kicker de rol arriba, "ficha del colega"
+   con marco doble (el avatar es la foto del expediente), section-head
+   y bajada para la decisión, dos opciones grandes verde/rojo con
+   sello "Elegido" cuando se selecciona.
+   ============================================================ */
+
+.desafio-screen .content {
+  padding: 16px 18px 14px;
+  /* Centrado horizontal de los bloques (texto sigue alineado a la
+     izquierda dentro de cada bloque, salvo donde se diga otra cosa). */
+  display: flex;
+  flex-direction: column;
+}
+
+/* ------ KICKER de rol ------
+   Indica si me toca iniciar la llamada o esperar. Mono caps,
+   con un punto champagne adelante. La variante "active" (yo llamo)
+   levanta el color para enfatizar la acción que tengo que hacer. */
+.role-kicker {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  text-align: center;
+  margin: 0 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.role-kicker::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--line);
+  flex-shrink: 0;
+}
+.role-kicker.role-active {
+  color: var(--accent-d);
+}
+.role-kicker.role-active::before {
+  background: var(--accent);
+  /* Pulso sutil — comunica "ahora actuás vos". El reduced-motion
+     global ya neutraliza esto para usuarios sensibles. */
+  animation: rolePulse 1600ms ease-in-out infinite;
+}
+@keyframes rolePulse {
+  0%, 100% { opacity: 1;   transform: scale(1);   }
+  50%      { opacity: .55; transform: scale(.85); }
+}
+
+/* ------ FICHA del colega ------
+   Marco doble (borde fino + offset champagne) que abraza al avatar,
+   el nombre en font-display grande y una instrucción debajo. Lee
+   como una "foto de expediente" del documento interno. */
+.partner {
+  text-align: center;
+  margin: 0 0 18px;
+}
+.partner-frame {
+  width: 112px;
+  height: 112px;
+  margin: 0 auto 14px;
+  background: var(--paper-soft);
+  border: 1.5px solid var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  /* Sombra champagne offset — el "doble borde" del expediente.
+     Se replica del lenguaje del logo del Ingreso. */
+  box-shadow: 4px 4px 0 var(--accent);
+}
+/* Variante para el caso "sin pareja" — emoji centrado en el marco. */
+.partner-frame-libre {
+  font-size: 56px;
+  line-height: 1;
+}
+/* "Section-head" con teléfono — dos líneas finas que abrazan el
+   SVG centrado. Misma gramática que el .section-head global pero
+   con el ícono al medio en lugar de texto. Color tinta apagada
+   (currentColor hereda de aquí). */
+.partner-call {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 8px;
+  color: var(--ink-soft);
+}
+.partner-call::before,
+.partner-call::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--line);
+}
+.partner-call svg {
+  flex-shrink: 0;
+  display: block;
+}
+
+.partner-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 30px;
+  line-height: 1.05;
+  letter-spacing: -0.5px;
+  color: var(--ink);
+  margin: 0 0 8px;
+  font-variation-settings: 'opsz' 96;
+  text-wrap: balance;
+}
+.partner-instruction {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink);
+  margin: 0 auto;
+  max-width: 30ch;
+  text-wrap: balance;
+}
+
+/* ------ DECISIÓN ------
+   Section-head global (reusado), bajada centrada, dos opciones
+   en grid 1fr 1fr. */
+.desafio-screen .section-head {
+  margin: 18px 0 10px;
+}
+.decision-lead {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink);
+  text-align: center;
+  margin: 0 0 14px;
+  text-wrap: balance;
+}
+
+.options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+/* ------ OPCIÓN ------
+   Cada opción es un "chip ampliado": el mismo lenguaje que las celdas
+   verde/rojo del Briefing (matriz de pagos), pero a tamaño botón.
+   El emoji va arriba como "marca de tinta" del color; el título es
+   font-display; el subtítulo es mono caps. Estado seleccionado:
+   borde grueso del color + fondo más sólido + sello "Elegido" girado
+   en la esquina superior. */
+.option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 16px 10px 14px;
+  background: var(--paper-soft);
+  border: 1.5px solid var(--ink);
+  border-radius: 2px;
+  cursor: pointer;
+  color: var(--ink);
+  font: inherit;
+  min-height: 110px;
+  /* Sombra offset al estilo "sello apilado" — coherente con .btn
+     global pero un poquito más sutil porque hay dos opciones. */
+  box-shadow: 3px 3px 0 var(--line);
+  transition:
+    transform 100ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+.option:active {
+  transform: translateY(2px);
+  box-shadow: 1px 1px 0 var(--line);
+}
+@media (hover: hover) {
+  .option:hover:not(:active):not(.option-on) {
+    background: var(--paper);
+  }
+}
+
+/* Marker de la opción — círculo pleno CSS en lugar de emoji.
+   El color es editorial (--approved / --stamp apagados), mucho más
+   coherente con el papel crema que el verde/rojo saturado de los
+   emojis 🟢/🔴. Un anillo interno fino con el papel da textura sin
+   gritar. */
+.option-mark {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  margin-bottom: 4px;
+  /* El color de fondo viene de la variante .option-verde/.option-rojo
+     (ver más abajo) — la regla base lo deja indefinido. */
+  box-shadow: inset 0 0 0 2px var(--paper-soft);
+}
+.option-verde .option-mark { background: var(--approved); }
+.option-rojo  .option-mark { background: var(--stamp);    }
+.option-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: 0.5px;
+  line-height: 1;
+  font-variation-settings: 'opsz' 36;
+}
+.option-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+}
+
+/* Variantes verde/rojo — sombra del color de la opción para que
+   "se sienta" verde/rojo incluso sin estar seleccionada. */
+.option-verde {
+  box-shadow: 3px 3px 0 var(--approved);
+}
+.option-verde:active { box-shadow: 1px 1px 0 var(--approved); }
+
+.option-rojo {
+  box-shadow: 3px 3px 0 var(--stamp);
+}
+.option-rojo:active { box-shadow: 1px 1px 0 var(--stamp); }
+
+/* Estado SELECCIONADO — borde grueso del color, fondo del color
+   apagado, título coloreado. La opción no elegida se atenúa. */
+.option-verde.option-on {
+  border-color: var(--approved);
+  border-width: 2.5px;
+  background: #eaf2dd;
+  box-shadow: 3px 3px 0 var(--approved);
+}
+.option-verde.option-on .option-title,
+.option-verde.option-on .option-sub  { color: var(--approved); }
+
+.option-rojo.option-on {
+  border-color: var(--stamp);
+  border-width: 2.5px;
+  background: var(--stamp-soft);
+  box-shadow: 3px 3px 0 var(--stamp);
+}
+.option-rojo.option-on .option-title,
+.option-rojo.option-on .option-sub  { color: var(--stamp); }
+
+/* "Atenuar" la opción NO elegida cuando hay una decisión tomada.
+   `:has()` chequea si dentro de `.options` hay un `.option-on`;
+   si lo hay, las opciones que NO están on bajan opacidad. */
+.options:has(.option-on) .option:not(.option-on) {
+  opacity: 0.45;
+}
+
+/* ------ SELLO "Elegido" ------
+   Pequeño rótulo girado en la esquina superior derecha del chip
+   seleccionado. Lenguaje de los sellos de los documentos oficiales
+   (Comunicado/Final), a escala mini. */
+.option-stamp {
+  position: absolute;
+  top: -10px;
+  right: -8px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 3px 8px 4px;
+  border: 1.5px solid currentColor;
+  background: var(--paper);
+  transform: rotate(8deg);
+  white-space: nowrap;
+  pointer-events: none;
+  /* Color heredado del .option-on (verde o rojo). */
+}
+
+/* ------ ESTADO ------ */
+.decision-state {
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  text-align: center;
+  margin: 0;
+  text-wrap: balance;
+}
+.decision-state strong {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--ink);
+  text-transform: uppercase;
+  font-size: 10.5px;
+  padding: 0 2px;
+}
+
+/* ------ RAMA "sin pareja" ------ */
+.desafio-libre {
+  justify-content: center;
+}

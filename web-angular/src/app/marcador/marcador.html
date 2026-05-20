@@ -5,11 +5,13 @@
     </span>
     <span class="pill">💼 {{ yo()?.influence ?? 0 }}</span>
   </div>
-  <div class="appheader">Aprobaciones · Marcador</div>
+  <div class="appheader">
+    Día {{ dia() }} de {{ diasTotal() }} · {{ tema() }}
+  </div>
 
   <div class="content">
-    <h2>Ronda {{ ronda() }} de {{ rondasTotal() }} — terminada</h2>
-    <p class="muted-note">Así va el marcador antes de la próxima ronda.</p>
+    <h2>Día {{ dia() }} de {{ diasTotal() }} — cerrado</h2>
+    <p class="muted-note">Así va el marcador antes del próximo día.</p>
 
     <div class="card pad0">
       @for (p of ranking(); track p.id; let i = $index) {

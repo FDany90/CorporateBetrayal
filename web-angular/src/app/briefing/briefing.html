@@ -1,8 +1,10 @@
-<!-- Briefing del minijuego.
+<!-- Briefing del minijuego — "Memo interno" del día.
      El topbar y el appheader son parte del "shell" y aparecen al instante.
      Todo lo que está dentro de <app-intro> se revela escalonado (beats con
-     style="--i:N"). Tap en cualquier parte del intro salta la secuencia. -->
-<div class="screen">
+     style="--i:N"). Tap en cualquier parte del intro salta la secuencia.
+     Se usa la variante `intro-slow` (700ms entre beats) porque es lectura,
+     no UI rápida — el mismo ritmo del Comunicado. -->
+<div class="screen briefing-screen">
   <div class="topbar">
     <span class="brand">
       SINERGIA<span class="dot">·</span>CORP
@@ -10,58 +12,128 @@
     <span class="pill">💼 {{ yo()?.influence ?? 0 }}</span>
   </div>
   <div class="appheader">
-    Aprobaciones · Ronda {{ ronda() }} de {{ rondasTotal() }}
+    Día {{ dia() }} de {{ diasTotal() }} · {{ tema() }}
   </div>
 
-  <app-intro>
+  <app-intro class="intro-slow">
     <div class="content">
       @switch (challengeId()) {
         @case ('boton-del-bonus') {
-          <h1 class="beat" style="--i:0">El Botón del Bonus</h1>
-          <p class="beat" style="--i:1">
-            Vas a hablar 1-a-1 con un colega por Teams. Al cerrar la llamada,
-            en secreto elegís Compartir el bono o Quedártelo.
+          <p class="kicker beat" style="--i:0">
+            Memo interno · Desempeño individual
           </p>
-          <div class="card beat" style="--i:2">
-            <div class="rule">
-              <span>🟢 Compartir + 🟢 Compartir</span>
-              <strong>+3 / +3</strong>
+          <h1 class="doc-h1 beat" style="--i:1">El Botón del Bonus</h1>
+
+          <p class="briefing-lead beat" style="--i:2">
+            La Dirección libera un <strong>bono compartible</strong> entre
+            dos colegas. Cada uno decide, <strong>en secreto y por
+            separado</strong>, si lo <em class="verde">comparte</em> o
+            se lo <em class="rojo">queda</em>. Las decisiones se revelan
+            recién al cerrar la llamada.
+          </p>
+
+          <div class="matrix beat" style="--i:3">
+            <div class="matrix-head">Matriz de pagos · Influencia</div>
+
+            <div class="matrix-row">
+              <div class="matrix-label">Ambos cooperan</div>
+              <div class="matrix-cells">
+                <span class="cell verde">Compartir <span class="cell-val">+3</span></span>
+                <span class="vs">+</span>
+                <span class="cell verde">Compartir <span class="cell-val">+3</span></span>
+              </div>
+              <p class="matrix-explain">
+                Bono completo para los dos. Gana la confianza mutua.
+              </p>
             </div>
-            <div class="rule">
-              <span>🔴 Quedárselo vs 🟢 Compartir</span>
-              <strong>+5 / 0</strong>
+
+            <div class="matrix-row">
+              <div class="matrix-label">Uno traiciona</div>
+              <div class="matrix-cells">
+                <span class="cell rojo">Quedárselo <span class="cell-val">+5</span></span>
+                <span class="vs">vs</span>
+                <span class="cell verde">Compartir <span class="cell-val">0</span></span>
+              </div>
+              <p class="matrix-explain">
+                El que se lo queda se lleva todo. El que confió se va con
+                las manos vacías.
+              </p>
             </div>
-            <div class="rule">
-              <span>🔴 Quedárselo + 🔴 Quedárselo</span>
-              <strong>+1 / +1</strong>
+
+            <div class="matrix-row">
+              <div class="matrix-label">Nadie confía</div>
+              <div class="matrix-cells">
+                <span class="cell rojo">Quedárselo <span class="cell-val">+1</span></span>
+                <span class="vs">+</span>
+                <span class="cell rojo">Quedárselo <span class="cell-val">+1</span></span>
+              </div>
+              <p class="matrix-explain">
+                Premio mínimo: si los dos se cubren, casi no hay bono.
+              </p>
             </div>
           </div>
-          <p class="muted-note beat" style="--i:3">
-            El otro no ve tu elección hasta el resultado.
+
+          <p class="briefing-cierre beat" style="--i:4">
+            Vas a tener <strong>varias llamadas</strong> con colegas
+            distintos. Gana quien acumula más Influencia al cerrar el día.
           </p>
         }
+
         @case ('el-recorte') {
-          <h1 class="beat" style="--i:0">El Recorte</h1>
-          <p class="beat" style="--i:1">
-            La empresa anuncia un recorte y hay que elegir a quién. Es un
-            desafío grupal: se juega en la reunión de Teams.
+          <p class="kicker beat" style="--i:0">
+            Memo interno · Decisión grupal
           </p>
-          <p class="beat" style="--i:2">
-            Van a debatir todos juntos —defenderse, acusar, negociar— y después
-            cada uno vota en secreto a quién recortar.
+          <h1 class="doc-h1 beat" style="--i:1">El Recorte</h1>
+
+          <p class="briefing-lead beat" style="--i:2">
+            La Dirección informa un <strong>recorte de presupuesto</strong>:
+            el trimestre no cierra y <em>no alcanza para todos los bonos</em>.
+            Entre todos hay que decidir a quién se le <em>quita</em>.
           </p>
-          <p class="muted-note beat" style="--i:3">
-            El más votado pierde Influencia. Nadie queda eliminado: se sigue
-            jugando.
+
+          <!-- Instrucción destacada: ícono multi-persona + título +
+               bajada. Es el momento clave de este minijuego — todos
+               tienen que entrar a la misma llamada. -->
+          <aside class="meeting-call beat" style="--i:3">
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="none"
+                 stroke="currentColor" stroke-width="1.6"
+                 stroke-linecap="round" stroke-linejoin="round"
+                 aria-hidden="true">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <div class="meeting-text">
+              <strong>Reunión obligatoria en Teams</strong>
+              <span>
+                Todos se conectan a la misma llamada grupal para discutir.
+              </span>
+            </div>
+          </aside>
+
+          <p class="briefing-lead beat" style="--i:4">
+            Es el momento de <strong>defenderse, acusar y negociar</strong>.
+            Al cerrar la reunión, cada uno <strong>vota en secreto</strong>
+            a quién dejar sin bono.
+          </p>
+
+          <p class="briefing-cierre beat" style="--i:5">
+            El más votado <strong>pierde Influencia</strong>. Nadie queda
+            eliminado: el juego sigue, pero el golpe pesa.
           </p>
         }
+
         @default {
-          <h1 class="beat" style="--i:0">Ronda grupal</h1>
-          <p class="beat" style="--i:1">
-            Este desafío grupal todavía no está implementado. Esta ronda es un
-            placeholder: se saltea hasta sumar el minijuego.
+          <p class="kicker beat" style="--i:0">
+            Memo interno · Jornada de evaluación
           </p>
-          <p class="muted-note beat" style="--i:2">
+          <h1 class="doc-h1 beat" style="--i:1">Día grupal</h1>
+          <p class="briefing-lead beat" style="--i:2">
+            Este desafío grupal todavía no está implementado. El día se
+            saltea hasta sumar el minijuego.
+          </p>
+          <p class="briefing-cierre beat" style="--i:3">
             Tocá «ENTENDIDO» para continuar.
           </p>
         }
@@ -76,7 +148,7 @@
         </p>
       } @else {
         <!-- El botón es el último beat del intro: aparece tras los textos. -->
-        <button class="btn beat" style="--i:5" (click)="confirmar()">
+        <button class="btn beat" style="--i:6" (click)="confirmar()">
           ENTENDIDO
         </button>
       }

@@ -5,9 +5,11 @@
 
 **Última actualización:** 2026-05-20 · **Hito actual:** Paso 3 completo ·
 2 minijuegos · cliente Angular con lenguaje visual editorial aplicado a
-Ingreso / Lobby / Comunicado / Final · sistema de avatars (15 SVGs +
-modal pantalla-completa) · pasada completa de a11y/UX mobile-first
-(Tandas 1-4 de Web Interface Guidelines de Vercel)
+**7 pantallas** (Ingreso / Lobby / Comunicado / Final / Briefing /
+Desafío / Votación) · nomenclatura editorial **"Día X de Y · Tema del
+día"** en todos los appheaders de juego · votación con **conteo en vivo
+y Confirmar Voto** · sistema de avatars (15 SVGs + modal pantalla-completa)
+· pasada completa de a11y/UX mobile-first (Tandas 1-4 WIG Vercel)
 
 ---
 
@@ -62,7 +64,7 @@ Roadmap del [GDD §10](GDD.md):
 | 2 — Bucle base (El Botón del Bonus) | ✅ completo |
 | **3 — Motor de rondas + marcador + pantalla final** | ✅ **completo (hito actual)** |
 | 4 — Resto del catálogo de minijuegos | 🔄 en curso (2 de 13) |
-| 5 — Pulido (estética, onboarding) | 🔄 en curso (lenguaje editorial aplicado a 3 pantallas) |
+| 5 — Pulido (estética, onboarding) | 🔄 en curso (lenguaje editorial aplicado a 7 pantallas) |
 | 6 — Deploy y post-MVP | pendiente |
 
 > Además del roadmap, entre el Paso 2 y el 3 se migró el cliente web de
@@ -76,18 +78,42 @@ Roadmap del [GDD §10](GDD.md):
 - **2 minijuegos:** *El Botón del Bonus* (individual, llamadas 1-a-1 en
   tandas sin repetir pareja) y *El Recorte* (grupal, votación).
 
-**Lenguaje visual "Editorial Sinergia"** aplicado a cuatro pantallas:
+**Lenguaje visual "Editorial Sinergia"** aplicado a siete pantallas:
 - **Ingreso** — formulario con tipografía editorial (Fraunces + JetBrains Mono),
   selector de avatar grande clickeable que abre un modal pantalla-completa.
 - **Lobby** — "memorándum interno" con folio, expediente (código de sala
   grande), planilla de convocados con puntos guía, anexo técnico para bots.
 - **Comunicado** — premisa narrativa del juego (nueva pantalla, fase
   `'comunicado'` del server): plan de optimización con 1 ascenso + 1
-  desvinculación en juego. Sello "CONFIDENCIAL" cayendo diagonal.
+  desvinculación en juego. Sello "CONFIDENCIAL" cayendo diagonal. El
+  botón ENTENDIDO vive **dentro** del papel (sin actionbar separado).
 - **Final** — "circular oficial" con papel crema, grano, sombra dramática,
   sello rojo "ASCENSO APROBADO" cayendo al final con scale+rotate.
-- **Briefing** — sistema de "intro dramática" con beats escalonados (350ms
-  entre cada uno) + tap-para-saltar; reusable en otras pantallas.
+- **Briefing** — memo interno del día: kicker, h1 grande, bajada narrativa,
+  *Matriz de pagos* editorial (chips verde/rojo con puntaje + bajada por
+  caso) para el Botón del Bonus; *aviso destacado* "Reunión obligatoria
+  en Teams" con ícono multi-persona para El Recorte. Variante `intro-slow`
+  (700ms entre beats) — ritmo de lectura.
+- **Desafío** — "Dictamen secreto" del Botón del Bonus: kicker de rol
+  (pulso champagne si me toca llamar), ficha del colega con marco doble
+  + sombra champagne, *section-head con ícono de teléfono* SVG entre
+  avatar y nombre, dos opciones grandes (verde/rojo) con sello "Elegido"
+  girado al seleccionar.
+- **Votación** — "Acta interna" del Recorte: planilla con cabecera
+  (Candidato / Votos), filas con avatar + nombre + tag "Tu voto" + tally
+  en vivo. Yo aparezco en la lista (con tag "vos", rayado diagonal, no
+  clickeable). Botón **CONFIRMAR VOTO** definitivo; el voto se cambia
+  libremente hasta confirmar.
+
+Sistema editorial común a las pantallas de juego:
+- **Appheader** uniforme: `Día X de Y · Tema del día` (sin "Aprobaciones"
+  ni "Ronda"). El "Tema" sale de [`challenge-meta.ts`](../web-angular/src/app/challenge-meta.ts)
+  — un mapa cliente `challengeId → tema editorial`. Cubre Briefing,
+  Desafío, Votación, Resultado, Marcador.
+- **Lenguaje narrativo del Recorte**: ya no es "recorte de personal", es
+  "**recorte de presupuesto**": no alcanza para todos los bonos, se vota
+  a quién dejar sin bono. Más coherente con la mecánica (nadie eliminado,
+  solo se pierde Influencia).
 
 **Sistema de avatars:** 15 ilustraciones SVG cartoon (cabeza grande, cuello
 corto, marco redondo) con personalidades reconocibles (Dirección, Sistemas,
@@ -200,11 +226,11 @@ Detalle de cada archivo: [codigo.md](codigo.md).
    primero el server (timestamp de fin de fase en el `GameState` +
    `setTimeout` para forzar avance si vence), después la UI (componente
    `<app-timer>` reusable con cuenta regresiva visual).
-2. **Migrar el resto de pantallas al lenguaje editorial.** Aplicar el sistema
-   a Briefing, Votación, Desafío, Resultado, Marcador, Reunión. Las
-   primitivas globales (`.doc-head`, `.row`, `.expediente`, `.section-head`,
-   `.vos-tag`) ya están en `styles.css`. Hoy se ven coherentes pero no
-   tan distintivas como Ingreso/Lobby/Comunicado/Final.
+2. **Migrar las últimas pantallas al lenguaje editorial.** Quedan:
+   **Reunión** (la llamada grupal previa al voto del Recorte), **Resultado**
+   (parcial entre tandas y final del minijuego) y **Marcador** (entre
+   rondas). Las tres ya tienen el appheader unificado "Día X de Y · Tema";
+   falta el rediseño del contenido (kicker, h1 editorial, planillas).
 3. **Paso 4** — Resto del catálogo: más minijuegos, **uno por incremento**.
    Quedan 5 individuales y 6 grupales. Un minijuego de un *kind* ya existente
    (`llamadas` / `votacion`) no toca el motor.

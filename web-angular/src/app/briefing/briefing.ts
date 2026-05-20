@@ -1,21 +1,28 @@
 import { Component, computed, inject } from '@angular/core';
 import { GameService } from '../game.service';
 import { Intro } from '../intro/intro';
+import { temaDelDia } from '../challenge-meta';
 import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
 
 /**
- * Pantalla de Briefing: explica las reglas del minijuego de la ronda antes
+ * Pantalla de Briefing: explica las reglas del minijuego del día antes
  * de jugarlo. Cada jugador confirma con "ENTENDIDO"; la fase avanza cuando
  * todos confirmaron.
  *
- * El contenido se muestra dentro de `<app-intro>` para hacer un "reveal"
- * escalonado (cine corto ~3s) y dar sensación de juego en lugar de página.
- * Ver [intro/intro.ts](../intro/intro.ts) para el detalle del componente.
+ * Lenguaje editorial: el appheader dice "DÍA X DE Y · TEMA DEL DÍA"
+ * (no "Ronda", no "Aprobaciones") — conecta con la narrativa del
+ * Comunicado ("durante los próximos días se procederá al monitoreo
+ * de la performance individual"). Cada minijuego tiene su propio tema
+ * mapeado en [challenge-meta.ts](../challenge-meta.ts).
+ *
+ * El contenido se muestra dentro de `<app-intro class="intro-slow">`
+ * para hacer un "reveal" escalonado y darle ritmo de lectura (no UI).
  */
 @Component({
   selector: 'app-briefing',
   imports: [Intro],
   templateUrl: './briefing.html',
+  styleUrl: './briefing.css',
 })
 export class Briefing {
   private readonly juego = inject(GameService);
@@ -26,14 +33,19 @@ export class Briefing {
     this.jugadores().find((p) => p.id === this.miId()),
   );
 
-  /** Ronda actual y total — para la cabecera "Ronda 2 de 4". */
-  readonly ronda = computed(() => this.juego.estado()?.ronda ?? 0);
-  readonly rondasTotal = computed(() => this.juego.estado()?.rondasTotal ?? 0);
-  /** Id del minijuego de la ronda: decide qué briefing mostrar.
-   *  "" = ronda sin minijuego implementado (placeholder). */
+  /** Día actual y total — para la cabecera "DÍA 2 DE 4". */
+  readonly dia = computed(() => this.juego.estado()?.ronda ?? 0);
+  readonly diasTotal = computed(() => this.juego.estado()?.rondasTotal ?? 0);
+
+  /** Id del minijuego del día: decide qué briefing mostrar.
+   *  "" = día sin minijuego implementado (placeholder). */
   readonly challengeId = computed(
     () => this.juego.estado()?.challengeId ?? '',
   );
+
+  /** Tema editorial del día — viene de un mapa cliente (challenge-meta). */
+  readonly tema = computed(() => temaDelDia(this.challengeId()));
+
   /** Cuántos jugadores ya confirmaron (campo `acted`). */
   readonly listos = computed(
     () => this.jugadores().filter((p) => p.acted).length,

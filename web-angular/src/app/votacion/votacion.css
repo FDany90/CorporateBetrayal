@@ -1,0 +1,213 @@
+/* ============================================================
+   Pantalla Votación · "Acta interna" del Recorte
+   ============================================================
+   Lenguaje: kicker + h1 grande tipo Comunicado, bajada narrativa,
+   planilla editorial con cabecera + filas estilo .row del Lobby,
+   tally de votos en columna derecha. Una vez confirmado, la
+   planilla se "congela" (locked) para señalar visualmente que
+   el voto ya no se puede cambiar.
+   ============================================================ */
+
+.votacion-screen .content {
+  padding: 22px 18px 14px;
+}
+
+/* h1 — misma clase que el Briefing (rotunda editorial). */
+.votacion-screen .doc-h1 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 32px;
+  line-height: 1.05;
+  letter-spacing: -0.6px;
+  color: var(--ink);
+  margin: 0 0 14px;
+  font-variation-settings: 'opsz' 96;
+  text-wrap: balance;
+}
+
+.voto-lead {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink);
+  margin: 0 0 18px;
+  text-wrap: balance;
+}
+.voto-lead strong {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 11.5px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent-d);
+  padding: 0 2px;
+}
+
+/* ------ PLANILLA ------
+   Recuadro con borde tinta + fondo papel-soft. Cabecera mono caps
+   con divisor; filas como .row pero con tally de votos a la derecha. */
+.planilla {
+  background: var(--paper-soft);
+  border: 1.5px solid var(--ink);
+  border-radius: 2px;
+  padding: 4px 14px 8px;
+  margin: 0 0 8px;
+}
+.planilla-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 10px 0 8px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* ------ FILA de candidato ------
+   Botón flex con avatar · nombre · (tag "Tu voto") · tally. */
+.voto-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 2px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px dashed var(--line-dash);
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background-color 180ms ease,
+    opacity 180ms ease,
+    transform 100ms ease;
+}
+.voto-row:last-child { border-bottom: 0; }
+.voto-row:active:not(:disabled) {
+  transform: translateY(1px);
+}
+@media (hover: hover) {
+  .voto-row:hover:not(:disabled):not(.voto-row-elegida) {
+    background: var(--paper);
+  }
+}
+
+.voto-row-nombre {
+  flex: 1;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--ink);
+  font-variation-settings: 'opsz' 18;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* Tag "Tu voto" — chip champagne entre el nombre y el tally cuando
+   esta fila es la que voté. */
+.voto-row-tag {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent-d);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  padding: 3px 7px 4px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* Tally de votos a la derecha — número grande mono + label mono caps
+   chiquito debajo. Tabular-nums para que columnas con 1, 2, 10 votos
+   queden alineadas. */
+.voto-row-tally {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+  line-height: 1;
+  min-width: 38px;
+}
+.tally-num {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  /* Pequeña transición cuando el número cambia: hace evidente el voto
+     entrante para los demás espectadores. */
+  transition: color 220ms ease;
+}
+.tally-lbl {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+.tally-zero {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  color: var(--ink-mute);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------ ESTADOS de la fila ------ */
+
+/* Fila ELEGIDA por mí — fondo champagne claro + tally en color acento.
+   Se nota desde lejos cuál estoy votando. */
+.voto-row-elegida {
+  background: var(--accent-soft);
+}
+.voto-row-elegida .tally-num {
+  color: var(--accent-d);
+}
+
+/* Mi propia fila — no clickeable, opacidad reducida y nombre con tag "vos"
+   (que viene como .tag del sistema global). El cursor se deshabilita
+   visualmente y el hover no aplica. */
+.voto-row-mia {
+  cursor: not-allowed;
+  opacity: 0.72;
+  /* Fondo distinto para señalar "este eres tú" — papel con borde
+     punteado interno sutil (similar al panel .dev del Ingreso). */
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent 0,
+    transparent 6px,
+    rgba(26, 22, 18, 0.025) 6px,
+    rgba(26, 22, 18, 0.025) 8px
+  );
+}
+.voto-row-mia .voto-row-nombre {
+  color: var(--ink-soft);
+}
+
+/* Estado LOCKED — toda la planilla post-confirmación. Las filas pierden
+   pointer-events y bajan saturación; la elegida mantiene el highlight
+   pero un poco apagado, así sigue siendo visible cuál fue tu voto. */
+.voto-row-locked {
+  cursor: default;
+  opacity: 0.85;
+}
+.voto-row-locked.voto-row-elegida {
+  opacity: 1;
+}
+
+/* Botón disabled del actionbar — mismo look que .btn:disabled global,
+   pero acá lo dejamos limpio para que la pantalla no luzca rota cuando
+   todavía no voté. */
+.votacion-screen .actionbar .btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

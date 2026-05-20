@@ -1,0 +1,227 @@
+/* ============================================================
+   Pantalla Briefing · "Memo interno" del día
+   ============================================================
+   Tipografía editorial fuerte (h1 grande estilo Comunicado),
+   matriz de pagos en formato planilla (puntos guía + mono),
+   bajada/cierre narrativos. Mantiene el shell (topbar + appheader)
+   porque es una pantalla FUNCIONAL — no teatral como el Comunicado.
+   ============================================================ */
+
+.briefing-screen .content {
+  padding: 22px 18px 12px;
+}
+
+/* ------ KICKER ------
+   Reusa la primitiva global `.kicker` (mono, letter-spacing 3px,
+   ink-soft). Acá solo le damos un poco más de aire abajo. */
+.briefing-screen .kicker {
+  margin-bottom: 8px;
+}
+
+/* ------ TÍTULO GRANDE estilo Comunicado ------
+   La regla global de <h1> está en 28px. En Briefing queremos un
+   título más rotundo (como el del Comunicado, ~36px) — usamos
+   una clase específica `.doc-h1` para no afectar a otras pantallas
+   que todavía usan el h1 chico. */
+.doc-h1 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 36px;
+  line-height: 1;
+  letter-spacing: -0.8px;
+  color: var(--ink);
+  margin: 0 0 18px;
+  font-variation-settings: 'opsz' 96;
+  text-wrap: balance;
+}
+
+/* ------ BAJADA Y CIERRE ------
+   La bajada (lead) es el primer párrafo "narrativo": un poco más
+   grande que el body, line-height generoso. El cierre va abajo de
+   la matriz y mantiene el mismo peso para que la pantalla cierre
+   con coherencia tipográfica. */
+.briefing-lead,
+.briefing-cierre {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink);
+  margin: 0 0 18px;
+}
+.briefing-lead strong,
+.briefing-cierre strong {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.2px;
+}
+.briefing-lead em,
+.briefing-cierre em {
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent-d);
+  padding: 0 4px;
+}
+/* "comparte" / "queda" del lead — colores que enganchan con los chips
+   de la matriz. Es solo color: mantienen mono + uppercase del <em>
+   base, pero ahora el lector reconoce visualmente el verbo cuando
+   aparece como chip abajo. */
+.briefing-lead em.verde,
+.briefing-cierre em.verde { color: var(--approved); }
+.briefing-lead em.rojo,
+.briefing-cierre em.rojo  { color: var(--stamp);    }
+
+/* ------ MATRIZ DE PAGOS ------
+   Formato planilla editorial: cabecera mono pequeña con divisor,
+   tres filas con celdas verde/rojo, puntos guía dashed que
+   conectan con el valor mono a la derecha. Misma gramática visual
+   que las `.row` del Lobby (planilla de convocados). */
+.matrix {
+  background: var(--paper-soft);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 12px 14px 14px;
+  margin: 0 0 18px;
+}
+.matrix-head {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  text-align: center;
+  padding-bottom: 10px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+/* Cada fila es un BLOQUE didáctico vertical: label arriba (mono caps),
+   chips con puntaje al medio, bajada narrativa abajo. Separadas por
+   línea dashed entre filas — gramática planilla del Lobby. */
+.matrix-row {
+  padding: 10px 0;
+}
+.matrix-row + .matrix-row {
+  border-top: 1px dashed var(--line-dash);
+}
+.matrix-label {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.matrix-cells {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.matrix-explain {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--ink);
+  margin: 0;
+}
+
+/* ------ BLOQUE DESTACADO · "Reunión obligatoria en Teams" ------
+   Aviso instruccional con ícono grupal a la izquierda y un título +
+   bajada a la derecha. Borde tinta + fondo papel-soft + sombra offset
+   champagne (mismo lenguaje "sellado" que el marco del avatar del
+   Desafío). Es el momento crítico del Recorte: hay que entrar a la
+   misma llamada que el resto. */
+.meeting-call {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  margin: 0 0 16px;
+  background: var(--paper-soft);
+  border: 1.5px solid var(--ink);
+  border-radius: 2px;
+  color: var(--ink);
+  box-shadow: 4px 4px 0 var(--accent);
+}
+.meeting-call svg {
+  flex-shrink: 0;
+  display: block;
+  color: var(--ink);
+}
+.meeting-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.meeting-text strong {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 15px;
+  line-height: 1.15;
+  letter-spacing: -0.1px;
+  color: var(--ink);
+  font-variation-settings: 'opsz' 18;
+}
+.meeting-text span {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+/* ------ CELDAS de decisión (Compartir / Quedárselo) ------
+   Chip con borde de 1px, fondo papel-soft. Verde para "compartir"
+   (aprobado), rojo apagado para "quedárselo" (sello). Tipografía
+   mono apretada — se leen como botones de un formulario interno. */
+.cell {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 10.5px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  padding: 4px 7px 5px;
+  border-radius: 2px;
+  border: 1px solid currentColor;
+  background: var(--paper);
+  line-height: 1;
+  white-space: nowrap;
+}
+.cell.verde {
+  color: var(--approved);
+  background: #eaf2dd;
+}
+.cell.rojo {
+  color: var(--stamp);
+  background: var(--stamp-soft);
+}
+
+/* Puntaje pegado al chip — separado por una línea fina del mismo
+   color del cell. Mono tabular para que los números se alineen
+   visualmente entre las distintas filas. */
+.cell-val {
+  display: inline-block;
+  margin-left: 6px;
+  padding-left: 6px;
+  border-left: 1px solid currentColor;
+  font-weight: 800;
+  font-size: 11.5px;
+  letter-spacing: 0.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Operador entre celdas — "+" para igual decisión, "vs" para
+   asimétrica. Mono fino, color tinta apagada. */
+.vs {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--ink-soft);
+  text-transform: lowercase;
+  padding: 0 2px;
+}

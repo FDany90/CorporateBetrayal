@@ -1,6 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { GameService } from '../game.service';
 import { Avatar } from '../avatar/avatar';
+import { temaDelDia } from '../challenge-meta';
 import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
 
 /**
@@ -24,6 +25,13 @@ export class Marcador {
   );
   readonly ronda = computed(() => this.juego.estado()?.ronda ?? 0);
   readonly rondasTotal = computed(() => this.juego.estado()?.rondasTotal ?? 0);
+  /** Mismos valores con nomenclatura "día" para el appheader editorial. */
+  readonly dia = this.ronda;
+  readonly diasTotal = this.rondasTotal;
+  /** Tema editorial del día — para el appheader. */
+  readonly tema = computed(() =>
+    temaDelDia(this.juego.estado()?.challengeId ?? ''),
+  );
   readonly yo = computed(() =>
     this.jugadores().find((p) => p.id === this.miId()),
   );

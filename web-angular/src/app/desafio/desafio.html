@@ -1,6 +1,7 @@
-<!-- La "cáscara" (topbar + appheader) envuelve las dos ramas posibles:
+<!-- Pantalla Desafío — "Dictamen secreto" del Botón del Bonus.
+     La "cáscara" (topbar + appheader) envuelve las dos ramas posibles:
      con pareja y sin pareja. El contenido cambia según partner(). -->
-<div class="screen">
+<div class="screen desafio-screen">
   <div class="topbar">
     <span class="brand">
       SINERGIA<span class="dot">·</span>CORP
@@ -8,59 +9,114 @@
     <span class="pill">💼 {{ yo()?.influence ?? 0 }}</span>
   </div>
   <div class="appheader">
-    Ronda {{ ronda() }}/{{ rondasTotal() }} · El Botón del Bonus ·
-    Tanda {{ tanda() }}/{{ tandasTotal() }}
+    Día {{ dia() }} de {{ diasTotal() }} · {{ tema() }} ·
+    Llamada {{ llamada() }} de {{ llamadasTotal() }}
   </div>
 
   @if (partner(); as colega) {
     <!-- Caso normal: me tocó un colega. -->
-    <div class="content center">
-      <!-- Solo un lado inicia la llamada: evita llamadas cruzadas (GDD §5). -->
-      @if (soyQuienLlama()) {
-        <p class="muted-note">📞 Llamá vos a tu colega por Teams</p>
-      } @else {
-        <p class="muted-note">⏳ Tu colega te va a llamar — esperá</p>
-      }
-      <app-avatar [id]="colega.avatar" [size]="80" />
-      <h2>{{ colega.nickname }}</h2>
-      <p>Tras la llamada, decidí en secreto qué hacer con el bono:</p>
+    <div class="content">
 
-      <div class="choices">
-        <!-- sel-g / sel-r resaltan la opción elegida. -->
+      <!-- Rol del jugador en esta llamada: iniciar o esperar. -->
+      <p class="role-kicker" [class.role-active]="soyQuienLlama()">
+        @if (soyQuienLlama()) {
+          Iniciás la llamada
+        } @else {
+          Aguardar llamada entrante
+        }
+      </p>
+
+      <!-- "Ficha" del colega: marco editorial con avatar grande,
+           "section-head" con ícono de teléfono al medio + nombre
+           en display + instrucción concreta. -->
+      <article class="partner">
+        <div class="partner-frame">
+          <app-avatar [id]="colega.avatar" [size]="96" />
+        </div>
+
+        <!-- "Section-head" con teléfono: dos líneas finas que abrazan
+             un SVG de teléfono, indicando "este expediente es una
+             llamada". currentColor lo enlaza con el color tinta. -->
+        <div class="partner-call" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="34" height="34" fill="none"
+               stroke="currentColor" stroke-width="1.6"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.5 16.5v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 1.62 3.81 2 2 0 0 1 3.61 1.5h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L7.6 9.4a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7a2 2 0 0 1 1.72 2.03z"/>
+          </svg>
+        </div>
+
+        <h1 class="partner-name">{{ colega.nickname }}</h1>
+        <p class="partner-instruction">
+          @if (soyQuienLlama()) {
+            Llamá a tu colega por Teams. Cuando cierren la llamada,
+            registrá el dictamen.
+          } @else {
+            Tu colega va a llamarte por Teams. Cuando cierren la llamada,
+            registrá el dictamen.
+          }
+        </p>
+      </article>
+
+      <!-- Sección de decisión: divisor + bajada + dos opciones grandes. -->
+      <div class="section-head">Dictamen secreto</div>
+
+      <p class="decision-lead">
+        Decidí en secreto qué hacer con el bono del equipo:
+      </p>
+
+      <div class="options">
         <button
-          class="choice"
-          [class.sel-g]="miDecision() === 'verde'"
+          type="button"
+          class="option option-verde"
+          [class.option-on]="miDecision() === 'verde'"
+          [attr.aria-pressed]="miDecision() === 'verde'"
           (click)="decidir('verde')"
         >
-          <div class="ic">🟢</div>
-          <div class="t1">COMPARTIR</div>
-          <div class="t2">Cooperar</div>
+          <span class="option-mark" aria-hidden="true"></span>
+          <span class="option-title">Compartir</span>
+          <span class="option-sub">Cooperar</span>
+          @if (miDecision() === 'verde') {
+            <span class="option-stamp" aria-hidden="true">Elegido</span>
+          }
         </button>
+
         <button
-          class="choice"
-          [class.sel-r]="miDecision() === 'rojo'"
+          type="button"
+          class="option option-rojo"
+          [class.option-on]="miDecision() === 'rojo'"
+          [attr.aria-pressed]="miDecision() === 'rojo'"
           (click)="decidir('rojo')"
         >
-          <div class="ic">🔴</div>
-          <div class="t1">QUEDÁRMELO</div>
-          <div class="t2">Traicionar</div>
+          <span class="option-mark" aria-hidden="true"></span>
+          <span class="option-title">Quedármelo</span>
+          <span class="option-sub">Traicionar</span>
+          @if (miDecision() === 'rojo') {
+            <span class="option-stamp" aria-hidden="true">Elegido</span>
+          }
         </button>
       </div>
 
-      @if (miDecision()) {
-        <p class="muted-note">
-          Decisión enviada. Podés cambiarla hasta que decidan todos.
-        </p>
-      } @else {
-        <p class="muted-note">Tu elección es secreta.</p>
-      }
+      <p class="decision-state" aria-live="polite">
+        @if (miDecision()) {
+          Dictamen registrado. Podés cambiarlo hasta que decidan todos.
+        } @else {
+          Tu elección es <strong>secreta</strong>: el otro no la ve hasta
+          el resultado.
+        }
+      </p>
     </div>
   } @else {
     <!-- Número impar de jugadores: esta ronda quedé sin pareja. -->
-    <div class="content center">
-      <div class="av-xl">🤷</div>
-      <h2>Te quedaste sin pareja</h2>
-      <p>Esta ronda no te tocó nadie. Esperá a que los demás terminen.</p>
+    <div class="content desafio-libre">
+      <p class="role-kicker">Sin asignación</p>
+      <article class="partner">
+        <div class="partner-frame partner-frame-libre">🤷</div>
+        <h1 class="partner-name">Quedaste sin pareja</h1>
+        <p class="partner-instruction">
+          Esta llamada no te tocó nadie. Aguardá a que los demás cierren
+          sus dictámenes.
+        </p>
+      </article>
     </div>
   }
 

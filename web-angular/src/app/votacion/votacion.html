@@ -1,4 +1,8 @@
-<div class="screen">
+<!-- Pantalla Votación — "Acta de votación" del Recorte.
+     Mecánica: el voto se cambia tocando filas (se propaga en vivo
+     al estado compartido); todos ven los conteos cambiar mientras
+     deliberan. Confirmar voto es definitivo. -->
+<div class="screen votacion-screen">
   <div class="topbar">
     <span class="brand">
       SINERGIA<span class="dot">·</span>CORP
@@ -6,42 +10,89 @@
     <span class="pill">💼 {{ yo()?.influence ?? 0 }}</span>
   </div>
   <div class="appheader">
-    Votación · Ronda {{ ronda() }} de {{ rondasTotal() }}
+    Día {{ dia() }} de {{ diasTotal() }} · {{ tema() }}
   </div>
 
   <div class="content">
-    <h2>¿A quién recortás?</h2>
-    <p class="muted-note">
-      Tu voto es secreto. Podés cambiarlo hasta que voten todos.
+    <p class="kicker">Acta interna · Voto secreto</p>
+    <h1 class="doc-h1">¿A quién le quitamos el bono?</h1>
+
+    <p class="voto-lead">
+      Tocá una fila para votar. Podés cambiarlo hasta
+      <strong>confirmar</strong>. La planilla se actualiza en vivo:
+      todos ven cómo se inclina la votación durante la deliberación.
     </p>
 
-    <!-- Cada candidato es un botón; el votado queda resaltado. -->
-    <div class="card pad0">
-      @for (p of candidatos(); track p.id) {
+    <!-- Planilla editorial: cada jugador es una fila estilo .row
+         (Lobby), con conteo de votos a la derecha. Yo aparezco
+         también, pero la fila no es clickeable (no se puede autovotar). -->
+    <div class="planilla">
+      <div class="planilla-head">
+        <span class="planilla-head-nombre">Candidato</span>
+        <span class="planilla-head-votos">Votos</span>
+      </div>
+
+      @for (p of filas(); track p.id) {
         <button
-          class="voto-op"
-          [class.voto-sel]="miVoto() === p.id"
-          [class.voto-otros]="miVoto() && miVoto() !== p.id"
+          type="button"
+          class="voto-row"
+          [class.voto-row-mia]="esMia(p.id)"
+          [class.voto-row-elegida]="miVoto() === p.id"
+          [class.voto-row-locked]="confirmado()"
+          [disabled]="esMia(p.id) || confirmado()"
+          [attr.aria-pressed]="miVoto() === p.id"
           (click)="votar(p.id)"
         >
           <app-avatar [id]="p.avatar" [size]="40" />
-          <span class="nm">{{ p.nickname }}</span>
+
+          <span class="voto-row-nombre">
+            {{ p.nickname }}
+            @if (esMia(p.id)) {
+              <span class="tag">vos</span>
+            }
+          </span>
+
           @if (miVoto() === p.id) {
-            <span class="st ready">✓ tu voto</span>
+            <span class="voto-row-tag">Tu voto</span>
           }
+
+          <!-- Conteo en vivo. Si tiene 0 votos lo mostramos igual
+               (con guion) para que la columna esté siempre alineada. -->
+          <span class="voto-row-tally" aria-hidden="true">
+            @if (votosDe(p.id) > 0) {
+              <span class="tally-num">{{ votosDe(p.id) }}</span>
+              <span class="tally-lbl">
+                {{ votosDe(p.id) === 1 ? 'voto' : 'votos' }}
+              </span>
+            } @else {
+              <span class="tally-zero">—</span>
+            }
+          </span>
         </button>
       }
     </div>
   </div>
 
   <div class="actionbar">
-    <p class="muted-note" aria-live="polite" aria-atomic="true">
-      @if (miVoto()) {
-        Voto enviado.
-      } @else {
-        Elegí a quién recortar.
-      }
-      ({{ votaron() }}/{{ total() }})
-    </p>
+    @if (confirmado()) {
+      <!-- Voto firme: muestro el estado y el progreso de la sala. -->
+      <p class="muted-note" aria-live="polite" aria-atomic="true">
+        Voto confirmado. Esperando al resto…
+        ({{ confirmados() }}/{{ total() }})
+      </p>
+    } @else if (miVoto()) {
+      <!-- Voté pero todavía no confirmé: botón habilitado. -->
+      <button class="btn" (click)="confirmar()">CONFIRMAR VOTO</button>
+      <p class="muted-note" aria-live="polite" aria-atomic="true">
+        ({{ confirmados() }}/{{ total() }} confirmados)
+      </p>
+    } @else {
+      <!-- Sin voto: el botón está deshabilitado, mostramos hint. -->
+      <button class="btn" disabled>CONFIRMAR VOTO</button>
+      <p class="muted-note" aria-live="polite" aria-atomic="true">
+        Elegí una fila para votar.
+        ({{ confirmados() }}/{{ total() }} confirmados)
+      </p>
+    }
   </div>
 </div>
