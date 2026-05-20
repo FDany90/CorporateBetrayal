@@ -1,0 +1,812 @@
+<!-- Marco redondo del avatar. Es-placeholder cuando el id todavía no
+     tiene SVG diseñado (pinta el fondo con el color del depto).
+     Nota: --avatar-size se setea en el HOST vía @HostBinding en avatar.ts
+     (no acá), para que el :host pueda leerla en su width/height. -->
+<div class="avatar-frame"
+     [class.is-placeholder]="!tieneSvg"
+     [style.--dept-color]="deptColor">
+
+  @switch (id) {
+
+    <!-- ============================================================
+         #1 · Dirección Ejecutiva
+         Cabeza grande, pelo negro con raya al costado, saco azul
+         oscuro con solapas, camisa blanca, corbata roja apagada.
+         Expresión: seria, cejas firmes.
+         ============================================================ -->
+    @case ('emp-direccion') {
+      <svg class="avatar-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Torso: saco oscuro (azul casi negro) -->
+        <path d="M 0 100 Q 0 82 18 78 L 82 78 Q 100 82 100 100 Z" fill="#2b3a55"/>
+        <!-- Camisa visible en V -->
+        <path d="M 38 78 L 50 92 L 62 78 L 60 100 L 40 100 Z" fill="#f5efe4"/>
+        <!-- Solapas -->
+        <path d="M 30 78 L 50 90 L 38 100 L 26 96 Z" fill="#1f2a3d"/>
+        <path d="M 70 78 L 50 90 L 62 100 L 74 96 Z" fill="#1f2a3d"/>
+        <!-- Corbata -->
+        <path d="M 47 90 L 53 90 L 55 100 L 50 100 L 45 100 Z" fill="#8b2a23"/>
+        <!-- Cuello -->
+        <rect x="44" y="68" width="12" height="12" rx="2" fill="#d8a878"/>
+        <!-- Cabeza GRANDE -->
+        <ellipse cx="50" cy="42" rx="27" ry="30" fill="#d8a878"/>
+        <!-- Pelo: raya al costado, lado derecho más alto -->
+        <path d="M 23 44 Q 22 18 50 14 Q 78 17 77 44
+                 L 75 32 Q 67 22 56 22 L 56 18 Q 48 22 40 28 Q 32 32 26 38 Z"
+              fill="#1f140c"/>
+        <!-- Orejas -->
+        <ellipse cx="22" cy="46" rx="3" ry="5" fill="#c89878"/>
+        <ellipse cx="78" cy="46" rx="3" ry="5" fill="#c89878"/>
+        <!-- Cejas (rectas, serias) -->
+        <path d="M 35 38 L 44 38" stroke="#1f140c" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M 56 38 L 65 38" stroke="#1f140c" stroke-width="2.2" stroke-linecap="round"/>
+        <!-- Ojos cartoon -->
+        <circle cx="40" cy="46" r="2.4" fill="#1a1612"/>
+        <circle cx="60" cy="46" r="2.4" fill="#1a1612"/>
+        <!-- Brillo del ojo -->
+        <circle cx="41" cy="45" r="0.7" fill="#f5efe4"/>
+        <circle cx="61" cy="45" r="0.7" fill="#f5efe4"/>
+        <!-- Nariz sutil -->
+        <path d="M 50 50 Q 51 54 49 56" stroke="#a87a52" stroke-width="1" fill="none" stroke-linecap="round"/>
+        <!-- Boca seria (línea casi recta) -->
+        <path d="M 44 62 Q 50 63 56 62" stroke="#5a3a28" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+      </svg>
+    }
+
+    <!-- ============================================================
+         #2 · Sistemas (IT)
+         Pelo castaño desordenado con flequillo, sweater carbón con
+         camiseta abajo, auriculares grandes.
+         Expresión: relajada, leve sonrisa.
+         ============================================================ -->
+    @case ('emp-sistemas') {
+      <svg class="avatar-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Sweater -->
+        <path d="M 0 100 Q 0 82 18 78 L 82 78 Q 100 82 100 100 Z" fill="#3a3530"/>
+        <!-- Cuello del sweater (V abierta) -->
+        <path d="M 40 78 Q 50 84 60 78 L 58 88 Q 50 92 42 88 Z" fill="#2a2622"/>
+        <!-- Camiseta debajo asoma -->
+        <path d="M 44 84 Q 50 86 56 84 L 56 100 L 44 100 Z" fill="#e8dccc"/>
+        <!-- Cuello -->
+        <rect x="44" y="68" width="12" height="12" rx="2" fill="#f0d0b0"/>
+        <!-- Cabeza GRANDE -->
+        <ellipse cx="50" cy="42" rx="27" ry="30" fill="#f0d0b0"/>
+        <!-- Pelo desordenado con flequillo: forma orgánica -->
+        <path d="M 23 44 Q 20 14 50 14 Q 80 14 77 44
+                 L 74 32 Q 64 22 54 28 Q 48 20 42 26 Q 34 22 28 34 Z"
+              fill="#5a3820"/>
+        <!-- Mechones sueltos del flequillo -->
+        <path d="M 34 28 Q 36 36 32 42" stroke="#5a3820" stroke-width="4" stroke-linecap="round" fill="none"/>
+        <path d="M 48 24 Q 50 32 46 38" stroke="#5a3820" stroke-width="4" stroke-linecap="round" fill="none"/>
+        <path d="M 62 26 Q 64 34 60 40" stroke="#5a3820" stroke-width="4" stroke-linecap="round" fill="none"/>
+        <!-- Auriculares: arco sobre la cabeza + copas grandes en orejas -->
+        <path d="M 22 42 Q 50 4 78 42" stroke="#1a1612" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <ellipse cx="22" cy="46" rx="6" ry="9" fill="#1a1612"/>
+        <ellipse cx="78" cy="46" rx="6" ry="9" fill="#1a1612"/>
+        <ellipse cx="22" cy="46" rx="3" ry="5" fill="#b08d3d"/>
+        <ellipse cx="78" cy="46" rx="3" ry="5" fill="#b08d3d"/>
+        <!-- Cejas (curvas relajadas) -->
+        <path d="M 35 39 Q 39 36 44 39" stroke="#3a2010" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <path d="M 56 39 Q 60 36 65 39" stroke="#3a2010" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <!-- Ojos cartoon -->
+        <circle cx="40" cy="46" r="2.4" fill="#1a1612"/>
+        <circle cx="60" cy="46" r="2.4" fill="#1a1612"/>
+        <circle cx="41" cy="45" r="0.7" fill="#f5efe4"/>
+        <circle cx="61" cy="45" r="0.7" fill="#f5efe4"/>
+        <!-- Nariz -->
+        <path d="M 50 51 Q 51 55 49 57" stroke="#c89878" stroke-width="1" fill="none" stroke-linecap="round"/>
+        <!-- Sonrisa leve -->
+        <path d="M 44 62 Q 50 66 56 62" stroke="#7a4520" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+      </svg>
+    }
+
+    <!-- ============================================================
+         #3 · Recursos Humanos
+         Pelo negro recogido en rodete (asoma por arriba), blusa clara
+         con collar de perlas, anteojos rectangulares, aritos perla.
+         Expresión: amable, sonrisa marcada.
+         ============================================================ -->
+    @case ('emp-rrhh') {
+      <svg class="avatar-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Rodete atrás de la cabeza (sobresale arriba) -->
+        <ellipse cx="50" cy="12" rx="11" ry="9" fill="#2b1d12"/>
+        <!-- Blusa -->
+        <path d="M 0 100 Q 0 82 18 78 L 82 78 Q 100 82 100 100 Z" fill="#e8dccc"/>
+        <!-- Cuello V de la blusa -->
+        <path d="M 40 78 L 50 90 L 60 78 L 58 100 L 42 100 Z" fill="#d4c4ac"/>
+        <!-- Collar de perlas -->
+        <circle cx="44" cy="80" r="1.8" fill="#f5efe4" stroke="#a89c8e" stroke-width="0.4"/>
+        <circle cx="50" cy="82" r="2"   fill="#f5efe4" stroke="#a89c8e" stroke-width="0.4"/>
+        <circle cx="56" cy="80" r="1.8" fill="#f5efe4" stroke="#a89c8e" stroke-width="0.4"/>
+        <!-- Cuello -->
+        <rect x="44" y="68" width="12" height="12" rx="2" fill="#d8a878"/>
+        <!-- Cabeza GRANDE -->
+        <ellipse cx="50" cy="42" rx="27" ry="30" fill="#d8a878"/>
+        <!-- Pelo: peinado tirante con raya al medio -->
+        <path d="M 23 44 Q 22 16 50 14 Q 78 16 77 44
+                 L 75 34 Q 65 22 50 22 Q 35 22 25 34 Z"
+              fill="#2b1d12"/>
+        <!-- Orejas con aritos -->
+        <ellipse cx="22" cy="46" rx="3" ry="5" fill="#c89878"/>
+        <ellipse cx="78" cy="46" rx="3" ry="5" fill="#c89878"/>
+        <circle cx="22" cy="52" r="1.6" fill="#f5efe4" stroke="#a89c8e" stroke-width="0.3"/>
+        <circle cx="78" cy="52" r="1.6" fill="#f5efe4" stroke="#a89c8e" stroke-width="0.3"/>
+        <!-- Cejas (curvas amables) -->
+        <path d="M 34 38 Q 39 35 45 38" stroke="#2b1d12" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <path d="M 55 38 Q 61 35 66 38" stroke="#2b1d12" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <!-- Anteojos rectangulares -->
+        <rect x="32" y="42" width="14" height="10" rx="1.5"
+              fill="none" stroke="#1a1612" stroke-width="1.5"/>
+        <rect x="54" y="42" width="14" height="10" rx="1.5"
+              fill="none" stroke="#1a1612" stroke-width="1.5"/>
+        <line x1="46" y1="47" x2="54" y2="47" stroke="#1a1612" stroke-width="1.5"/>
+        <!-- Ojos detrás de los anteojos -->
+        <circle cx="39" cy="47" r="2" fill="#1a1612"/>
+        <circle cx="61" cy="47" r="2" fill="#1a1612"/>
+        <circle cx="40" cy="46" r="0.6" fill="#f5efe4"/>
+        <circle cx="62" cy="46" r="0.6" fill="#f5efe4"/>
+        <!-- Nariz -->
+        <path d="M 50 54 Q 51 58 49 60" stroke="#a87a52" stroke-width="1" fill="none" stroke-linecap="round"/>
+        <!-- Sonrisa amable -->
+        <path d="M 42 64 Q 50 70 58 64" stroke="#7a3a3b" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        <!-- Labios sugeridos (color suave) -->
+        <path d="M 44 64 Q 50 66 56 64" stroke="#a04050" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+      </svg>
+    }
+
+    <!-- ============================================================
+         #4 · Seguridad Patrimonial
+         Gorra azul oscuro con visera negra e insignia dorada, pelo
+         corto que asoma, piel oscura, uniforme con placa champagne.
+         Expresión: adusta, mandíbula firme.
+         ============================================================ -->
+    @case ('emp-seguridad') {
+      <svg class="avatar-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Uniforme -->
+        <path d="M 0 100 Q 0 82 18 78 L 82 78 Q 100 82 100 100 Z" fill="#2a2622"/>
+        <!-- Cuello del uniforme tipo polo -->
+        <path d="M 40 78 L 46 88 L 50 86 L 54 88 L 60 78 L 58 100 L 42 100 Z" fill="#1c1a17"/>
+        <!-- Placa dorada en el pecho -->
+        <rect x="62" y="86" width="11" height="8" rx="0.5"
+              fill="#b08d3d" stroke="#1a1612" stroke-width="0.7"/>
+        <line x1="63" y1="90" x2="72" y2="90" stroke="#1a1612" stroke-width="0.5"/>
+        <!-- Botones -->
+        <circle cx="50" cy="92" r="1" fill="#b08d3d"/>
+        <circle cx="50" cy="98" r="1" fill="#b08d3d"/>
+        <!-- Cuello -->
+        <rect x="44" y="68" width="12" height="12" rx="2" fill="#7a4f30"/>
+        <!-- Cabeza GRANDE -->
+        <ellipse cx="50" cy="44" rx="27" ry="30" fill="#7a4f30"/>
+        <!-- Pelo corto asomando lateralmente debajo de la gorra -->
+        <path d="M 23 42 Q 25 36 28 36 L 30 44 Z" fill="#1a1612"/>
+        <path d="M 77 42 Q 75 36 72 36 L 70 44 Z" fill="#1a1612"/>
+        <!-- Gorra: copa azul oscuro -->
+        <path d="M 22 32 Q 22 12 50 10 Q 78 12 78 32 Z" fill="#1f2a3d"/>
+        <!-- Banda de la gorra -->
+        <rect x="22" y="30" width="56" height="4" fill="#0c1424"/>
+        <!-- Insignia central dorada -->
+        <path d="M 46 16 L 54 16 L 50 24 Z" fill="#b08d3d"/>
+        <circle cx="50" cy="18" r="1.5" fill="#1f2a3d"/>
+        <!-- Visera negra -->
+        <path d="M 16 32 Q 50 40 84 32 L 84 36 Q 50 44 16 36 Z" fill="#0c1424"/>
+        <!-- Orejas -->
+        <ellipse cx="22" cy="48" rx="3" ry="5" fill="#6b4220"/>
+        <ellipse cx="78" cy="48" rx="3" ry="5" fill="#6b4220"/>
+        <!-- Cejas (gruesas, firmes) -->
+        <path d="M 34 42 L 44 42" stroke="#1a1612" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M 56 42 L 66 42" stroke="#1a1612" stroke-width="2.4" stroke-linecap="round"/>
+        <!-- Ojos cartoon -->
+        <circle cx="40" cy="49" r="2.4" fill="#1a1612"/>
+        <circle cx="60" cy="49" r="2.4" fill="#1a1612"/>
+        <circle cx="41" cy="48" r="0.7" fill="#f5efe4"/>
+        <circle cx="61" cy="48" r="0.7" fill="#f5efe4"/>
+        <!-- Nariz -->
+        <path d="M 50 54 Q 52 58 49 60" stroke="#4a2a18" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <!-- Boca firme -->
+        <path d="M 44 65 L 56 65" stroke="#3a1d10" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    }
+
+    <!-- ============================================================
+         #5 · Coach Motivacional (SONRISA FUERTE)
+         Pelo rubio peinado con volumen, camisa abierta + chaleco de
+         color, ojos enormes con brillo, sonrisa abierta mostrando
+         dientes, cejas arqueadas hacia arriba (energía positiva).
+         ============================================================ -->
+    @case ('emp-coach') {
+      <svg class="avatar-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Chaleco colorido (naranja energía) -->
+        <path d="M 0 100 Q 0 82 18 78 L 82 78 Q 100 82 100 100 Z" fill="#c8843a"/>
+        <!-- Camisa blanca abierta en V amplia -->
+        <path d="M 36 78 L 50 96 L 64 78 L 62 100 L 38 100 Z" fill="#f5efe4"/>
+        <!-- Bordes del chaleco -->
+        <path d="M 30 78 L 50 92 L 38 100 L 26 96 Z" fill="#a86824"/>
+        <path d="M 70 78 L 50 92 L 62 100 L 74 96 Z" fill="#a86824"/>
+        <!-- Cuello -->
+        <rect x="44" y="68" width="12" height="12" rx="2" fill="#e8c098"/>
+        <!-- Cabeza GRANDE -->
+        <ellipse cx="50" cy="42" rx="27" ry="30" fill="#e8c098"/>
+        <!-- Pelo rubio con volumen, peinado hacia atrás -->
+        <path d="M 23 42 Q 20 12 50 12 Q 80 12 77 42
+                 L 76 28 Q 70 18 60 22 Q 50 14 40 22 Q 30 18 24 30 Z"
+              fill="#c8a058"/>
+        <!-- Mechón delantero característico -->
+        <path d="M 50 14 Q 56 22 50 30" stroke="#a8804a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <!-- Orejas -->
+        <ellipse cx="22" cy="46" rx="3" ry="5" fill="#d8a878"/>
+        <ellipse cx="78" cy="46" rx="3" ry="5" fill="#d8a878"/>
+        <!-- Cejas arqueadas (alegres) -->
+        <path d="M 33 36 Q 39 32 45 36" stroke="#8a6038" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+        <path d="M 55 36 Q 61 32 67 36" stroke="#8a6038" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+        <!-- Ojos cartoon ENORMES con brillo grande -->
+        <circle cx="40" cy="46" r="3.2" fill="#f5efe4"/>
+        <circle cx="60" cy="46" r="3.2" fill="#f5efe4"/>
+        <circle cx="40" cy="46" r="2.4" fill="#1a1612"/>
+        <circle cx="60" cy="46" r="2.4" fill="#1a1612"/>
+        <circle cx="41.2" cy="44.8" r="1.1" fill="#f5efe4"/>
+        <circle cx="61.2" cy="44.8" r="1.1" fill="#f5efe4"/>
+        <!-- Nariz -->
+        <path d="M 50 51 Q 52 56 49 58" stroke="#a87a52" stroke-width="1" fill="none" stroke-linecap="round"/>
+        <!-- SONRISA ENORME mostrando dientes -->
+        <path d="M 38 60 Q 50 74 62 60 Q 50 67 38 60 Z" fill="#3a1d10"/>
+        <path d="M 41 62 Q 50 66 59 62 L 59 64 Q 50 67 41 64 Z" fill="#f5efe4"/>
+        <!-- Cachetes rosados -->
+        <ellipse cx="28" cy="56" rx="4" ry="3" fill="#f0a890" opacity="0.5"/>
+        <ellipse cx="72" cy="56" rx="4" ry="3" fill="#f0a890" opacity="0.5"/>
+      </svg>
+    }
+
+    <!-- ============================================================
+         #6 · CTO Visionario (LOCURA)
+         Pelo verde fluo en todas direcciones, ojos saltones asimétricos
+         mirando en distintas direcciones, sonrisa torcida demente,
+         hoodie violeta, vena en la frente.
+         ============================================================ -->
+    @case ('emp-visionario') {
+      <svg class="avatar-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Hoodie violeta -->
+        <path d="M 0 100 Q 0 82 18 78 L 82 78 Q 100 82 100 100 Z" fill="#5a3a8a"/>
+        <!-- Cuello del hoodie con cordones -->
+        <path d="M 40 78 Q 50 84 60 78 L 58 90 Q 50 94 42 90 Z" fill="#42286a"/>
+        <line x1="46" y1="84" x2="46" y2="100" stroke="#3a205a" stroke-width="1.5"/>
+        <line x1="54" y1="84" x2="54" y2="100" stroke="#3a205a" stroke-width="1.5"/>
+        <!-- Camiseta debajo -->
+        <path d="M 44 86 Q 50 88 56 86 L 56 100 L 44 100 Z" fill="#e8dccc"/>
+        <!-- Cuello -->
+        <rect x="44" y="68" width="12" height="12" rx="2" fill="#f0d0b0"/>
+        <!-- Cabeza GRANDE -->
+        <ellipse cx="50" cy="44" rx="27" ry="30" fill="#f0d0b0"/>
+        <!-- Pelo verde fluo ALOCADO en todas direcciones -->
+        <path d="M 23 44 Q 18 8 50 12 Q 82 8 77 44
+                 L 74 22 Q 66 14 60 26 Q 50 10 40 26 Q 32 14 26 22 Z"
+              fill="#5a8a3a"/>
+        <!-- Mechones que apuntan en distintas direcciones -->
+        <path d="M 28 18 L 24 6" stroke="#4a7a2a" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M 38 14 L 36 4" stroke="#4a7a2a" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M 50 8 L 52 0" stroke="#4a7a2a" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M 62 14 L 66 4" stroke="#4a7a2a" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M 72 18 L 76 6" stroke="#4a7a2a" stroke-width="3.5" stroke-linecap="round"/>
+        <!-- Orejas -->
+        <ellipse cx="22" cy="48" rx="3" ry="5" fill="#d8a878"/>
+        <ellipse cx="78" cy="48" rx="3" ry="5" fill="#d8a878"/>
+        <!-- Vena en la frente (detalle de locura) -->
+        <path d="M 36 30 Q 38 26 36 22" stroke="#7a3838" stroke-width="1.4" fill="none"/>
+        <!-- Cejas ASIMÉTRICAS (una arriba, una abajo) -->
+        <path d="M 34 32 L 44 34" stroke="#3a5a1a" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M 56 38 L 66 36" stroke="#3a5a1a" stroke-width="2.2" stroke-linecap="round"/>
+        <!-- Ojos SALTONES asimétricos -->
+        <circle cx="40" cy="46" r="4.5" fill="#f5efe4" stroke="#1a1612" stroke-width="0.8"/>
+        <circle cx="60" cy="48" r="3.8" fill="#f5efe4" stroke="#1a1612" stroke-width="0.8"/>
+        <!-- Pupilas mirando en distintas direcciones (locura) -->
+        <circle cx="42.5" cy="44.5" r="2" fill="#1a1612"/>
+        <circle cx="58" cy="49.5" r="1.8" fill="#1a1612"/>
+        <!-- Ojeras leves -->
+        <path d="M 36 50 Q 40 51 44 50" stroke="#a87a52" stroke-width="0.8" fill="none" opacity="0.6"/>
+        <path d="M 56 52 Q 60 53 64 52" stroke="#a87a52" stroke-width="0.8" fill="none" opacity="0.6"/>
+        <!-- Nariz -->
+        <path d="M 50 54 Q 52 58 49 60" stroke="#a87a52" stroke-width="1" fill="none" stroke-linecap="round"/>
+        <!-- Sonrisa TORCIDA mostrando diente -->
+        <path d="M 38 64 Q 46 71 56 67 L 60 64" stroke="#5a3a28" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        <!-- Diente que asoma -->
+        <rect x="49" y="65" width="2.5" height="3" fill="#f5efe4"/>
+      </svg>
+    }
+
+    <!-- ============================================================
+         #7 · Becario Quemado (DEPRIMIDO)
+         Pelo lacio caído sobre la frente, ojeras enormes, ojos caídos,
+         boca hacia abajo, sweater gris desgastado, postura derrotada.
+         ============================================================ -->
+    @case ('emp-quemado') {
+      <svg class="avatar-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Sweater gris desgastado -->
+        <path d="M 0 100 Q 0 82 18 78 L 82 78 Q 100 82 100 100 Z" fill="#5a5550"/>
+        <!-- Manchas/desgaste -->
+        <ellipse cx="32" cy="92" rx="4" ry="2" fill="#4a4540" opacity="0.6"/>
+        <ellipse cx="68" cy="96" rx="5" ry="2.5" fill="#4a4540" opacity="0.6"/>
+        <!-- Cuello del sweater (estirado) -->
+        <path d="M 38 78 Q 50 86 62 78 L 60 92 Q 50 96 40 92 Z" fill="#4a4540"/>
+        <!-- Camiseta debajo gris claro -->
+        <path d="M 44 86 Q 50 88 56 86 L 56 100 L 44 100 Z" fill="#a89c8e"/>
+        <!-- Cuello -->
+        <rect x="44" y="68" width="12" height="12" rx="2" fill="#dbb898"/>
+        <!-- Cabeza GRANDE -->
+        <ellipse cx="50" cy="44" rx="27" ry="30" fill="#dbb898"/>
+        <!-- Pelo lacio MARRÓN OPACO caído sobre la frente y los lados -->
+        <path d="M 23 46 Q 22 14 50 12 Q 78 14 77 46
+                 L 76 38 Q 68 32 50 36 Q 32 32 24 38 Z"
+              fill="#3a2a1a"/>
+        <!-- Mechones lacios caídos sobre los ojos -->
+        <path d="M 32 36 Q 30 44 32 50" stroke="#3a2a1a" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <path d="M 44 34 Q 42 44 44 50" stroke="#3a2a1a" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <path d="M 56 34 Q 58 44 56 50" stroke="#3a2a1a" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <path d="M 68 36 Q 70 44 68 50" stroke="#3a2a1a" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <!-- Orejas -->
+        <ellipse cx="22" cy="48" rx="3" ry="5" fill="#cba888"/>
+        <ellipse cx="78" cy="48" rx="3" ry="5" fill="#cba888"/>
+        <!-- Cejas CAÍDAS hacia afuera (tristes) -->
+        <path d="M 33 42 Q 38 44 44 42" stroke="#3a2a1a" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <path d="M 56 42 Q 62 44 67 42" stroke="#3a2a1a" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <!-- OJERAS enormes y oscuras -->
+        <path d="M 35 53 Q 40 56 45 53" stroke="#7a5a3a" stroke-width="2" fill="none" opacity="0.7"/>
+        <path d="M 55 53 Q 60 56 65 53" stroke="#7a5a3a" stroke-width="2" fill="none" opacity="0.7"/>
+        <ellipse cx="40" cy="52" rx="6" ry="2" fill="#8a6a4a" opacity="0.35"/>
+        <ellipse cx="60" cy="52" rx="6" ry="2" fill="#8a6a4a" opacity="0.35"/>
+        <!-- Ojos pequeños y caídos -->
+        <ellipse cx="40" cy="48" rx="2.2" ry="1.5" fill="#1a1612"/>
+        <ellipse cx="60" cy="48" rx="2.2" ry="1.5" fill="#1a1612"/>
+        <!-- Nariz -->
+        <path d="M 50 54 Q 51 58 49 60" stroke="#a87a52" stroke-width="1" fill="none" stroke-linecap="round"/>
+        <!-- Boca HACIA ABAJO (tristeza) -->
+        <path d="M 42 67 Q 50 63 58 67" stroke="#5a3a28" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        <!-- Una lagrimita -->
+        <ellipse cx="38" cy="55" rx="0.8" ry="2.4" fill="#7aa8c8" opacity="0.7"/>
+      </svg>
+    }
+
+    <!-- ============================================================
+         #8 · Gerencia Media (ENOJADO)
+         Calva con brillo, bigote tupido, traje gris oscuro, corbata
+         roja apretada, cejas en V profunda, ojos entrecerrados,
+         boca apretada hacia abajo. La autoridad caricaturesca.
+         ============================================================ -->
+    @case ('emp-jefe') {
+      <svg class="avatar-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Traje oscuro -->
+        <path d="M 0 100 Q 0 82 18 78 L 82 78 Q 100 82 100 100 Z" fill="#2a2218"/>
+        <!-- Camisa blanca -->
+        <path d="M 38 78 L 50 92 L 62 78 L 60 100 L 40 100 Z" fill="#f5efe4"/>
+        <!-- Solapas grandes -->
+        <path d="M 28 78 L 50 90 L 38 100 L 24 96 Z" fill="#1a1410"/>
+        <path d="M 72 78 L 50 90 L 62 100 L 76 96 Z" fill="#1a1410"/>
+        <!-- Corbata roja apretada -->
+        <path d="M 46 90 L 54 90 L 56 100 L 50 100 L 44 100 Z" fill="#8b2a23"/>
+        <!-- Cuello -->
+        <rect x="44" y="68" width="12" height="12" rx="2" fill="#d8a878"/>
+        <!-- Cabeza GRANDE -->
+        <ellipse cx="50" cy="42" rx="27" ry="30" fill="#d8a878"/>
+        <!-- CALVA: solo pelo a los costados, arriba brillo -->
+        <path d="M 23 44 Q 22 36 26 32 Q 28 38 30 42 Z" fill="#5a4030"/>
+        <path d="M 77 44 Q 78 36 74 32 Q 72 38 70 42 Z" fill="#5a4030"/>
+        <!-- Pelos remanentes en la nuca/laterales -->
+        <ellipse cx="22" cy="50" rx="5" ry="8" fill="#5a4030"/>
+        <ellipse cx="78" cy="50" rx="5" ry="8" fill="#5a4030"/>
+        <!-- Brillo de la calva -->
+        <ellipse cx="50" cy="22" rx="14" ry="4" fill="#e8c4a0" opacity="0.6"/>
+        <!-- Orejas grandes (rasgo cómico de jefe gruñón) -->
+        <ellipse cx="22" cy="46" rx="3.5" ry="6" fill="#c89878"/>
+        <ellipse cx="78" cy="46" rx="3.5" ry="6" fill="#c89878"/>
+        <!-- Cejas pobladas en V PROFUNDA (enojado) -->
+        <path d="M 32 36 L 46 42" stroke="#3a2a1a" stroke-width="3.2" stroke-linecap="round"/>
+        <path d="M 68 36 L 54 42" stroke="#3a2a1a" stroke-width="3.2" stroke-linecap="round"/>
+        <!-- Ojos entrecerrados (rectángulos casi planos) -->
+        <path d="M 36 46 L 44 47" stroke="#1a1612" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M 56 47 L 64 46" stroke="#1a1612" stroke-width="2.4" stroke-linecap="round"/>
+        <!-- Vena en la sien (enojo) -->
+        <path d="M 28 32 Q 30 36 28 40" stroke="#7a3838" stroke-width="1.4" fill="none"/>
+        <!-- Nariz prominente -->
+        <path d="M 50 50 Q 53 56 48 60 L 52 60" stroke="#a87a52" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <!-- BIGOTE tupido -->
+        <path d="M 38 62 Q 50 60 62 62 Q 60 66 50 65 Q 40 66 38 62 Z" fill="#3a2a1a"/>
+        <!-- Boca apretada hacia abajo -->
+        <path d="M 42 70 Q 50 67 58 70" stroke="#3a1d10" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+        <!-- Mandíbula apretada (línea sutil) -->
+        <path d="M 30 64 Q 35 72 45 73" stroke="#a87a52" stroke-width="0.6" fill="none" opacity="0.5"/>
+        <path d="M 70 64 Q 65 72 55 73" stroke="#a87a52" stroke-width="0.6" fill="none" opacity="0.5"/>
+      </svg>
+    }
+
+    <!-- ============================================================
+         #9 · Nerd / Analista Junior
+         Pelo castaño peinado prolijo con raya al medio, anteojos
+         grandes cuadrados, camisa abotonada hasta el cuello con
+         bolsillo + lapicera, sonrisa tímida. Frenos visibles.
+         ============================================================ -->
+    @case ('emp-nerd') {
+      <svg class="avatar-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Camisa abotonada -->
+        <path d="M 0 100 Q 0 82 18 78 L 82 78 Q 100 82 100 100 Z" fill="#d8dde4"/>
+        <!-- Cuello de la camisa (cerrado, abotonado) -->
+        <path d="M 40 78 L 50 82 L 60 78 L 58 92 Q 50 90 42 92 Z" fill="#c8ced6"/>
+        <!-- Línea de los botones -->
+        <line x1="50" y1="84" x2="50" y2="100" stroke="#9098a4" stroke-width="0.8"/>
+        <circle cx="50" cy="90" r="1" fill="#9098a4"/>
+        <circle cx="50" cy="96" r="1" fill="#9098a4"/>
+        <!-- Bolsillo con lapiceras en el pecho -->
+        <rect x="62" y="84" width="10" height="10" fill="none" stroke="#9098a4" stroke-width="0.7"/>
+        <rect x="64" y="80" width="1.8" height="6" fill="#5a3a28"/>
+        <rect x="67" y="80" width="1.8" height="6" fill="#2b3a55"/>
+        <!-- Cuello -->
+        <rect x="44" y="68" width="12" height="12" rx="2" fill="#e8c8a8"/>
+        <!-- Cabeza GRANDE -->
+        <ellipse cx="50" cy="42" rx="27" ry="30" fill="#e8c8a8"/>
+        <!-- Pelo castaño peinado prolijo con raya al medio -->
+        <path d="M 23 42 Q 22 14 50 14 Q 78 14 77 42
+                 L 75 30 Q 65 22 50 22 Q 35 22 25 30 Z"
+              fill="#5a3a20"/>
+        <!-- Raya al medio (línea de partición) -->
+        <line x1="50" y1="14" x2="50" y2="22" stroke="#d8a878" stroke-width="0.8"/>
+        <!-- Orejas -->
+        <ellipse cx="22" cy="46" rx="3" ry="5" fill="#d8a878"/>
+        <ellipse cx="78" cy="46" rx="3" ry="5" fill="#d8a878"/>
+        <!-- Anteojos grandes cuadrados con marco grueso -->
+        <rect x="30" y="40" width="16" height="14" rx="1.5"
+              fill="rgba(245,239,228,0.25)" stroke="#1a1612" stroke-width="2"/>
+        <rect x="54" y="40" width="16" height="14" rx="1.5"
+              fill="rgba(245,239,228,0.25)" stroke="#1a1612" stroke-width="2"/>
+        <line x1="46" y1="46" x2="54" y2="46" stroke="#1a1612" stroke-width="2"/>
+        <!-- Cejas detrás de los anteojos -->
+        <path d="M 32 39 Q 38 36 44 39" stroke="#3a2010" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+        <path d="M 56 39 Q 62 36 68 39" stroke="#3a2010" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+        <!-- Ojos -->
+        <circle cx="38" cy="47" r="2" fill="#1a1612"/>
+        <circle cx="62" cy="47" r="2" fill="#1a1612"/>
+        <circle cx="39" cy="46" r="0.6" fill="#f5efe4"/>
+        <circle cx="63" cy="46" r="0.6" fill="#f5efe4"/>
+        <!-- Espinilla en el mentón (detalle nerd) -->
+        <circle cx="56" cy="65" r="1" fill="#c87a5a" opacity="0.6"/>
+        <!-- Nariz -->
+        <path d="M 50 56 Q 51 60 49 62" stroke="#c89878" stroke-width="1" fill="none" stroke-linecap="round"/>
+        <!-- Sonrisa tímida con frenos -->
+        <path d="M 45 67 Q 50 69 55 67" stroke="#5a3a28" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <!-- Frenos: rectangulito metálico debajo de la sonrisa -->
+        <rect x="46" y="67.5" width="8" height="1.2" fill="#c0c8d0"/>
+        <line x1="48" y1="67.5" x2="48" y2="68.7" stroke="#8a98a0" stroke-width="0.4"/>
+        <line x1="50" y1="67.5" x2="50" y2="68.7" stroke="#8a98a0" stroke-width="0.4"/>
+        <line x1="52" y1="67.5" x2="52" y2="68.7" stroke="#8a98a0" stroke-width="0.4"/>
+      </svg>
+    }
+
+    <!-- ============================================================
+         #10 · Viejo / Veterano
+         Calva con coronita de pelo gris a los lados, bigote canoso
+         tupido, lentes para leer en la punta de la nariz, camisa
+         con chaleco beige y suspensores. Expresión sabia, sonrisa
+         suave de "te lo dije".
+         ============================================================ -->
+    @case ('emp-viejo') {
+      <svg class="avatar-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Camisa blanca -->
+        <path d="M 0 100 Q 0 82 18 78 L 82 78 Q 100 82 100 100 Z" fill="#f5efe4"/>
+        <!-- Chaleco color tierra -->
+        <path d="M 18 80 Q 26 78 30 78 L 30 100 L 70 100 L 70 78 Q 74 78 82 80 L 82 100 L 18 100 Z" fill="#8a6a3a"/>
+        <!-- Suspensores oscuros sobre el chaleco -->
+        <rect x="36" y="78" width="4" height="22" fill="#3a2818"/>
+        <rect x="60" y="78" width="4" height="22" fill="#3a2818"/>
+        <!-- Corbatín pequeño -->
+        <path d="M 46 78 L 54 78 L 56 84 L 50 82 L 44 84 Z" fill="#5a4030"/>
+        <!-- Cuello -->
+        <rect x="44" y="68" width="12" height="12" rx="2" fill="#e8c4a0"/>
+        <!-- Cabeza GRANDE -->
+        <ellipse cx="50" cy="42" rx="27" ry="30" fill="#e8c4a0"/>
+        <!-- Arrugas en la frente -->
+        <path d="M 36 30 Q 50 27 64 30" stroke="#c89878" stroke-width="0.7" fill="none"/>
+        <path d="M 36 33 Q 50 31 64 33" stroke="#c89878" stroke-width="0.6" fill="none" opacity="0.7"/>
+        <!-- Calva con corona de pelo gris a los lados/atrás -->
+        <ellipse cx="22" cy="50" rx="5" ry="10" fill="#a8a39c"/>
+        <ellipse cx="78" cy="50" rx="5" ry="10" fill="#a8a39c"/>
+        <path d="M 23 38 Q 25 22 50 22 Q 75 22 77 38" stroke="#a8a39c" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <!-- Brillo de calva -->
+        <ellipse cx="50" cy="22" rx="16" ry="5" fill="#f0d8b8" opacity="0.4"/>
+        <!-- Orejas grandes (viejo) -->
+        <ellipse cx="22" cy="46" rx="3.5" ry="6" fill="#d8a878"/>
+        <ellipse cx="78" cy="46" rx="3.5" ry="6" fill="#d8a878"/>
+        <!-- Cejas grises tupidas -->
+        <path d="M 33 38 Q 39 35 45 38" stroke="#a8a39c" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+        <path d="M 55 38 Q 61 35 67 38" stroke="#a8a39c" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+        <!-- Lentes de leer en la punta de la nariz (más abajo de lo normal) -->
+        <circle cx="40" cy="52" r="6" fill="rgba(245,239,228,0.3)" stroke="#5a4030" stroke-width="1.3"/>
+        <circle cx="60" cy="52" r="6" fill="rgba(245,239,228,0.3)" stroke="#5a4030" stroke-width="1.3"/>
+        <line x1="46" y1="52" x2="54" y2="52" stroke="#5a4030" stroke-width="1.3"/>
+        <!-- Ojos por encima de los anteojos (mirando por encima) -->
+        <circle cx="40" cy="46" r="1.6" fill="#1a1612"/>
+        <circle cx="60" cy="46" r="1.6" fill="#1a1612"/>
+        <!-- Bolsas debajo de los ojos -->
+        <path d="M 36 50 Q 40 51 44 50" stroke="#a87a52" stroke-width="0.8" fill="none" opacity="0.6"/>
+        <path d="M 56 50 Q 60 51 64 50" stroke="#a87a52" stroke-width="0.8" fill="none" opacity="0.6"/>
+        <!-- Nariz prominente -->
+        <path d="M 50 50 Q 53 58 48 62 L 52 62" stroke="#a87a52" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <!-- Bigote canoso TUPIDO -->
+        <path d="M 36 64 Q 50 60 64 64 Q 62 70 50 68 Q 38 70 36 64 Z" fill="#d8d0c4" stroke="#a8a39c" stroke-width="0.5"/>
+        <!-- Sonrisa sabia (apenas curva) -->
+        <path d="M 44 71 Q 50 73 56 71" stroke="#5a3a28" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+      </svg>
+    }
+
+    <!-- ============================================================
+         #11 · Hippie / Cultura Organizacional
+         Pelo largo castaño con vincha colorada, barba leve, remera
+         estampada estilo bohemio (tie-dye), collar con dije de paz.
+         Expresión zen, sonrisa relajada. Ojos suaves.
+         ============================================================ -->
+    @case ('emp-hippie') {
+      <svg class="avatar-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Remera estampada tie-dye (base verde olivo con manchas) -->
+        <path d="M 0 100 Q 0 82 18 78 L 82 78 Q 100 82 100 100 Z" fill="#7a8a3a"/>
+        <ellipse cx="30" cy="90" rx="10" ry="6" fill="#a89a3a" opacity="0.6"/>
+        <ellipse cx="70" cy="94" rx="12" ry="5" fill="#3a6a3a" opacity="0.5"/>
+        <ellipse cx="50" cy="86" rx="8" ry="4" fill="#c8a83a" opacity="0.4"/>
+        <!-- Cuello redondo de la remera -->
+        <path d="M 40 78 Q 50 82 60 78 L 60 84 Q 50 86 40 84 Z" fill="#5a6a2a"/>
+        <!-- Collar con dije -->
+        <path d="M 38 80 Q 50 90 62 80" stroke="#8a6a3a" stroke-width="1" fill="none"/>
+        <circle cx="50" cy="92" r="3.5" fill="#b08d3d"/>
+        <path d="M 50 89 L 50 95 M 47.5 92 L 52.5 92 M 48 90 L 52 94 M 48 94 L 52 90"
+              stroke="#5a4030" stroke-width="0.6"/>
+        <!-- Cuello -->
+        <rect x="44" y="68" width="12" height="12" rx="2" fill="#d8a878"/>
+        <!-- Pelo largo (sobresale por los lados, debajo del marco se corta) -->
+        <ellipse cx="50" cy="42" rx="32" ry="34" fill="#5a3820"/>
+        <!-- Cabeza GRANDE (encima del pelo) -->
+        <ellipse cx="50" cy="42" rx="26" ry="29" fill="#d8a878"/>
+        <!-- Pelo arriba/flequillo -->
+        <path d="M 24 38 Q 22 18 50 14 Q 78 18 76 38
+                 L 72 28 Q 60 22 50 24 Q 40 22 28 28 Z" fill="#5a3820"/>
+        <!-- Mechones largos que caen a los lados de la cara -->
+        <path d="M 23 38 Q 18 56 22 78" stroke="#5a3820" stroke-width="5" stroke-linecap="round" fill="none"/>
+        <path d="M 77 38 Q 82 56 78 78" stroke="#5a3820" stroke-width="5" stroke-linecap="round" fill="none"/>
+        <!-- Vincha colorada con detalle -->
+        <rect x="22" y="30" width="56" height="5" fill="#b04030"/>
+        <circle cx="34" cy="32.5" r="1" fill="#f5efe4"/>
+        <circle cx="50" cy="32.5" r="1" fill="#f5efe4"/>
+        <circle cx="66" cy="32.5" r="1" fill="#f5efe4"/>
+        <!-- Orejas -->
+        <ellipse cx="22" cy="48" rx="3" ry="5" fill="#c89878"/>
+        <ellipse cx="78" cy="48" rx="3" ry="5" fill="#c89878"/>
+        <!-- Cejas suaves -->
+        <path d="M 35 43 Q 40 41 45 43" stroke="#3a2010" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+        <path d="M 55 43 Q 60 41 65 43" stroke="#3a2010" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+        <!-- Ojos zen (medio cerrados, contento) -->
+        <path d="M 36 49 Q 40 47 44 49" stroke="#1a1612" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <path d="M 56 49 Q 60 47 64 49" stroke="#1a1612" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <!-- Nariz -->
+        <path d="M 50 53 Q 52 58 49 60" stroke="#a87a52" stroke-width="1" fill="none" stroke-linecap="round"/>
+        <!-- Barba/perilla leve -->
+        <path d="M 44 66 Q 50 72 56 66 Q 52 70 50 70 Q 48 70 44 66 Z" fill="#5a3820" opacity="0.6"/>
+        <!-- Sonrisa zen relajada -->
+        <path d="M 42 64 Q 50 68 58 64" stroke="#7a4520" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+      </svg>
+    }
+
+    <!-- ============================================================
+         #12 · Casual Friday / Hombre con remera
+         Pelo castaño normal, remera azul-petróleo con estampa simple
+         (un círculo o forma logo), expresión neutra-amable. La
+         encarnación del "trabajo remoto, dejen de joder con el dress
+         code". Sin accesorios.
+         ============================================================ -->
+    @case ('emp-remera') {
+      <svg class="avatar-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Remera azul-petróleo -->
+        <path d="M 0 100 Q 0 82 18 78 L 82 78 Q 100 82 100 100 Z" fill="#3a6a7a"/>
+        <!-- Cuello redondo -->
+        <path d="M 40 78 Q 50 82 60 78 L 60 84 Q 50 86 40 84 Z" fill="#2a5a6a"/>
+        <!-- Estampa: pequeño círculo champagne en el pecho -->
+        <circle cx="68" cy="92" r="5" fill="none" stroke="#b08d3d" stroke-width="1.4"/>
+        <circle cx="68" cy="92" r="2" fill="#b08d3d"/>
+        <!-- Cuello -->
+        <rect x="44" y="68" width="12" height="12" rx="2" fill="#d8a878"/>
+        <!-- Cabeza GRANDE -->
+        <ellipse cx="50" cy="42" rx="27" ry="30" fill="#d8a878"/>
+        <!-- Pelo castaño normal, corte casual (un poco despeinado) -->
+        <path d="M 23 42 Q 22 16 50 14 Q 78 16 77 42
+                 L 75 30 Q 64 22 56 26 Q 50 20 44 26 Q 32 22 26 32 Z"
+              fill="#4a3220"/>
+        <!-- Un par de mechones sueltos -->
+        <path d="M 36 24 Q 36 32 34 38" stroke="#4a3220" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M 64 24 Q 64 32 66 38" stroke="#4a3220" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <!-- Orejas -->
+        <ellipse cx="22" cy="46" rx="3" ry="5" fill="#c89878"/>
+        <ellipse cx="78" cy="46" rx="3" ry="5" fill="#c89878"/>
+        <!-- Cejas normales -->
+        <path d="M 34 39 Q 39 37 44 39" stroke="#2a1a0a" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <path d="M 56 39 Q 61 37 66 39" stroke="#2a1a0a" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <!-- Ojos cartoon -->
+        <circle cx="40" cy="46" r="2.4" fill="#1a1612"/>
+        <circle cx="60" cy="46" r="2.4" fill="#1a1612"/>
+        <circle cx="41" cy="45" r="0.7" fill="#f5efe4"/>
+        <circle cx="61" cy="45" r="0.7" fill="#f5efe4"/>
+        <!-- Nariz -->
+        <path d="M 50 51 Q 51 55 49 57" stroke="#a87a52" stroke-width="1" fill="none" stroke-linecap="round"/>
+        <!-- Boca neutra-amable con leve sonrisa -->
+        <path d="M 44 62 Q 50 65 56 62" stroke="#5a3a28" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+      </svg>
+    }
+
+    <!-- ============================================================
+         #13 · Contaduría / Finanzas
+         Contador clásico: visor verde traslúcido en la frente, calva
+         con pelos canosos a los lados, camisa con chaleco gris, lápiz
+         atrás de la oreja, expresión concentrada en los números.
+         ============================================================ -->
+    @case ('emp-finanzas') {
+      <svg class="avatar-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Camisa blanca -->
+        <path d="M 0 100 Q 0 82 18 78 L 82 78 Q 100 82 100 100 Z" fill="#f5efe4"/>
+        <!-- Chaleco gris encima -->
+        <path d="M 18 80 Q 28 78 32 78 L 32 100 L 68 100 L 68 78 Q 72 78 82 80 L 82 100 L 18 100 Z"
+              fill="#7a7570"/>
+        <!-- Línea central + botones del chaleco -->
+        <line x1="50" y1="80" x2="50" y2="100" stroke="#5a5550" stroke-width="0.6"/>
+        <circle cx="50" cy="86" r="0.9" fill="#3a3530"/>
+        <circle cx="50" cy="92" r="0.9" fill="#3a3530"/>
+        <circle cx="50" cy="98" r="0.9" fill="#3a3530"/>
+        <!-- Corbata fina oscura asomando -->
+        <path d="M 47 78 L 53 78 L 51 92 L 50 94 L 49 92 Z" fill="#3a2818"/>
+        <!-- Cuello -->
+        <rect x="44" y="68" width="12" height="12" rx="2" fill="#e8c4a0"/>
+        <!-- Cabeza GRANDE -->
+        <ellipse cx="50" cy="42" rx="27" ry="30" fill="#e8c4a0"/>
+        <!-- Pelo canoso solo a los lados (entradas marcadas) -->
+        <ellipse cx="22" cy="48" rx="5" ry="9" fill="#a8a39c"/>
+        <ellipse cx="78" cy="48" rx="5" ry="9" fill="#a8a39c"/>
+        <path d="M 25 38 Q 28 30 35 30" stroke="#a8a39c" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <path d="M 75 38 Q 72 30 65 30" stroke="#a8a39c" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <!-- Lápiz atrás de la oreja derecha (amarillo clásico) -->
+        <rect x="79" y="40" width="3" height="11" fill="#c8a83a"
+              transform="rotate(20 80 45)"/>
+        <rect x="79" y="38" width="3" height="3" fill="#3a2818"
+              transform="rotate(20 80 45)"/>
+        <!-- Visor verde traslúcido en la frente (sombrilla de contador) -->
+        <path d="M 22 30 Q 50 22 78 30 L 80 36 Q 50 32 20 36 Z"
+              fill="#3a8a4a" opacity="0.85"/>
+        <!-- Cinta/banda del visor -->
+        <path d="M 22 28 Q 50 22 78 28" stroke="#1a4a2a" stroke-width="2.5" fill="none"/>
+        <!-- Brillo del visor -->
+        <path d="M 26 31 Q 50 28 74 31" stroke="#5aaa6a" stroke-width="0.8" fill="none" opacity="0.7"/>
+        <!-- Orejas -->
+        <ellipse cx="22" cy="46" rx="3" ry="5" fill="#d8a878"/>
+        <ellipse cx="78" cy="46" rx="3" ry="5" fill="#d8a878"/>
+        <!-- Cejas concentradas (un poco fruncidas) -->
+        <path d="M 33 40 L 44 41" stroke="#5a5550" stroke-width="2" stroke-linecap="round"/>
+        <path d="M 56 41 L 67 40" stroke="#5a5550" stroke-width="2" stroke-linecap="round"/>
+        <!-- Ojos pequeños concentrados -->
+        <circle cx="40" cy="47" r="2" fill="#1a1612"/>
+        <circle cx="60" cy="47" r="2" fill="#1a1612"/>
+        <circle cx="41" cy="46" r="0.6" fill="#f5efe4"/>
+        <circle cx="61" cy="46" r="0.6" fill="#f5efe4"/>
+        <!-- Bolsas ligeras debajo (trabaja hasta tarde) -->
+        <path d="M 36 51 Q 40 52 44 51" stroke="#a87a52" stroke-width="0.7" fill="none" opacity="0.55"/>
+        <path d="M 56 51 Q 60 52 64 51" stroke="#a87a52" stroke-width="0.7" fill="none" opacity="0.55"/>
+        <!-- Nariz -->
+        <path d="M 50 55 Q 52 60 49 62" stroke="#a87a52" stroke-width="1" fill="none" stroke-linecap="round"/>
+        <!-- Boca contraída (modo "no me molestes") -->
+        <path d="M 44 67 L 56 67" stroke="#5a3a28" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+    }
+
+    <!-- ============================================================
+         #14 · Asesoría Legal
+         Abogada formal: pelo corto severo lacio, blazer oscuro con
+         broche dorado, anteojos pequeños rectangulares, sonrisa
+         contenida (sabe algo que vos no). Aritos discretos.
+         ============================================================ -->
+    @case ('emp-legales') {
+      <svg class="avatar-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Blazer oscuro estricto -->
+        <path d="M 0 100 Q 0 82 18 78 L 82 78 Q 100 82 100 100 Z" fill="#2a2838"/>
+        <!-- Blusa blanca en V cerrada -->
+        <path d="M 40 78 L 50 90 L 60 78 L 58 100 L 42 100 Z" fill="#f5efe4"/>
+        <!-- Solapas del blazer -->
+        <path d="M 30 78 L 50 88 L 38 100 L 26 96 Z" fill="#1f1d2a"/>
+        <path d="M 70 78 L 50 88 L 62 100 L 74 96 Z" fill="#1f1d2a"/>
+        <!-- Broche dorado en la solapa izquierda -->
+        <circle cx="34" cy="86" r="2" fill="#b08d3d" stroke="#5a4030" stroke-width="0.5"/>
+        <circle cx="34" cy="86" r="0.8" fill="#5a4030"/>
+        <!-- Cuello -->
+        <rect x="44" y="68" width="12" height="12" rx="2" fill="#d8a878"/>
+        <!-- Cabeza GRANDE -->
+        <ellipse cx="50" cy="42" rx="27" ry="30" fill="#d8a878"/>
+        <!-- Pelo corto lacio con raya al lado (estilo bob severo) -->
+        <path d="M 23 44 Q 22 14 50 12 Q 78 14 77 44
+                 L 76 32 Q 70 22 50 22 Q 32 22 26 34 Z"
+              fill="#1a1612"/>
+        <!-- Mechones que enmarcan la cara hasta la mandíbula -->
+        <path d="M 23 44 Q 20 60 24 70" stroke="#1a1612" stroke-width="5" stroke-linecap="round" fill="none"/>
+        <path d="M 77 44 Q 80 60 76 70" stroke="#1a1612" stroke-width="5" stroke-linecap="round" fill="none"/>
+        <!-- Orejas con aritos discretos -->
+        <ellipse cx="22" cy="46" rx="2.5" ry="4" fill="#c89878"/>
+        <ellipse cx="78" cy="46" rx="2.5" ry="4" fill="#c89878"/>
+        <circle cx="22" cy="51" r="1.2" fill="#b08d3d"/>
+        <circle cx="78" cy="51" r="1.2" fill="#b08d3d"/>
+        <!-- Cejas finas arqueadas (juicio crítico) -->
+        <path d="M 34 38 Q 39 36 44 38" stroke="#1a1612" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+        <path d="M 56 38 Q 61 36 66 38" stroke="#1a1612" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+        <!-- Anteojos pequeños rectangulares (al borde de la nariz) -->
+        <rect x="34" y="44" width="12" height="6" rx="1" fill="rgba(245,239,228,0.2)"
+              stroke="#1a1612" stroke-width="1.3"/>
+        <rect x="54" y="44" width="12" height="6" rx="1" fill="rgba(245,239,228,0.2)"
+              stroke="#1a1612" stroke-width="1.3"/>
+        <line x1="46" y1="47" x2="54" y2="47" stroke="#1a1612" stroke-width="1.3"/>
+        <!-- Ojos detrás de los anteojos -->
+        <circle cx="40" cy="47" r="1.5" fill="#1a1612"/>
+        <circle cx="60" cy="47" r="1.5" fill="#1a1612"/>
+        <!-- Nariz fina -->
+        <path d="M 50 53 Q 51 58 49 60" stroke="#a87a52" stroke-width="1" fill="none" stroke-linecap="round"/>
+        <!-- Sonrisa contenida (apenas una curva) — sabe algo que vos no -->
+        <path d="M 44 65 Q 50 66 56 65" stroke="#5a3a28" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+        <!-- Labial sutil rojo -->
+        <path d="M 45 64 Q 50 65 55 64" stroke="#8b2a23" stroke-width="0.7" fill="none" stroke-linecap="round" opacity="0.7"/>
+      </svg>
+    }
+
+    <!-- ============================================================
+         #15 · Diseño / Creativo
+         Hipster creativo: pelo recogido en bun arriba, barba prolija,
+         anteojos redondos sin marco, sweater mostaza con estampa
+         geométrica triangular. Expresión relajada-pensativa.
+         ============================================================ -->
+    @case ('emp-disenio') {
+      <svg class="avatar-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Sweater mostaza -->
+        <path d="M 0 100 Q 0 82 18 78 L 82 78 Q 100 82 100 100 Z" fill="#c8a83a"/>
+        <!-- Cuello redondo del sweater -->
+        <path d="M 40 78 Q 50 84 60 78 L 58 88 Q 50 90 42 88 Z" fill="#a88a2a"/>
+        <!-- Estampa geométrica triangular en el pecho -->
+        <path d="M 64 86 L 72 86 L 68 94 Z" fill="none" stroke="#5a4030" stroke-width="1.4"/>
+        <path d="M 68 88 L 74 88 L 71 93 Z" fill="#5a4030"/>
+        <!-- Cuello -->
+        <rect x="44" y="68" width="12" height="12" rx="2" fill="#d8a878"/>
+        <!-- Cabeza GRANDE -->
+        <ellipse cx="50" cy="42" rx="27" ry="30" fill="#d8a878"/>
+        <!-- BUN (rodete arriba) — característico hipster -->
+        <ellipse cx="50" cy="10" rx="9" ry="8" fill="#3a2818"/>
+        <!-- Cinta/lazo del bun -->
+        <path d="M 44 11 Q 50 8 56 11" stroke="#2a1a08" stroke-width="1.2" fill="none"/>
+        <!-- Pelo lateral peinado hacia el bun (recogido tirante) -->
+        <path d="M 23 42 Q 22 18 50 14 Q 78 18 77 42
+                 L 73 26 Q 60 18 50 20 Q 40 18 27 26 Z"
+              fill="#3a2818"/>
+        <!-- Líneas del pelo "peinado hacia atrás" -->
+        <path d="M 32 22 Q 40 18 48 16" stroke="#2a1a08" stroke-width="0.8" fill="none"/>
+        <path d="M 52 16 Q 60 18 68 22" stroke="#2a1a08" stroke-width="0.8" fill="none"/>
+        <!-- Orejas -->
+        <ellipse cx="22" cy="46" rx="3" ry="5" fill="#c89878"/>
+        <ellipse cx="78" cy="46" rx="3" ry="5" fill="#c89878"/>
+        <!-- Cejas medias arqueadas (relajadas) -->
+        <path d="M 34 39 Q 39 37 44 39" stroke="#2a1a08" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <path d="M 56 39 Q 61 37 66 39" stroke="#2a1a08" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <!-- Anteojos REDONDOS sin marco grueso (estilo Lennon hipster) -->
+        <circle cx="40" cy="47" r="6" fill="rgba(245,239,228,0.18)" stroke="#3a2818" stroke-width="1.2"/>
+        <circle cx="60" cy="47" r="6" fill="rgba(245,239,228,0.18)" stroke="#3a2818" stroke-width="1.2"/>
+        <line x1="46" y1="47" x2="54" y2="47" stroke="#3a2818" stroke-width="1.2"/>
+        <!-- Ojos detrás -->
+        <circle cx="40" cy="47" r="1.8" fill="#1a1612"/>
+        <circle cx="60" cy="47" r="1.8" fill="#1a1612"/>
+        <circle cx="40.8" cy="46.2" r="0.6" fill="#f5efe4"/>
+        <circle cx="60.8" cy="46.2" r="0.6" fill="#f5efe4"/>
+        <!-- Nariz -->
+        <path d="M 50 54 Q 51 58 49 60" stroke="#a87a52" stroke-width="1" fill="none" stroke-linecap="round"/>
+        <!-- Bigote / barba prolija (recortada al ras de la mandíbula) -->
+        <path d="M 38 64 Q 50 68 62 64 Q 60 74 50 76 Q 40 74 38 64 Z"
+              fill="#3a2818" opacity="0.92"/>
+        <!-- Boca dentro de la barba (sutil sonrisa) -->
+        <path d="M 45 68 Q 50 70 55 68" stroke="#d8a878" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+      </svg>
+    }
+
+    <!-- PLACEHOLDER · solo para ids desconocidos (bots legacy, fallback) -->
+    @default {
+      <div class="avatar-placeholder">{{ inicial }}</div>
+    }
+  }
+</div>

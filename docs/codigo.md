@@ -5,7 +5,7 @@
 > el código actual archivo por archivo. Acompaña a la
 > [Arquitectura](arquitectura.md) y al [Modelo de Datos](modelo-datos.md).
 
-**Versión:** 0.3 · **Fecha:** 2026-05-18
+**Versión:** 0.4 · **Fecha:** 2026-05-20
 
 ---
 
@@ -217,14 +217,19 @@ Toda la lógica de juego está en el servidor; el cliente solo dibuja y avisa.
 
 ```
 web-angular/src/
-├── index.html              el HTML raíz (vacío; Angular lo llena)
+├── index.html              el HTML raíz; carga fonts de Google
 ├── main.ts                 arranca la app
-├── styles.css              estilos globales (colores, 2 temas)
+├── styles.css              sistema visual editorial (paleta única + primitivas)
 └── app/
     ├── app.ts / app.html    componente raíz: elige qué pantalla mostrar
-    ├── app.config.ts        configuración de Angular
+    ├── app.config.ts        configuración de Angular (incl. provideAnimations)
     ├── models.ts            las "formas" de los datos que llegan del server
     ├── game.service.ts      la conexión con el servidor (lo más importante)
+    ├── animations.ts        triggers de Angular Animations (transición de pantalla)
+    ├── avatars.ts           catálogo de avatars (id + puesto + depto + color)
+    ├── avatar/              <app-avatar>: renderiza el SVG del avatar por id
+    ├── avatar-picker/       <app-avatar-picker>: modal pantalla-completa de selección
+    ├── intro/               <app-intro>: orquesta el reveal escalonado "dramático"
     ├── dlog.ts              logs de depuración (temporal)
     └── <una carpeta por pantalla>
 ```
@@ -280,24 +285,82 @@ del estado, con `computed()` (un signal calculado a partir de otros).
 
 | Carpeta | Pantalla |
 |---|---|
-| `ingreso/` | Crear o unirse a una sala (apodo, avatar, código). |
-| `lobby/` | Sala de espera: jugadores en vivo, fichar, bots, anfitrión, expulsar. |
-| `theme-switcher/` | Conmutador de paleta (Sinergia Azul / Verde Acción). |
-| `briefing/` | Explicación del minijuego de la ronda. |
+| `ingreso/` | Crear o unirse a una sala (apodo, avatar grande clickeable, código). |
+| `lobby/` | "Memorándum interno": jugadores en vivo, fichar, bots, anfitrión, expulsar. |
+| `briefing/` | Explicación del minijuego de la ronda (con `<app-intro>`). |
 | `desafio/` | El Botón: a quién llamar + decisión Verde/Rojo. |
 | `reunion/` | El Recorte: la reunión grupal. |
 | `votacion/` | El Recorte: el voto secreto. |
 | `resultado/` | Resultado de la tanda/minijuego + marcador. |
 | `marcador/` | Marcador entre rondas. |
-| `final/` | Ranking final ("Empleado del Mes"). |
+| `final/` | "Circular oficial": ranking final + sello "ASCENSO APROBADO". |
 
-### 5.5 `styles.css` — el estilo
+### 5.5 `styles.css` — el sistema visual "Editorial Sinergia"
 
-Un sistema de **tokens** (variables CSS: colores, tamaños). Hay 2 paletas que se
-cambian con un atributo del HTML (`data-theme`): *Sinergia Azul* (default) y
-*Verde Acción*. Todas las pantallas reusan los mismos tokens.
+Define la **paleta única** del juego (custom properties CSS) y un set de
+**primitivas reusables** que arman cualquier pantalla como bloques de Lego.
 
-### 5.6 `dlog.ts` — logs de depuración (temporal)
+**Paleta editorial:**
+- `--paper` (papel crema `#f5efe4`) — fondo del shell.
+- `--ink` (tinta carbón `#1a1612`) — texto, bordes.
+- `--accent` (champagne `#b08d3d`) — botones, links, énfasis.
+- `--stamp` (rojo apagado `#8b2a23`) — sellos, errores, alertas.
+- `--desk` (mesa oscura `#2a2622`) — solo en pantalla Final.
+
+**Fonts:**
+- `--font-display` → **Fraunces** (serif editorial, ejes opsz).
+- `--font-mono` → **JetBrains Mono** (cuerpo "sistema interno").
+
+**Primitivas reusables** (cualquier pantalla nueva las arma):
+- `.doc-head` + `.folio` + `.dept` + `.divider` → membrete con folio.
+- `.expediente` → recuadro con número grande (códigos, valores únicos).
+- `.section-head` → título de sección con líneas decorativas.
+- `.row` + `.row-puesto/av/name/dots/inf/status` → planilla burocrática.
+- `.vos-tag` + `.tag.host/.bot` → etiquetas pequeñas.
+- `.btn` → timbre/tampón con base champagne (se hunde al apretar).
+- `.kicker` → texto chico mayúscula para etiquetas/contextos.
+
+**Intensidad modulada por pantalla:**
+- Funcionales (Ingreso, Lobby, Votación…): papel claro liso, sin grano.
+- Teatrales (Final): mesa oscura + papel con grano + sombra dramática + sello.
+
+### 5.6 `animations.ts` — transiciones de pantalla
+
+Define el trigger `pageAnim` de Angular Animations: cada pantalla entra con
+fade + slide-up (260ms) al aparecer. Se aplica en el `<main>` de `app.html`
+con `<div class="page" @pageAnim>`.
+
+### 5.7 Sistema de avatars
+
+**`avatars.ts`** — catálogo de 15 avatars con metadata corporativa. Cada uno
+tiene `id` ("emp-direccion"), `puesto`, `dept` y `deptColor`. El server solo
+persiste el `id` como string opaco.
+
+**`avatar/avatar.ts`** + `avatar.html` + `avatar.css` — componente
+`<app-avatar [id]="..." [size]="56" />` que renderiza el SVG correspondiente
+dentro de un marco redondo. Si el id no tiene SVG, muestra un placeholder
+con la inicial del puesto sobre el color del depto. La CSS var `--avatar-size`
+se setea con `@HostBinding('style.--avatar-size.px')` en el host para que el
+`:host` la herede en width/height (truco importante de Angular: las custom
+properties no suben de hijos a padres).
+
+**`avatar-picker/avatar-picker.ts`** — componente `<app-avatar-picker>` que
+abre como modal pantalla-completa con grilla 3×5 de avatars a 70px + preview
+grande (112px) + info del puesto. Recibe `[currentId]` y emite `(pick)` con
+el id elegido o `(close)` para cancelar.
+
+### 5.8 `intro/intro.ts` — reveal dramático escalonado
+
+Componente `<app-intro>` que orquesta una entrada "cinematográfica" para
+pantallas teatrales (Briefing, Final, etc.). Los hijos llevan clase `.beat`
+con `style="--i:N"` y entran uno por uno (350ms entre cada beat). Un tap
+en cualquier parte salta toda la secuencia. Implementado con CSS keyframes
++ `animation-delay: calc(var(--i) * 0.35s)` — Angular Animations brilla en
+`:enter/:leave` pero CSS es más cómodo para reveals escalonados con skip.
+
+### 5.9 `dlog.ts` — logs de depuración (temporal)
+
+### 5.9 `dlog.ts` — logs de depuración (temporal)
 
 Un ayudante que imprime en la consola del navegador qué función se ejecuta y
 con qué datos (prefijo `[traición·…]`). Es **temporal**, para seguir el flujo

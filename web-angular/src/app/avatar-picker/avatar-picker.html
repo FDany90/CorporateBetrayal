@@ -1,0 +1,44 @@
+<!-- Backdrop: ocupa toda la ventana, oscurece el fondo. Tap = cerrar.
+     stopPropagation en el modal evita que un click adentro burbuje a acá. -->
+<div class="picker-backdrop" (click)="cancelar()">
+  <div class="picker-modal" (click)="$event.stopPropagation()">
+
+    <header class="picker-head">
+      <div>
+        <p class="picker-kicker">SINERGIA·CORP · Asignación de identidad</p>
+        <h2 class="picker-title">¿Quién sos?</h2>
+      </div>
+      <button class="picker-close" (click)="cancelar()" title="Cerrar">✕</button>
+    </header>
+
+    <!-- Preview grande de la selección actual: avatar enorme + puesto. -->
+    <div class="picker-preview">
+      <app-avatar [id]="seleccion()" [size]="112" />
+      <div class="picker-preview-info">
+        <strong>{{ info.puesto || '—' }}</strong>
+        <span>Departamento: {{ info.dept || '—' }}</span>
+      </div>
+    </div>
+
+    <!-- Grilla 4 columnas con los 16 avatars. Tocar uno actualiza
+         la selección temporal (no cierra todavía). -->
+    <div class="picker-body">
+      <div class="picker-grid">
+        @for (a of avatares; track a.id) {
+          <button
+            class="picker-cell"
+            [class.on]="seleccion() === a.id"
+            (click)="elegir(a.id)"
+            [title]="a.puesto"
+          >
+            <app-avatar [id]="a.id" [size]="70" />
+          </button>
+        }
+      </div>
+    </div>
+
+    <footer class="picker-foot">
+      <button class="btn" (click)="confirmar()">LISTO</button>
+    </footer>
+  </div>
+</div>

@@ -1,5 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { GameService } from '../game.service';
+import { Avatar } from '../avatar/avatar';
 import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
 
 /**
@@ -12,6 +13,7 @@ import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
  */
 @Component({
   selector: 'app-lobby',
+  imports: [Avatar],
   templateUrl: './lobby.html',
 })
 export class Lobby {

@@ -1,14 +1,20 @@
 import { Component, computed, inject } from '@angular/core';
 import { GameService } from '../game.service';
+import { Intro } from '../intro/intro';
 import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
 
 /**
- * Pantalla de Briefing: explica las reglas de El Botón del Bonus antes de
- * jugarlo. Cada jugador confirma con "ENTENDIDO"; la fase avanza cuando
+ * Pantalla de Briefing: explica las reglas del minijuego de la ronda antes
+ * de jugarlo. Cada jugador confirma con "ENTENDIDO"; la fase avanza cuando
  * todos confirmaron.
+ *
+ * El contenido se muestra dentro de `<app-intro>` para hacer un "reveal"
+ * escalonado (cine corto ~3s) y dar sensación de juego en lugar de página.
+ * Ver [intro/intro.ts](../intro/intro.ts) para el detalle del componente.
  */
 @Component({
   selector: 'app-briefing',
+  imports: [Intro],
   templateUrl: './briefing.html',
 })
 export class Briefing {

@@ -1,5 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { GameService } from '../game.service';
+import { Avatar } from '../avatar/avatar';
 import { NOMBRE_CHALLENGE } from '../models';
 import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
 
@@ -9,6 +10,7 @@ import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
  */
 @Component({
   selector: 'app-resultado',
+  imports: [Avatar],
   templateUrl: './resultado.html',
 })
 export class Resultado {

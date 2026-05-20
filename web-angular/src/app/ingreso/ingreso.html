@@ -2,7 +2,7 @@
   <div class="content">
     <div class="logo">S</div>
     <h1 class="center">
-      SINERGIA <span style="color:var(--primary)">CORP</span>
+      SINERGIA <span style="color:var(--accent)">CORP</span>
     </h1>
     <p class="center">Acceso de personal · Traición en la Oficina</p>
 
@@ -18,17 +18,13 @@
       </button>
     </div>
 
-    <!-- @if: muestra el bloque solo si hay error. -->
     @if (error()) {
       <div class="error">{{ error() }}</div>
     }
 
-    <!-- El campo de código solo aparece en modo "unirse". -->
     @if (modo() === 'unirse') {
       <div class="field">
-        <label>CÓDIGO DE SALA</label>
-        <!-- [ngModel] escribe el input; (ngModelChange) avisa el cambio.
-             Lo separamos en vez de [(ngModel)] para pasar por setCode(). -->
+        <label>Código de sala</label>
         <input
           class="code"
           maxlength="5"
@@ -40,7 +36,7 @@
     }
 
     <div class="field">
-      <label>TU APODO</label>
+      <label>Tu apodo</label>
       <input
         maxlength="20"
         placeholder="Cómo te ven los demás"
@@ -49,20 +45,23 @@
       />
     </div>
 
-    <label style="font-size:12px;font-weight:700;color:var(--muted)">
-      ELEGÍ TU AVATAR
-    </label>
-    <!-- @for repite un botón por avatar. track: identifica cada ítem. -->
-    <div class="avatars">
-      @for (a of avatares; track a) {
-        <button [class.on]="avatar() === a" (click)="avatar.set(a)">
-          {{ a }}
-        </button>
-      }
+    <!-- Selección de avatar: ya no es una grilla inline. Es un preview
+         GRANDE clickeable; al tocarlo se abre el modal pantalla-completa
+         con los 16 avatares y la preview ampliada. -->
+    <div class="field">
+      <label>Tu identidad</label>
+      <button
+        class="avatar-current"
+        type="button"
+        (click)="abrirPicker()"
+      >
+        <app-avatar [id]="avatar()" [size]="96" />
+        <span class="avatar-current-info">
+          <strong>{{ puestoActual() }}</strong>
+          <span>Tocá para cambiar</span>
+        </span>
+      </button>
     </div>
-
-    <!-- Otro componente embebido. Self-closing, como en JSX. -->
-    <app-theme-switcher />
 
     @if (servidorUrl) {
       <p class="muted-note">Servidor: {{ servidorUrl }}</p>
@@ -80,4 +79,14 @@
       }
     </button>
   </div>
+
+  <!-- Modal pantalla-completa. Solo se monta cuando pickerAbierto() es true.
+       (pick) recibe el id elegido; (close) se dispara al cancelar. -->
+  @if (pickerAbierto()) {
+    <app-avatar-picker
+      [currentId]="avatar()"
+      (pick)="seleccionarAvatar($event)"
+      (close)="cerrarPicker()"
+    />
+  }
 </div>

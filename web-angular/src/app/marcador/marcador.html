@@ -15,7 +15,7 @@
       @for (p of ranking(); track p.id; let i = $index) {
         <div class="player">
           <span class="pos">{{ i + 1 }}</span>
-          <div class="av">{{ p.avatar }}</div>
+          <app-avatar [id]="p.avatar" [size]="36" />
           <span class="nm">
             {{ p.nickname }}
             @if (p.id === miId()) { <span class="tag">vos</span> }

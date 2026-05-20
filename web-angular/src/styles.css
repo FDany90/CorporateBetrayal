@@ -1,221 +1,711 @@
 /* ============================================================
-   Traición en la Oficina — sistema de estilo (tokens)
-   Tema A "Sinergia Azul" (default) · Tema B "Verde Acción"
+   Traición en la Oficina — Sistema visual "Editorial Sinergia"
+   ============================================================
+
+   Concepto único: el juego es el sistema de documentos internos de
+   una empresa burocrática (SINERGIA·CORP). Cada pantalla es un
+   "papel" con folio, departamento y un cuerpo según el rito que toca.
+
+   Intensidad modulada:
+     - Pantallas funcionales (lobby, ingreso, llamadas, votación):
+       papel claro liso, sin grano ni sombra dramática. Ritmo de oficina.
+     - Pantallas teatrales (briefing, resultado, marcador):
+       el cuerpo es un "documento" (.doc) con sombra y grano.
+     - Pantalla Final: documento sobre "mesa oscura", grano más fuerte,
+       sello rojo al final. Pico dramático del juego.
+
+   Tokens
+   ------
+   Las custom properties heredadas (--bg, --card, --ink, --primary…) se
+   conservan apuntando a la paleta editorial, así las pantallas todavía
+   no migradas adoptan el look nuevo automáticamente. Las custom props
+   nuevas (--paper, --ink-soft, --accent, --stamp, --font-display,
+   --font-mono) son las que conviene usar en pantallas nuevas.
    ============================================================ */
 
-:root, [data-theme="azul"] {
-  --bg:#eef1f6; --card:#ffffff; --ink:#0f172a; --muted:#64748b;
-  --line:#e2e8f0; --soft:#f1f5f9;
-  --brand:#1d4ed8;
-  --primary:#2563eb; --primary-d:#1d4ed8; --on-primary:#ffffff;
-  --primary-soft:#eff6ff; --primary-border:#dbeafe;
-  --green:#16a34a; --red:#dc2626; --warn:#d97706;
-}
+:root {
+  /* — Paleta editorial — */
+  --paper:        #f5efe4;  /* papel crema base */
+  --paper-soft:   #faf6ec;  /* papel más claro, para "tarjetas" */
+  --paper-edge:   #ede5d3;  /* sombra de pliegue */
+  --desk:         #2a2622;  /* "mesa oscura" — solo en Final */
+  --ink:          #1a1612;  /* tinta carbón */
+  --ink-soft:     #5a4f44;  /* tinta apagada (subtítulos, folio) */
+  --ink-mute:     #8a7e72;  /* tinta más débil aún */
+  --line:         #d4cab8;  /* línea de separador sobre papel */
+  --line-dash:    #c0b6a3;  /* líneas dashed/dotted */
+  --accent:       #b08d3d;  /* champagne (acento principal) */
+  --accent-d:     #8e7330;  /* champagne hundido */
+  --accent-soft:  #f0e5c8;  /* champagne pálido */
+  --accent-border:#d8c594;
+  --stamp:        #8b2a23;  /* rojo apagado del sello */
+  --stamp-soft:   #f7e3df;  /* rojo papel */
+  --approved:     #5d7a3a;  /* verde "aprobado" apagado */
 
-[data-theme="verde"] {
-  --bg:#f4f5f7; --card:#ffffff; --ink:#0f172a; --muted:#64748b;
-  --line:#e5e7eb; --soft:#f3f4f6;
-  --brand:#0f172a;
-  --primary:#16a34a; --primary-d:#15803d; --on-primary:#ffffff;
-  --primary-soft:#ecfdf5; --primary-border:#bbf7d0;
-  --green:#16a34a; --red:#dc2626; --warn:#d97706;
+  /* — Aliases legacy (mantienen vivas las pantallas no migradas) — */
+  --bg:            var(--paper);
+  --card:          var(--paper-soft);
+  --muted:         var(--ink-soft);
+  --soft:          var(--paper-edge);
+  --brand:         var(--ink);
+  --primary:       var(--accent);
+  --primary-d:     var(--accent-d);
+  --on-primary:    var(--paper);
+  --primary-soft:  var(--accent-soft);
+  --primary-border:var(--accent-border);
+  --green:         var(--approved);
+  --red:           var(--stamp);
+  --warn:          #b7843a;
+
+  /* — Tipografías — */
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, Menlo, monospace;
+  --font-body:    var(--font-mono);
 }
 
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;}
 body{
-  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  background:#cbd5e1;color:var(--ink);line-height:1.45;
+  font-family:var(--font-body);
+  background:var(--desk);  /* fuera del "celular" se ve la mesa */
+  color:var(--ink);
+  line-height:1.5;
   -webkit-font-smoothing:antialiased;
 }
 
 /* "celular": columna a alto de viewport */
 .app{
-  max-width:440px;margin:0 auto;background:var(--bg);
+  max-width:440px;margin:0 auto;background:var(--paper);
   height:100vh;height:100dvh;
   display:flex;flex-direction:column;overflow:hidden;
 }
 .screen{display:flex;flex-direction:column;flex:1;min-height:0;}
 
-/* shell */
+/* Wrapper de animación de pantalla (Angular Animations en app.ts). */
+.page{display:flex;flex-direction:column;flex:1;min-height:0;}
+
+/* ============================================================
+   SHELL editorial — topbar (membrete) + appheader (sección)
+   ============================================================ */
 .topbar{
-  flex-shrink:0;display:flex;align-items:center;justify-content:space-between;
-  background:var(--card);border-bottom:1px solid var(--line);padding:12px 16px;
+  flex-shrink:0;display:flex;align-items:flex-end;justify-content:space-between;
+  background:var(--paper);
+  border-bottom:1px solid var(--ink);
+  padding:14px 18px 10px;
+  gap:8px;
 }
-.brand{font-weight:800;letter-spacing:.4px;font-size:15px;color:var(--brand);}
-.brand .dot{color:var(--primary);}
+.brand{
+  font-family:var(--font-display);
+  font-weight:900;
+  font-size:18px;
+  letter-spacing:-0.4px;
+  color:var(--ink);
+  line-height:1;
+  font-variation-settings:'opsz' 60;
+}
+.brand .dot{color:var(--accent);}
 .pill{
-  background:var(--primary-soft);color:var(--primary-d);font-weight:700;
-  font-size:12px;padding:5px 10px;border-radius:999px;border:1px solid var(--primary-border);
+  font-family:var(--font-mono);
+  font-weight:700;font-size:10px;
+  letter-spacing:1.5px;
+  color:var(--ink-soft);
+  text-transform:uppercase;
+  padding:4px 8px;
+  border:1px solid var(--line);
+  border-radius:2px;
+  background:var(--paper-soft);
+  white-space:nowrap;
 }
 .appheader{
-  flex-shrink:0;padding:9px 16px;font-size:11px;font-weight:700;
-  letter-spacing:1px;color:var(--on-primary);background:var(--primary);
+  flex-shrink:0;
+  font-family:var(--font-mono);
+  padding:8px 18px;
+  font-size:10px;font-weight:600;
+  letter-spacing:2.5px;
+  color:var(--ink);
+  background:var(--paper-soft);
+  border-bottom:1px solid var(--line);
+  text-transform:uppercase;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.appheader::before{
+  content:'§';
+  font-family:var(--font-display);
+  font-size:14px;
+  color:var(--accent);
+  font-weight:700;
+}
+
+.content{
+  padding:22px 18px;flex:1;overflow-y:auto;min-height:0;
+  background:var(--paper);
+}
+.actionbar{
+  flex-shrink:0;padding:14px 18px 18px;
+  background:var(--paper);
+  border-top:1px dashed var(--line);
+  display:flex;flex-direction:column;gap:8px;
+}
+
+/* ============================================================
+   TIPOGRAFÍA base
+   ============================================================ */
+h1{
+  font-family:var(--font-display);
+  font-weight:800;font-size:28px;
+  line-height:1.05;letter-spacing:-0.5px;
+  color:var(--ink);
+  margin-bottom:8px;
+  font-variation-settings:'opsz' 96;
+}
+h2{
+  font-family:var(--font-display);
+  font-weight:700;font-size:17px;
+  letter-spacing:-0.2px;
+  color:var(--ink);
+  margin-bottom:10px;
+  font-variation-settings:'opsz' 24;
+}
+p{
+  color:var(--ink);
+  font-size:13px;margin-bottom:10px;
+  font-family:var(--font-body);
+}
+.center{text-align:center;}
+.muted-note{
+  font-size:11px;color:var(--ink-soft);
+  text-align:center;margin-top:10px;
+  letter-spacing:0.3px;
+}
+.kicker{
+  font-family:var(--font-mono);
+  font-size:10px;font-weight:600;
+  letter-spacing:3px;
+  color:var(--ink-soft);
+  text-transform:uppercase;
+  margin-bottom:4px;
+}
+
+/* ============================================================
+   PRIMITIVAS DE DOCUMENTO (reusables en todas las pantallas)
+   ============================================================ */
+
+/* Encabezado de pantalla tipo "membrete" del documento — folio,
+   departamento, divisor. Usar al principio del .content. */
+.doc-head{ margin-bottom:18px; }
+.doc-head .folio,
+.doc-head .dept{
+  font-family:var(--font-mono);
+  font-size:9.5px;letter-spacing:1.6px;
+  color:var(--ink-soft);
   text-transform:uppercase;
 }
-.content{padding:20px 16px;flex:1;overflow-y:auto;min-height:0;}
-.actionbar{
-  flex-shrink:0;padding:14px 16px;background:var(--card);
-  border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px;
+.doc-head .dept{margin-bottom:10px;}
+.doc-head .doc-brand{
+  font-family:var(--font-display);
+  font-weight:900;font-size:22px;
+  letter-spacing:-0.5px;
+  color:var(--ink);
+  font-variation-settings:'opsz' 96;
+}
+.divider{
+  height:1px;background:var(--ink);
+  margin:10px 0 14px;
+}
+.divider.thin{background:var(--line);}
+
+/* Fila tipo "planilla" — para listados de personas, items, etc.
+   Layout: puesto · avatar · nombre · ... puntos ... · valor numérico */
+.row{
+  display:flex;align-items:baseline;gap:8px;
+  padding:8px 0;
+  border-bottom:1px dashed var(--line);
+  font-size:13px;
+}
+.row:last-of-type{border-bottom:0;}
+.row.off{opacity:.45;}
+.row-puesto{
+  font-family:var(--font-mono);
+  font-weight:700;color:var(--ink-soft);
+  font-size:12px;letter-spacing:1px;
+  min-width:22px;
+}
+.row-av{
+  font-size:20px;line-height:1;
+  flex-shrink:0;
+  width:24px;
+  text-align:center;
+}
+.row-name{
+  font-family:var(--font-display);
+  font-weight:600;font-size:15px;
+  color:var(--ink);
+  font-variation-settings:'opsz' 18;
+  display:flex;align-items:center;gap:6px;
+  flex-wrap:wrap;
+}
+.row-dots{
+  flex:1;
+  border-bottom:1px dotted var(--line-dash);
+  margin:0 4px 4px;
+  min-width:12px;
+  align-self:flex-end;
+  height:1px;
+}
+.row-inf{
+  font-family:var(--font-mono);
+  font-weight:700;color:var(--ink);
+  font-size:13px;
+}
+.row-status{
+  font-family:var(--font-mono);
+  font-size:10px;letter-spacing:1.5px;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+}
+.row-status.ready{color:var(--approved);}
+.row-status.danger{color:var(--stamp);}
+.row .kick{
+  width:24px;height:24px;border-radius:2px;flex-shrink:0;line-height:1;
+  background:var(--stamp-soft);color:var(--stamp);
+  border:1px solid var(--stamp);
+  font-size:10px;font-weight:800;cursor:pointer;
+  font-family:var(--font-mono);
 }
 
-/* tipografía */
-h1{font-size:21px;margin-bottom:6px;}
-h2{font-size:16px;margin-bottom:10px;}
-p{color:var(--muted);font-size:14px;margin-bottom:10px;}
-.center{text-align:center;}
-.muted-note{font-size:12px;color:var(--muted);text-align:center;margin-top:10px;}
-
-/* botones */
-.btn{
-  display:block;width:100%;padding:15px;border:0;border-radius:12px;
-  background:var(--primary);color:var(--on-primary);font-size:15px;
-  font-weight:700;cursor:pointer;text-align:center;
+/* Etiqueta chica tipo "tag" — para anfitrión, bot, vos, etc. */
+.vos-tag,
+.tag{
+  display:inline-block;
+  font-family:var(--font-mono);
+  font-size:8.5px;font-weight:700;
+  letter-spacing:1.5px;
+  padding:2px 5px 3px;
+  background:var(--ink);
+  color:var(--paper);
+  vertical-align:middle;
+  border-radius:1px;
+  text-transform:uppercase;
 }
-.btn:active{background:var(--primary-d);}
-.btn:disabled{opacity:.45;cursor:not-allowed;}
-.btn.ghost{background:var(--soft);color:var(--ink);}
-.btn.danger{background:#fef2f2;color:var(--red);}
-.btn.sm{padding:10px;font-size:13px;border-radius:9px;}
+.tag.bot{background:var(--ink-mute);}
+.tag.host{background:var(--accent);color:var(--ink);}
+.tag.dim{background:transparent;color:var(--ink-soft);border:1px solid var(--line);}
 
-/* tarjetas */
-.card{
-  background:var(--card);border:1px solid var(--line);border-radius:12px;
-  padding:14px;margin-bottom:10px;
+/* Cuadro destacado tipo "número de expediente" — para códigos de sala,
+   valores únicos que tienen que llamar la atención. */
+.expediente{
+  text-align:center;
+  border:2px solid var(--ink);
+  padding:14px 12px 16px;
+  margin-bottom:18px;
+  background:var(--paper-soft);
+  position:relative;
 }
-.card.pad0{padding:4px 14px;}
-
-/* campos */
-.field{margin-bottom:12px;}
-.field label{font-size:12px;font-weight:700;color:var(--muted);}
-.field input{
-  width:100%;padding:13px;border:1px solid var(--line);border-radius:10px;
-  font-size:16px;margin-top:4px;background:var(--card);color:var(--ink);
+.expediente .lbl{
+  font-family:var(--font-mono);
+  font-size:10px;font-weight:700;
+  color:var(--ink-soft);
+  letter-spacing:2.5px;
+  text-transform:uppercase;
+  margin-bottom:6px;
 }
-.field input:focus{outline:2px solid var(--primary);border-color:var(--primary);}
-.field input.code{text-transform:uppercase;letter-spacing:3px;font-weight:700;}
-
-/* segmento crear/unirse */
-.seg{display:flex;background:var(--soft);border-radius:10px;padding:4px;margin-bottom:16px;}
-.seg button{
-  flex:1;padding:9px;border:0;background:transparent;border-radius:7px;
-  font-size:14px;font-weight:700;color:var(--muted);cursor:pointer;
+.expediente .val{
+  font-family:var(--font-display);
+  font-size:38px;font-weight:900;
+  letter-spacing:8px;
+  color:var(--ink);
+  line-height:1;
+  font-variation-settings:'opsz' 144;
 }
-.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08);}
-
-/* selector de avatar */
-.avatars{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 4px;}
-.avatars button{
-  width:46px;height:46px;border-radius:50%;background:var(--soft);
-  font-size:23px;cursor:pointer;border:3px solid transparent;
+.expediente .sub{
+  font-family:var(--font-mono);
+  font-size:9.5px;letter-spacing:1.5px;
+  color:var(--ink-soft);
+  margin-top:6px;
+  text-transform:uppercase;
 }
-.avatars button.on{border-color:var(--primary);background:var(--primary-soft);}
 
-/* lista de jugadores */
-.player{
-  display:flex;align-items:center;gap:10px;padding:11px 4px;
+/* Sección con título de departamento — para agrupar contenido. */
+.section-head{
+  font-family:var(--font-mono);
+  font-size:10px;letter-spacing:3px;
+  color:var(--ink-soft);
+  text-transform:uppercase;
+  text-align:center;
+  margin:10px 0 8px;
+  display:flex;align-items:center;gap:10px;
+  font-weight:600;
+}
+.section-head::before,
+.section-head::after{
+  content:'';flex:1;
   border-bottom:1px solid var(--line);
 }
-.player:last-child{border:0;}
-.av{
-  width:36px;height:36px;border-radius:50%;background:var(--soft);
-  display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;
+
+/* ============================================================
+   BOTONES — estilo "timbre/tampón"
+   ============================================================ */
+.btn{
+  display:block;width:100%;padding:14px 16px;border:0;
+  border-radius:2px;
+  background:var(--ink);
+  color:var(--paper);
+  font-family:var(--font-display);
+  font-size:13px;font-weight:700;
+  letter-spacing:3px;text-transform:uppercase;
+  cursor:pointer;text-align:center;
+  font-variation-settings:'opsz' 18;
+  /* "Base" champagne debajo + sombra — efecto de timbre que se hunde. */
+  box-shadow:
+    0 4px 0 var(--accent),
+    0 6px 12px rgba(26,22,18,.20);
+  transition:transform 100ms ease, box-shadow 160ms ease;
 }
-.player .nm{flex:1;font-weight:600;font-size:15px;}
-.player .st{font-size:12px;color:var(--muted);}
-.player .st.ready{color:var(--green);font-weight:700;}
-.player.off{opacity:.5;}
-.player .kick{
-  width:26px;height:26px;border-radius:6px;flex-shrink:0;line-height:1;
-  background:#fef2f2;color:var(--red);border:1px solid #fecaca;
-  font-size:12px;font-weight:800;cursor:pointer;
+.btn:active{
+  transform:translateY(3px);
+  box-shadow:
+    0 1px 0 var(--accent),
+    0 2px 6px rgba(26,22,18,.20);
+}
+.btn:disabled{
+  opacity:.45;cursor:not-allowed;
+  box-shadow:0 2px 0 var(--accent);
+  transform:none;
+}
+.btn.ghost{
+  background:var(--paper-soft);
+  color:var(--ink);
+  box-shadow:0 0 0 1px var(--ink) inset;
+}
+.btn.ghost:active{
+  box-shadow:0 0 0 1px var(--ink) inset;
+  transform:translateY(1px);
+}
+.btn.danger{
+  background:var(--paper-soft);
+  color:var(--stamp);
+  box-shadow:0 0 0 1.5px var(--stamp) inset;
+}
+.btn.sm{
+  padding:9px 12px;font-size:11px;letter-spacing:2px;
+  box-shadow:
+    0 2px 0 var(--accent),
+    0 3px 6px rgba(26,22,18,.12);
+}
+.btn.sm:active{box-shadow:0 1px 0 var(--accent);}
+.btn.sm.ghost,
+.btn.sm.danger{box-shadow:0 0 0 1px currentColor inset;}
+
+/* ============================================================
+   FORMULARIOS — campos tipo "formulario oficial"
+   ============================================================ */
+.field{margin-bottom:22px;}
+.field label{
+  display:block;
+  font-family:var(--font-mono);
+  font-size:12px;font-weight:700;
+  letter-spacing:2px;
+  color:var(--ink);
+  text-transform:uppercase;
+  margin-bottom:7px;
+}
+.field input{
+  width:100%;padding:11px 12px;
+  border:0;border-bottom:1.5px solid var(--ink);
+  border-radius:0;
+  font-family:var(--font-mono);
+  font-size:16px;font-weight:500;
+  background:transparent;color:var(--ink);
+  letter-spacing:0.5px;
+}
+.field input:focus{
+  outline:0;
+  border-bottom-color:var(--accent);
+  background:var(--accent-soft);
+}
+.field input.code{
+  text-transform:uppercase;letter-spacing:8px;
+  font-family:var(--font-display);
+  font-weight:800;font-size:22px;
 }
 
-/* opción de voto (pantalla de Votación) */
-.voto-op{
-  display:flex;align-items:center;gap:10px;width:100%;
-  padding:11px 4px;font:inherit;color:inherit;text-align:left;
-  background:transparent;border:0;border-bottom:1px solid var(--line);
+/* Segmento tipo "elegir trámite" (crear / unirse) */
+.seg{
+  display:flex;
+  border:1.5px solid var(--ink);
+  border-radius:2px;
+  margin-bottom:18px;
+  overflow:hidden;
+}
+.seg button{
+  flex:1;padding:10px 8px;border:0;
+  background:var(--paper);color:var(--ink-soft);
+  font-family:var(--font-mono);
+  font-size:10px;font-weight:700;
+  letter-spacing:2px;
   cursor:pointer;
+  text-transform:uppercase;
 }
-.voto-op:last-child{border-bottom:0;}
-.voto-op.voto-sel{background:var(--primary-soft);}
+.seg button.on{background:var(--ink);color:var(--paper);}
+.seg button+button{border-left:1.5px solid var(--ink);}
 
-.tag{
-  display:inline-block;background:var(--primary-soft);color:var(--primary-d);
-  font-size:10px;font-weight:800;padding:2px 6px;border-radius:5px;
-  vertical-align:middle;margin-left:4px;
+/* Preview del avatar elegido en el Ingreso — avatar GRANDE + info al
+   costado. Click abre el modal de selección (avatar-picker). */
+.avatar-current{
+  width:100%;
+  display:flex;align-items:center;gap:14px;
+  padding:10px 12px;
+  border:1.5px solid var(--ink);
+  border-radius:2px;
+  background:var(--paper-soft);
+  cursor:pointer;
+  text-align:left;
+  font:inherit;color:inherit;
+  transition:transform 100ms ease, background-color 160ms ease;
 }
-.tag.bot{background:#f1f5f9;color:var(--muted);}
-
-/* código de sala destacado */
-.codebox{
-  text-align:center;background:var(--soft);border:1px dashed var(--line);
-  border-radius:12px;padding:14px;margin-bottom:14px;
+.avatar-current:active{transform:translateY(1px);}
+.avatar-current:hover{background:var(--accent-soft);}
+.avatar-current-info{
+  display:flex;flex-direction:column;gap:3px;
+  min-width:0;flex:1;
 }
-.codebox .lbl{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1px;}
-.codebox .val{font-size:30px;font-weight:800;letter-spacing:6px;}
-
-/* panel dev */
-.dev{
-  margin-top:14px;border:1px dashed var(--line);border-radius:12px;
-  padding:12px;background:var(--soft);
+.avatar-current-info strong{
+  font-family:var(--font-display);
+  font-weight:800;font-size:18px;
+  color:var(--ink);line-height:1.1;
+  font-variation-settings:'opsz' 36;
 }
-.dev .devtitle{font-size:11px;font-weight:800;letter-spacing:1px;color:var(--muted);margin-bottom:8px;}
-.devrow{display:flex;gap:8px;}
-.devrow .btn{flex:1;}
+.avatar-current-info span{
+  font-family:var(--font-mono);
+  font-size:10px;letter-spacing:1.5px;
+  color:var(--ink-soft);
+  text-transform:uppercase;
+}
+.avatar-current::after{
+  content:'→';
+  font-family:var(--font-display);
+  font-size:20px;font-weight:800;
+  color:var(--accent);
+  flex-shrink:0;
+}
 
-/* logo / errores */
+/* Legacy: clases viejas para evitar romper componentes no migrados */
+.avatars{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 4px;}
+.avatars button{
+  width:42px;height:42px;border-radius:2px;
+  background:var(--paper-soft);font-size:22px;cursor:pointer;
+  border:1.5px solid var(--line);
+}
+.avatars button.on{
+  border-color:var(--ink);background:var(--accent-soft);
+}
+
+/* Logo de la pantalla de Ingreso (sello cuadrado) */
 .logo{
-  width:56px;height:56px;border-radius:15px;background:var(--primary);
-  color:var(--on-primary);display:flex;align-items:center;justify-content:center;
-  font-size:27px;font-weight:800;margin:0 auto 12px;
+  width:54px;height:54px;border-radius:2px;
+  background:var(--ink);color:var(--paper);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);
+  font-size:28px;font-weight:900;
+  margin:0 auto 12px;
+  border:2px solid var(--ink);
+  box-shadow:3px 3px 0 var(--accent);
 }
 .error{
-  background:#fef2f2;border:1px solid #fecaca;color:var(--red);
-  font-size:13px;padding:10px 12px;border-radius:10px;margin-bottom:12px;
+  background:var(--stamp-soft);
+  border:1px solid var(--stamp);
+  color:var(--stamp);
+  font-size:12px;padding:9px 11px;border-radius:2px;
+  margin-bottom:12px;
+  font-family:var(--font-mono);
 }
 
-/* conmutador de tema (preview) */
+/* Panel dev — "anexo técnico" disimulado */
+.dev{
+  margin-top:14px;
+  border:1px dashed var(--line-dash);
+  border-radius:2px;
+  padding:10px 12px;
+  background:var(--paper-soft);
+}
+.dev .devtitle{
+  font-family:var(--font-mono);
+  font-size:9.5px;font-weight:700;
+  letter-spacing:2px;
+  color:var(--ink-soft);
+  margin-bottom:8px;
+  text-transform:uppercase;
+}
+.devrow{display:flex;gap:6px;}
+.devrow .btn{flex:1;}
+
+/* Conmutador de tema — queda obsoleto con el sistema unificado, pero
+   mantengo los estilos por si querés exponer "variantes" en el futuro. */
 .themebar{display:flex;gap:6px;align-items:center;justify-content:center;padding:8px;}
-.themebar span{font-size:11px;color:var(--muted);}
+.themebar span{font-size:10px;color:var(--ink-soft);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:1.5px;}
 .themebar button{
-  border:1px solid var(--line);background:var(--card);border-radius:999px;
-  padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;color:var(--muted);
+  border:1px solid var(--line);background:var(--paper);
+  border-radius:2px;padding:4px 8px;font-size:10px;font-weight:700;
+  cursor:pointer;color:var(--ink-soft);
+  font-family:var(--font-mono);text-transform:uppercase;letter-spacing:1px;
 }
-.themebar button.on{border-color:var(--primary);color:var(--primary-d);background:var(--primary-soft);}
+.themebar button.on{border-color:var(--ink);color:var(--ink);background:var(--accent-soft);}
 
-/* ---- desafíos (Paso 2) ---- */
+/* ============================================================
+   COMPONENTES JUEGO — pantallas no migradas todavía
+   (las uso para no romper resultados/desafío/votación mientras
+    los migramos en próximos turnos)
+   ============================================================ */
 
-/* número grande de resultado */
-.big{text-align:center;padding:16px 0;}
-.big .lbl{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1px;}
-.big .val{font-size:34px;font-weight:800;}
-.up{color:var(--green);}
-.down{color:var(--red);}
+/* Big number (Resultado): número grande con etiqueta */
+.big{text-align:center;padding:14px 0;}
+.big .lbl{
+  font-family:var(--font-mono);
+  font-size:10px;font-weight:700;
+  color:var(--ink-soft);letter-spacing:2px;
+  text-transform:uppercase;
+}
+.big .val{
+  font-family:var(--font-display);
+  font-size:36px;font-weight:900;
+  color:var(--ink);
+}
+.up{color:var(--approved);}
+.down{color:var(--stamp);}
 
-/* avatar grande */
+/* Avatar grande */
 .av-xl{
-  width:80px;height:80px;border-radius:50%;background:var(--soft);
+  width:80px;height:80px;border-radius:2px;background:var(--paper-soft);
+  border:1.5px solid var(--line);
   display:flex;align-items:center;justify-content:center;font-size:42px;
   margin:12px auto;
 }
 
-/* decisión binaria */
-.choices{display:flex;gap:12px;margin:14px 0;}
+/* Decisión binaria (Desafío) */
+.choices{display:flex;gap:10px;margin:14px 0;}
 .choice{
-  flex:1;border:2px solid var(--line);border-radius:14px;padding:18px 8px;
-  text-align:center;cursor:pointer;background:var(--card);
+  flex:1;border:1.5px solid var(--ink);border-radius:2px;
+  padding:16px 8px;text-align:center;cursor:pointer;
+  background:var(--paper-soft);
 }
-.choice:active{transform:scale(.98);}
-.choice .ic{font-size:30px;}
-.choice .t1{font-weight:800;margin-top:6px;font-size:15px;}
-.choice .t2{font-size:12px;color:var(--muted);}
-.choice.sel-g{border-color:var(--green);background:#f0fdf4;}
-.choice.sel-r{border-color:var(--red);background:#fef2f2;}
+.choice:active{transform:translateY(1px);}
+.choice .ic{font-size:28px;}
+.choice .t1{font-family:var(--font-display);font-weight:800;margin-top:6px;font-size:14px;letter-spacing:1px;text-transform:uppercase;}
+.choice .t2{font-size:11px;color:var(--ink-soft);font-family:var(--font-mono);letter-spacing:1px;text-transform:uppercase;}
+.choice.sel-g{border-color:var(--approved);background:#eaf2dd;box-shadow:3px 3px 0 var(--approved);}
+.choice.sel-r{border-color:var(--stamp);background:var(--stamp-soft);box-shadow:3px 3px 0 var(--stamp);}
 
-/* posición en el marcador */
+/* Opción de voto (votación) — adaptado al sistema */
+.voto-op{
+  display:flex;align-items:center;gap:10px;width:100%;
+  padding:10px 8px;font:inherit;color:inherit;text-align:left;
+  background:transparent;border:0;
+  border-bottom:1px dashed var(--line);
+  border-radius:2px;
+  cursor:pointer;
+  font-family:var(--font-display);
+  transition:background-color 220ms ease,opacity 220ms ease,transform 120ms ease;
+}
+.voto-op:last-child{border-bottom:0;}
+.voto-op:active{transform:scale(.98);}
+.voto-op .av{
+  width:36px;height:36px;border-radius:2px;background:var(--paper-soft);
+  border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;
+}
+.voto-op .nm{flex:1;font-weight:600;font-size:15px;}
+.voto-op .st{font-family:var(--font-mono);font-size:10px;letter-spacing:1.5px;color:var(--ink-soft);text-transform:uppercase;}
+.voto-op .st.ready{color:var(--approved);font-weight:700;}
+.voto-op.voto-sel{background:var(--accent-soft);}
+.voto-op.voto-otros{opacity:.45;}
+.voto-op .st.ready{
+  animation:votoIn 240ms cubic-bezier(.2,.7,.2,1);
+}
+@keyframes votoIn{
+  from{opacity:0;transform:translateX(8px);}
+  to  {opacity:1;transform:translateX(0);}
+}
+
+/* Compatibilidad: estilos legacy (.codebox, .card, .player) — los dejo
+   apuntando al sistema nuevo para que las pantallas viejas se vean
+   coherentes hasta que las migremos. */
+.card{
+  background:var(--paper-soft);
+  border:1px solid var(--line);border-radius:2px;
+  padding:14px;margin-bottom:10px;
+}
+.card.pad0{padding:4px 14px;}
+.codebox{
+  text-align:center;background:var(--paper-soft);border:1.5px solid var(--ink);
+  border-radius:2px;padding:14px;margin-bottom:14px;
+}
+.codebox .lbl{
+  font-family:var(--font-mono);font-size:10px;font-weight:700;
+  color:var(--ink-soft);letter-spacing:2.5px;text-transform:uppercase;
+}
+.codebox .val{
+  font-family:var(--font-display);font-size:30px;font-weight:900;
+  letter-spacing:6px;color:var(--ink);
+  font-variation-settings:'opsz' 144;
+}
+.player{
+  display:flex;align-items:center;gap:10px;padding:10px 4px;
+  border-bottom:1px dashed var(--line);
+}
+.player:last-child{border:0;}
+.player .av{
+  width:36px;height:36px;border-radius:2px;background:var(--paper-soft);
+  border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;
+}
+.player .nm{flex:1;font-family:var(--font-display);font-weight:600;font-size:15px;}
+.player .st{font-family:var(--font-mono);font-size:10px;letter-spacing:1.5px;color:var(--ink-soft);text-transform:uppercase;}
+.player .st.ready{color:var(--approved);font-weight:700;}
+.player.off{opacity:.45;}
+.player .kick{
+  width:24px;height:24px;border-radius:2px;flex-shrink:0;line-height:1;
+  background:var(--stamp-soft);color:var(--stamp);border:1px solid var(--stamp);
+  font-size:10px;font-weight:800;cursor:pointer;font-family:var(--font-mono);
+}
 .player .pos{
-  font-weight:800;width:20px;text-align:center;color:var(--muted);
-  flex-shrink:0;
+  font-weight:800;width:20px;text-align:center;color:var(--ink-soft);
+  font-family:var(--font-mono);flex-shrink:0;
+}
+
+/* ============================================================
+   Intro dramático (briefing / resultado / marcador / final)
+   ============================================================ */
+:host.intro,
+app-intro.intro{
+  display:flex;flex-direction:column;flex:1;min-height:0;
+}
+
+.intro .beat{
+  opacity:0;
+  transform:translateY(20px);
+  animation:beatIn 420ms cubic-bezier(.2,.7,.2,1) both;
+  animation-delay:calc(var(--i, 0) * 0.35s);
+}
+.intro h1.beat{
+  transform:scale(.92);
+  filter:blur(8px);
+  animation:beatInTitle 700ms cubic-bezier(.2,.7,.2,1) both;
+}
+.intro.skipped .beat,
+.intro.skipped h1.beat{
+  animation:none;
+  opacity:1;
+  transform:none;
+  filter:none;
+}
+@keyframes beatIn{
+  0%   { opacity:0; transform:translateY(20px); }
+  100% { opacity:1; transform:translateY(0); }
+}
+@keyframes beatInTitle{
+  0%   { opacity:0; transform:scale(.92); filter:blur(8px); }
+  60%  { opacity:1; }
+  100% { opacity:1; transform:scale(1);   filter:blur(0); }
 }

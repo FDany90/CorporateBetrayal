@@ -21,7 +21,7 @@
       } @else {
         <p class="muted-note">⏳ Tu colega te va a llamar — esperá</p>
       }
-      <div class="av-xl">{{ colega.avatar }}</div>
+      <app-avatar [id]="colega.avatar" [size]="80" />
       <h2>{{ colega.nickname }}</h2>
       <p>Tras la llamada, decidí en secreto qué hacer con el bono:</p>
 

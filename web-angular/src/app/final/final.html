@@ -1,4 +1,8 @@
-<div class="screen">
+<!-- Pantalla Final · "CIRCULAR OFICIAL"
+     El shell (topbar + appheader verde) se mantiene genérico-corporativo
+     porque es parte del chiste. Lo que entra por encima como documento
+     escaneado es la pieza distintiva. Ver final.ts para la coreografía. -->
+<div class="screen final-screen">
   <div class="topbar">
     <span class="brand">
       SINERGIA<span class="dot">·</span>CORP
@@ -7,33 +11,115 @@
   </div>
   <div class="appheader">Aprobaciones · Evaluación de Desempeño</div>
 
-  <div class="content">
-    <h1>Resultados finales</h1>
-    <p class="muted-note">Terminó la jornada. Así quedó el escalafón.</p>
+  <app-intro [totalMs]="totalMs()">
+    <div class="content doc-scroll">
+      <!-- El documento. La clase .doc aplica papel crema + grano + tipos. -->
+      <article class="doc">
+        <!-- ENCABEZADO: folio + departamento + marca grande del documento.
+             Beat 0: es lo primero que se "imprime". -->
+        <header class="doc-head beat" [style.--i]="beatHead">
+          <div class="folio">Nº 2026-Q2-EVAL-0042</div>
+          <div class="dept">DEPARTAMENTO DE RECURSOS HUMANOS</div>
+          <div class="doc-brand">SINERGIA·CORP</div>
+          <div class="divider"></div>
+        </header>
 
-    <div class="card pad0">
-      @for (p of ranking(); track p.id; let i = $index) {
-        <div class="player">
-          <span class="pos">{{ i + 1 }}</span>
-          <div class="av">{{ p.avatar }}</div>
-          <span class="nm">
-            {{ p.nickname }}
-            @if (p.id === miId()) { <span class="tag">vos</span> }
-            <span class="tag">{{ titulo(i) }}</span>
-          </span>
-          <span class="st">💼 {{ p.influence }}</span>
-        </div>
+        <!-- TÍTULO: "CIRCULAR OFICIAL / Evaluación trimestral". Beat 1. -->
+        <hgroup class="doc-title beat" [style.--i]="beatTitle">
+          <p class="kicker">CIRCULAR OFICIAL · INTERNA</p>
+          <h1>Evaluación<br/>de Desempeño</h1>
+        </hgroup>
+
+        <!-- BAJADA: párrafo introductorio. Beat 2. -->
+        <p class="doc-intro beat" [style.--i]="beatIntro">
+          Por la presente, esta Dirección informa el escalafón resultante de
+          la jornada y reconoce públicamente al colaborador destacado:
+        </p>
+
+        <!-- BLOQUE GANADOR (#1). Aparece tarde (beatGanador) pero visualmente
+             está arriba en el documento — refuerza que es la conclusión que
+             "se imprimió al final" pero se lee primero. -->
+        <section class="winner beat" [style.--i]="beatGanador()">
+          <p class="winner-kicker">— EMPLEADO DEL MES —</p>
+          <div class="winner-card">
+            <app-avatar class="winner-av" [id]="ganador().avatar" [size]="84" />
+            <div class="winner-name">
+              {{ ganador().nickname }}
+              @if (ganador().id === miId()) { <span class="vos-tag">vos</span> }
+            </div>
+            <div class="winner-influence">
+              <span class="lbl">Influencia acumulada</span>
+              <span class="val">{{ ganador().influence }}</span>
+            </div>
+          </div>
+          <!-- Sello rojo. Tiene su propia variable de delay, calculada
+               desde TS para que caiga DESPUÉS del fade del bloque ganador.
+               No usa el sistema de .beat porque su animación es distinta
+               (rotate + scale + overshoot) y no debe cancelarse con .skip
+               de cualquier forma — la cancela solo la clase .skipped. -->
+          <div class="stamp" [style.--stamp-delay.ms]="stampDelayMs()">
+            ASCENSO APROBADO
+          </div>
+        </section>
+
+        <!-- PLANTILLA GENERAL (#2 .. #N). La revelamos del peor al mejor
+             para crear suspenso: la última fila del DOM (que es la #2,
+             la mejor de la plantilla) tiene el beat MÁS BAJO. -->
+        <section class="plantilla">
+          <header class="section-head beat" [style.--i]="beatPlantillaHead">
+            Plantilla general
+          </header>
+
+          @for (p of plantilla(); track p.id; let i = $index) {
+            <div class="row beat" [style.--i]="beatFila(i)">
+              <span class="row-puesto">{{ p.puesto.toString().padStart(2, '0') }}</span>
+              <app-avatar [id]="p.avatar" [size]="32" />
+              <span class="row-name">
+                {{ p.nickname }}
+                @if (p.id === miId()) { <span class="vos-tag">vos</span> }
+              </span>
+              <span class="row-dots"></span>
+              <span class="row-inf">💼 {{ p.influence }}</span>
+            </div>
+            <!-- Nota al pie del último puesto: "en proceso de mejora". -->
+            @if (i === plantilla().length - 1) {
+              <p class="proceso-mejora">
+                <em>{{ p.nickname }}</em> · en proceso de mejora
+              </p>
+            }
+          }
+        </section>
+
+        <!-- FIRMA: cierra el documento, aparece después del sello. -->
+        <footer class="doc-foot beat" [style.--i]="beatFirma()">
+          <div class="firma-line"></div>
+          <p>
+            Firmado:<br/>
+            <strong>Dirección de RR. HH.</strong>
+          </p>
+          <p class="extension">
+            Por consultas, comunicarse al interno 0042
+          </p>
+        </footer>
+      </article>
+    </div>
+
+    <!-- ACTIONBAR: queda en el shell, sobre fondo del shell (no del papel).
+         El botón es el último beat — un beat más después de la firma. -->
+    <div class="actionbar">
+      @if (yo()?.acted) {
+        <p class="muted-note">
+          Esperando a los demás… ({{ listos() }}/{{ total() }})
+        </p>
+      } @else {
+        <button
+          class="btn final-btn beat"
+          [style.--i]="beatFirma() + 1"
+          (click)="volver()"
+        >
+          VOLVER AL LOBBY
+        </button>
       }
     </div>
-  </div>
-
-  <div class="actionbar">
-    @if (yo()?.acted) {
-      <p class="muted-note">
-        Esperando a los demás… ({{ listos() }}/{{ total() }})
-      </p>
-    } @else {
-      <button class="btn" (click)="volver()">VOLVER AL LOBBY</button>
-    }
-  </div>
+  </app-intro>
 </div>

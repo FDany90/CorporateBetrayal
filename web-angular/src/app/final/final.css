@@ -1,0 +1,214 @@
+/* ============================================================
+   Pantalla Final · "CIRCULAR OFICIAL"
+   ============================================================
+   Estilos LOCALES (component-scoped) — solo lo específico del momento
+   teatral final: "mesa oscura" de fondo, papel con grano fuerte y sombra
+   dramática, bloque del ganador, sello rojo cayendo, botón ceremonial.
+
+   Las primitivas que se usan acá (.row, .doc-head, .vos-tag, .section-head,
+   .kicker, .divider) viven en styles.css global y se comparten con todas
+   las pantallas. Lo que está acá no debería repetir esas reglas.
+   ============================================================ */
+
+/* La "mesa" oscura sobre la que cae el documento — reemplaza el papel
+   del shell SOLO en esta pantalla. */
+.final-screen { background: var(--desk); }
+.final-screen .content { background: var(--desk); padding: 22px 12px 28px; }
+
+/* ------ EL DOCUMENTO ------
+   Borde casi recto, sombra fuerte editorial, papel crema con grano SVG
+   inline (sin assets externos = sin red extra). Es el único lugar del
+   juego con grano + sombra de "mesa". */
+.doc {
+  position: relative;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 26px 20px 22px;
+  border-radius: 2px;
+  box-shadow:
+    0 18px 36px rgba(0, 0, 0, 0.50),
+    0 3px 8px rgba(0, 0, 0, 0.30);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.10 0 0 0 0 0.09 0 0 0 0 0.08 0 0 0 0 0.08 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-blend-mode: multiply;
+}
+
+/* Borde interno fino — convención de "documento oficial". */
+.doc::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(26, 22, 18, 0.18);
+  pointer-events: none;
+  border-radius: 1px;
+}
+
+/* Override local del encabezado: la marca del documento es más grande
+   acá (es la firma de la pieza), no la del shell. */
+.doc .doc-head .doc-brand { font-size: 26px; }
+
+/* ------ TÍTULO grande del documento ------ */
+.doc-title { margin-bottom: 18px; }
+.doc-title h1 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 38px;
+  line-height: 0.98;
+  letter-spacing: -1px;
+  color: var(--ink);
+  margin: 0;
+  font-variation-settings: 'opsz' 144;
+}
+
+.doc-intro {
+  font-size: 12.5px;
+  color: var(--ink);
+  margin: 0 0 22px;
+}
+
+/* ------ GANADOR ------ */
+.winner {
+  position: relative;
+  margin: 0 -4px 26px;
+  padding: 18px 16px 22px;
+  background: linear-gradient(180deg,
+    rgba(176, 141, 61, 0.12),
+    rgba(176, 141, 61, 0.03));
+  border-top: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+  overflow: visible;
+}
+.winner-kicker {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: var(--ink);
+  text-align: center;
+  margin: 0 0 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.winner-card { text-align: center; }
+.winner-av {
+  font-size: 64px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.winner-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 30px;
+  letter-spacing: -0.5px;
+  margin-bottom: 14px;
+  color: var(--ink);
+  font-variation-settings: 'opsz' 144;
+}
+.winner-influence {
+  display: inline-block;
+  border: 1.5px solid var(--ink);
+  padding: 7px 18px 9px;
+  border-radius: 1px;
+  background: rgba(245, 239, 228, 0.7);
+}
+.winner-influence .lbl {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  color: var(--ink-soft);
+  margin-bottom: 2px;
+  text-transform: uppercase;
+}
+.winner-influence .val {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 32px;
+  line-height: 1;
+  color: var(--accent);
+}
+
+/* ------ SELLO "ASCENSO APROBADO" ------ */
+.stamp {
+  position: absolute;
+  top: 38%;
+  right: -8px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 2.5px;
+  color: var(--stamp);
+  border: 3px double var(--stamp);
+  padding: 6px 12px 7px;
+  background: rgba(245, 239, 228, 0.45);
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0;
+  transform: rotate(-14deg) scale(1);
+  animation: stampIn 720ms cubic-bezier(0.18, 0.85, 0.30, 1.10) forwards;
+  animation-delay: var(--stamp-delay, 0ms);
+  box-shadow:
+    0 0 0 2px rgba(139, 42, 35, 0.06),
+    1px 1px 0 rgba(139, 42, 35, 0.20);
+}
+@keyframes stampIn {
+  0%   { opacity: 0; transform: scale(2.4) rotate(-30deg); }
+  55%  { opacity: 1; transform: scale(0.92) rotate(-9deg); }
+  78%  {              transform: scale(1.06) rotate(-15deg); }
+  100% { opacity: 1; transform: scale(1)    rotate(-14deg); }
+}
+.intro.skipped .stamp {
+  animation: none;
+  opacity: 1;
+  transform: rotate(-14deg) scale(1);
+}
+
+/* "En proceso de mejora" — el remate irónico bajo el último puesto. */
+.proceso-mejora {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-align: right;
+  color: var(--stamp);
+  letter-spacing: 0.5px;
+  margin: 6px 2px 0 0;
+  font-style: italic;
+}
+
+/* ------ FIRMA ------ */
+.doc-foot {
+  margin-top: 8px;
+  text-align: right;
+  font-size: 11px;
+  color: var(--ink);
+}
+.doc-foot .firma-line {
+  width: 130px;
+  height: 1px;
+  background: var(--ink);
+  margin: 14px 0 6px auto;
+}
+.doc-foot strong {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+}
+.doc-foot .extension {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 1px;
+  color: var(--ink-soft);
+  margin-top: 12px;
+  text-transform: uppercase;
+}
+
+/* ------ ACTIONBAR (override) y BOTÓN FINAL ------ */
+.final-screen .actionbar {
+  background: var(--desk);
+  border-top: 0;
+  padding-top: 18px;
+}
+.final-screen .actionbar .muted-note {
+  color: #a89c8e;
+}
+
+/* El botón del Final es el mismo .btn global; solo le agregamos algo
+   más de tamaño y peso ceremonial. */
+.final-btn { font-size: 14px; padding: 16px; }

@@ -3,8 +3,10 @@
 > Documento de traspaso. Si abrís el proyecto en otra PC o en una sesión
 > nueva (de Claude o tuya), **empezá por acá**.
 
-**Última actualización:** 2026-05-18 · **Hito actual:** Paso 3 (motor de
-rondas) completo · 2 minijuegos · cliente en Angular
+**Última actualización:** 2026-05-20 · **Hito actual:** Paso 3 (motor de
+rondas) completo · 2 minijuegos · cliente en Angular · lenguaje visual
+editorial aplicado a Ingreso/Lobby/Final · sistema de avatars con 15
+SVGs y modal de selección
 
 ---
 
@@ -59,7 +61,7 @@ Roadmap del [GDD §10](GDD.md):
 | 2 — Bucle base (El Botón del Bonus) | ✅ completo |
 | **3 — Motor de rondas + marcador + pantalla final** | ✅ **completo (hito actual)** |
 | 4 — Resto del catálogo de minijuegos | 🔄 en curso (2 de 13) |
-| 5 — Pulido (estética, onboarding) | pendiente |
+| 5 — Pulido (estética, onboarding) | 🔄 en curso (lenguaje editorial aplicado a 3 pantallas) |
 | 6 — Deploy y post-MVP | pendiente |
 
 > Además del roadmap, entre el Paso 2 y el 3 se migró el cliente web de
@@ -72,6 +74,22 @@ Roadmap del [GDD §10](GDD.md):
   `server/src/config.ts`), marcador entre rondas y pantalla final.
 - **2 minijuegos:** *El Botón del Bonus* (individual, llamadas 1-a-1 en
   tandas sin repetir pareja) y *El Recorte* (grupal, votación).
+
+**Lenguaje visual "Editorial Sinergia"** aplicado a tres pantallas:
+- **Ingreso** — formulario con tipografía editorial (Fraunces + JetBrains Mono),
+  selector de avatar grande clickeable que abre un modal pantalla-completa.
+- **Lobby** — "memorándum interno" con folio, expediente (código de sala
+  grande), planilla de convocados con puntos guía, anexo técnico para bots.
+- **Final** — "circular oficial" con papel crema, grano, sombra dramática,
+  sello rojo "ASCENSO APROBADO" cayendo al final con scale+rotate.
+- **Briefing** — sistema de "intro dramática" con beats escalonados (350ms
+  entre cada uno) + tap-para-saltar; reusable en otras pantallas.
+
+**Sistema de avatars:** 15 ilustraciones SVG cartoon (cabeza grande, cuello
+corto, marco redondo) con personalidades reconocibles (Dirección, Sistemas,
+RR.HH., Seguridad, Coach, Visionario, Quemado, Jefe, Nerd, Viejo, Hippie,
+Remera, Finanzas, Legales, Diseño). Componente `<app-avatar>` reusable +
+modal `<app-avatar-picker>` pantalla-completa.
 
 Todo jugable solo con bots.
 
@@ -124,9 +142,13 @@ Detalle de cada archivo: [codigo.md](codigo.md).
 - **MVP:** catálogo de 6 individuales + 7 grupales; estructura de rondas
   **parametrizable** (`config.ts`) — por defecto 4 rondas I-G-I-G; **un solo
   recurso** (Influencia); **sin** Misión Personal ni Sospecha (post-MVP).
-- **Visual:** "suite de apps corporativas" (empresa ficticia *SINERGIA CORP*),
-  **Mobile First**; hay 2 paletas conmutables (Sinergia Azul / Verde Acción) —
-  la definitiva aún no se eligió.
+- **Visual:** lenguaje **"Editorial Sinergia"** — sátira corporativa con
+  estética de documentos internos (papel crema, tinta carbón, acento champagne,
+  rojo apagado para el sello). Fonts: **Fraunces** (display, serif editorial)
+  + **JetBrains Mono** (body, "sistema interno"). **Mobile First**.
+  Las paletas conmutables Azul/Verde se retiraron — paleta única definitiva.
+  Intensidad modulada: pantallas funcionales con papel claro; pantalla Final
+  con grano + sombra dramática + sello rojo (pico teatral del juego).
 - **Teams:** integración solo por **instrucciones manuales** (la web dice a
   quién llamar; sin API de Teams).
 - **Minijuegos enchufables:** implementado. Cada minijuego es una
@@ -154,12 +176,16 @@ Detalle de cada archivo: [codigo.md](codigo.md).
 
 ## 9. Próximos pasos
 
-1. **Paso 4** — Resto del catálogo: más minijuegos, **uno por incremento**.
+1. **Migrar el resto de pantallas al lenguaje editorial.** Aplicar el sistema
+   a Briefing (texto), Votación, Desafío, Resultado, Marcador, Reunión. Las
+   primitivas globales (`.doc-head`, `.row`, `.expediente`, `.section-head`,
+   `.vos-tag`) ya están en `styles.css`. Hoy se ven coherentes pero no
+   tan distintivas como Ingreso/Lobby/Final.
+2. **Paso 4** — Resto del catálogo: más minijuegos, **uno por incremento**.
    Quedan 5 individuales y 6 grupales. Un minijuego de un *kind* ya existente
    (`llamadas` / `votacion`) no toca el motor.
-2. **Pendiente del Paso 3** — desempate por **votación directa** en la pantalla
+3. **Pendiente del Paso 3** — desempate por **votación directa** en la pantalla
    final (hoy, si hay empate en el #1, comparten puesto).
-3. **Paso 5** — Pulido visual (elegir paleta definitiva), onboarding/guía.
 4. **Deploy** — hosting estático (web) + Railway/Fly (server); habilita probar
    en celulares reales. Se puede adelantar cuando se quiera mostrar a otros.
 
@@ -170,5 +196,6 @@ Detalle de cada archivo: [codigo.md](codigo.md).
 
 ## 10. Pendientes de Dani (revisión)
 
-- Elegir la **paleta definitiva** entre las 2 propuestas.
+- ~~Elegir la **paleta definitiva** entre las 2 propuestas.~~ ✅ resuelto:
+  paleta editorial única (papel crema + tinta + champagne + rojo).
 - Revisar el prototipo HTML y los wireframes con ojo de detalle.

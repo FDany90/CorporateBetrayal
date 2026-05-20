@@ -21,9 +21,10 @@
         <button
           class="voto-op"
           [class.voto-sel]="miVoto() === p.id"
+          [class.voto-otros]="miVoto() && miVoto() !== p.id"
           (click)="votar(p.id)"
         >
-          <div class="av">{{ p.avatar }}</div>
+          <app-avatar [id]="p.avatar" [size]="40" />
           <span class="nm">{{ p.nickname }}</span>
           @if (miVoto() === p.id) {
             <span class="st ready">✓ tu voto</span>

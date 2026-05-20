@@ -4,7 +4,19 @@ import { roundRobinSchedule, ParejaPlana } from "../emparejador";
 import { CONFIG_DEFECTO, GameConfig } from "../config";
 import { CHALLENGE_REGISTRY, ChallengeDefinition } from "../challenges/registry";
 
-const AVATARS = ["🧑‍💼", "👩‍💼", "🧑‍💻", "👨‍💼", "👩‍💻", "🧔"];
+// Ids del catálogo de avatares — los dibuja el cliente con SVGs (ver
+// web-angular/src/app/avatars.ts). El server solo persiste el id como
+// string opaco; no necesita saber qué dibujo le corresponde.
+const AVATARS = [
+  // Empleados "estándar"
+  "emp-direccion", "emp-sistemas",  "emp-rrhh",      "emp-seguridad",
+  // Personalidades extremas (sátira)
+  "emp-coach",     "emp-visionario","emp-quemado",   "emp-jefe",
+  // Tipos de oficinista
+  "emp-nerd",      "emp-viejo",     "emp-hippie",    "emp-remera",
+  // Placeholders pendientes de SVG
+  "emp-finanzas",  "emp-legales",   "emp-disenio",
+];
 const BOT_NAMES = [
   "Ana", "Beto", "Caro", "Elena", "Fede", "Gastón",
   "Inés", "Lucía", "Marcos", "Nadia", "Omar",

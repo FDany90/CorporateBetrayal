@@ -1,28 +1,34 @@
 <!-- Ruteo por estado del juego.
      `as estado` ata el valor no-nulo del signal a una variable local.
-     Si hay sala: según status/phase elegimos la pantalla. Si no: Ingreso. -->
+     Si hay sala: según status/phase elegimos la pantalla. Si no: Ingreso.
+
+     Cada pantalla va envuelta en `<div class="page" @pageAnim>`. El wrapper:
+       - hereda el layout flex de `.app` (ver styles.css `.page`),
+       - dispara la animación `pageAnim` (animations.ts) cuando entra al DOM,
+         es decir, cada vez que cambia la rama del @if/@else if.
+     -->
 <main class="app">
   @if (juego.estado(); as estado) {
     @if (estado.status === 'lobby') {
-      <app-lobby />
+      <div class="page" @pageAnim><app-lobby /></div>
     } @else if (estado.phase === 'briefing') {
-      <app-briefing />
+      <div class="page" @pageAnim><app-briefing /></div>
     } @else if (estado.phase === 'calls') {
-      <app-desafio />
+      <div class="page" @pageAnim><app-desafio /></div>
     } @else if (estado.phase === 'meeting') {
-      <app-reunion />
+      <div class="page" @pageAnim><app-reunion /></div>
     } @else if (estado.phase === 'vote') {
-      <app-votacion />
+      <div class="page" @pageAnim><app-votacion /></div>
     } @else if (estado.phase === 'result') {
-      <app-resultado />
+      <div class="page" @pageAnim><app-resultado /></div>
     } @else if (estado.phase === 'marcador') {
-      <app-marcador />
+      <div class="page" @pageAnim><app-marcador /></div>
     } @else if (estado.phase === 'final') {
-      <app-final />
+      <div class="page" @pageAnim><app-final /></div>
     } @else {
-      <app-lobby />
+      <div class="page" @pageAnim><app-lobby /></div>
     }
   } @else {
-    <app-ingreso />
+    <div class="page" @pageAnim><app-ingreso /></div>
   }
 </main>

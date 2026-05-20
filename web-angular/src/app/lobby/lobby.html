@@ -1,43 +1,59 @@
+<!-- Lobby como "MEMORÁNDUM INTERNO" — convocatoria a reunión.
+     Aplica el sistema editorial: membrete con folio, código de sala
+     como número de expediente, lista de jugadores como planilla de
+     convocados, botones como sellos. -->
 <div class="screen">
   <div class="topbar">
     <span class="brand">
       SINERGIA<span class="dot">·</span>CORP
     </span>
-    <span class="pill">Sala {{ code() }}</span>
+    <span class="pill">Expte. {{ code() }}</span>
   </div>
-  <div class="appheader">Intranet · Lobby</div>
+  <div class="appheader">Convocatoria interna · Plantilla</div>
 
   <div class="content">
-    <div class="codebox">
-      <div class="lbl">CÓDIGO DE SALA</div>
+    <!-- Membrete del memo: folio + departamento + tipo de documento. -->
+    <header class="doc-head">
+      <div class="folio">MEMO Nº {{ code() }}-{{ total() }}</div>
+      <div class="dept">Departamento de Coordinación de Plantilla</div>
+      <div class="divider"></div>
+    </header>
+
+    <!-- Número de expediente / código de sala — el dato más importante
+         que el anfitrión necesita comunicar al resto. -->
+    <div class="expediente">
+      <div class="lbl">Código de convocatoria</div>
       <div class="val">{{ code() }}</div>
+      <div class="sub">Compartilo con tus colegas</div>
     </div>
 
-    <h2>Plantilla {{ total() }} / 12 · {{ listos() }} fichados</h2>
+    <!-- Lista de convocados — planilla burocrática. -->
+    <div class="section-head">
+      Plantilla convocada · {{ listos() }} / {{ total() }} fichados
+    </div>
 
-    <!-- @for repite una fila por jugador. track p.id: identifica cada uno
-         para que Angular reuse el DOM en vez de recrearlo en cada cambio. -->
-    <div class="card pad0">
+    <div>
       @for (p of jugadores(); track p.id) {
-        <!-- [class.off] atenúa la fila si el jugador está desconectado. -->
-        <div class="player" [class.off]="!p.connected">
-          <div class="av">{{ p.avatar }}</div>
-          <span class="nm">
+        <div class="row" [class.off]="!p.connected">
+          <app-avatar [id]="p.avatar" [size]="36" />
+          <span class="row-name">
             {{ p.nickname }}
             @if (p.id === miId()) { <span class="tag">vos</span> }
-            @if (p.id === hostId()) { <span class="tag">anfitrión</span> }
+            @if (p.id === hostId()) { <span class="tag host">anfitrión</span> }
             @if (p.isBot) { <span class="tag bot">bot</span> }
           </span>
-          <span class="st" [class.ready]="p.ready">
+          <span class="row-dots"></span>
+          <span class="row-status"
+                [class.ready]="p.ready && p.connected"
+                [class.danger]="!p.connected">
             @if (!p.connected) {
-              desconectado
+              ausente
             } @else if (p.ready) {
               ✓ fichado
             } @else {
-              · sin fichar
+              sin fichar
             }
           </span>
-          <!-- Botón de expulsar: solo lo ve el anfitrión, y no en su fila. -->
           @if (soyHost() && p.id !== miId()) {
             <button
               class="kick"
@@ -51,8 +67,9 @@
       }
     </div>
 
+    <!-- Anexo técnico: panel dev de bots. -->
     <div class="dev">
-      <div class="devtitle">🧪 MODO DESARROLLO</div>
+      <div class="devtitle">Anexo técnico · Personal ficticio</div>
       <div class="devrow">
         <button class="btn ghost sm" (click)="agregarBots(1)">+ 1 bot</button>
         <button class="btn ghost sm" (click)="agregarBots(3)">+ 3 bots</button>
@@ -68,14 +85,13 @@
   </div>
 
   <div class="actionbar">
-    <!-- Solo el anfitrión ve el botón de empezar; el resto, un aviso. -->
     @if (soyHost()) {
       <button class="btn" [disabled]="!puedeEmpezar()" (click)="empezar()">
         {{ textoEmpezar() }}
       </button>
     } @else {
       <p class="muted-note">
-        Esperando a que el anfitrión empiece la partida…
+        Esperando a que el anfitrión inicie la sesión…
       </p>
     }
     <div class="devrow">

@@ -1,34 +1,61 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { GameService } from '../game.service';
-import { ThemeSwitcher } from '../theme-switcher/theme-switcher';
+import { Avatar } from '../avatar/avatar';
+import { AvatarPicker } from '../avatar-picker/avatar-picker';
+import { AVATAR_BY_ID, AVATAR_DEFAULT } from '../avatars';
 import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
-
-const AVATARS = ['🧑‍💼', '👩‍💼', '🧑‍💻', '👨‍💼', '👩‍💻', '🧔'];
 
 /**
  * Pantalla de ingreso: crear una sala nueva o unirse a una existente.
  *
- * `imports`: este componente es standalone, así que declara lo que usa en
- * su template — FormsModule (para [ngModel]) y el componente ThemeSwitcher.
+ * `imports`: declara lo que usa el template — FormsModule (para [ngModel]),
+ * Avatar (preview del avatar elegido) y AvatarPicker (modal de selección).
+ *
+ * Flujo del avatar:
+ *  - Por defecto, el avatar es `AVATAR_DEFAULT` (primer empleado del catálogo).
+ *  - El usuario toca el preview grande → se abre el modal `AvatarPicker`.
+ *  - El modal emite `(pick)` con el id elegido → se guarda en `avatar`.
+ *  - Cancelar el modal (tap afuera o ✕) no cambia el id actual.
  */
 @Component({
   selector: 'app-ingreso',
-  imports: [FormsModule, ThemeSwitcher],
+  imports: [FormsModule, Avatar, AvatarPicker],
   templateUrl: './ingreso.html',
 })
 export class Ingreso {
   /** El servicio compartido: la pantalla le pide crear/unirse a sala. */
   private readonly juego = inject(GameService);
 
-  /** Lista de avatares para el selector. readonly: no cambia. */
-  readonly avatares = AVATARS;
-
   /* --- estado del formulario (signals: la UI reacciona a cada cambio) --- */
   readonly modo = signal<'crear' | 'unirse'>('crear');
   readonly nickname = signal('');
   readonly code = signal('');
-  readonly avatar = signal(AVATARS[0]);
+  readonly avatar = signal(AVATAR_DEFAULT);
+
+  /** ¿Está abierto el modal de selección? */
+  readonly pickerAbierto = signal(false);
+
+  /** Puesto del avatar actual (para mostrar al lado del preview grande). */
+  readonly puestoActual = computed(
+    () => AVATAR_BY_ID[this.avatar()]?.puesto ?? '',
+  );
+
+  abrirPicker(): void {
+    dlog('Ingreso.abrirPicker');
+    this.pickerAbierto.set(true);
+  }
+
+  cerrarPicker(): void {
+    dlog('Ingreso.cerrarPicker');
+    this.pickerAbierto.set(false);
+  }
+
+  seleccionarAvatar(id: string): void {
+    dlog('Ingreso.seleccionarAvatar', id);
+    this.avatar.set(id);
+    this.pickerAbierto.set(false);
+  }
 
   /* --- estado del servicio, re-expuesto para que lo lea el template --- */
   readonly cargando = this.juego.cargando;
