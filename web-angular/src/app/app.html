@@ -11,6 +11,8 @@
   @if (juego.estado(); as estado) {
     @if (estado.status === 'lobby') {
       <div class="page" @pageAnim><app-lobby /></div>
+    } @else if (estado.phase === 'comunicado') {
+      <div class="page" @pageAnim><app-comunicado /></div>
     } @else if (estado.phase === 'briefing') {
       <div class="page" @pageAnim><app-briefing /></div>
     } @else if (estado.phase === 'calls') {

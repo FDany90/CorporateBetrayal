@@ -1,0 +1,250 @@
+/* ============================================================
+   Pantalla Comunicado · "COMUNICADO OFICIAL"
+   ============================================================
+   Misma base visual que la pantalla Final (papel sobre "mesa oscura",
+   grano + sombra dramática) — el comunicado y el final son las dos
+   piezas teatrales del juego. Lo que cambia:
+     - Sello: "URGENTE" rojo en lugar de "ASCENSO APROBADO" champagne.
+     - Cuadros destacados: dos resoluciones (ASCENSO + DESPIDO).
+     - Posición y rotación del sello distintas (atravesando los cuadros).
+   ============================================================ */
+
+/* Mesa oscura como el Final — refuerza el paralelismo visual. */
+.comunicado-screen { background: var(--desk); }
+.comunicado-screen .content {
+  background: var(--desk);
+  padding: 22px 12px 28px;
+  /* Refuerzo de las propiedades del flex layout — el content debe
+     scrollear internamente para que el actionbar (botón ENTENDIDO)
+     siempre quede visible al fondo. */
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+/* Documento — papel crema + grano SVG + sombra editorial. Reusamos
+   el mismo grano-blend del Final para coherencia. */
+.doc {
+  position: relative;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 26px 20px 22px;
+  border-radius: 2px;
+  box-shadow:
+    0 18px 36px rgba(0, 0, 0, 0.50),
+    0 3px 8px rgba(0, 0, 0, 0.30);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.10 0 0 0 0 0.09 0 0 0 0 0.08 0 0 0 0 0.08 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-blend-mode: multiply;
+}
+.doc::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(26, 22, 18, 0.18);
+  pointer-events: none;
+  border-radius: 1px;
+}
+
+.doc .doc-head .doc-brand { font-size: 26px; }
+
+/* ------ TÍTULO grande ------ */
+.doc-title { margin-bottom: 14px; }
+.doc-title h1 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 28px;
+  line-height: 1;
+  letter-spacing: -0.8px;
+  color: var(--ink);
+  margin: 0;
+  font-variation-settings: 'opsz' 96;
+}
+
+.doc-intro {
+  font-size: 12.5px;
+  color: var(--ink);
+  margin: 0 0 18px;
+  line-height: 1.55;
+}
+.doc-intro strong {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.2px;
+}
+
+/* ------ RESOLUCIONES · dos cuadros destacados ------
+   El bloque tiene `position: relative` para enmarcar el sello URGENTE
+   que cae diagonal por encima de los dos cuadros. */
+.resoluciones {
+  position: relative;
+  margin: 0 -4px 26px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.resol {
+  border: 2px solid var(--ink);
+  padding: 12px 10px 14px;
+  background: var(--paper-soft);
+  text-align: center;
+  position: relative;
+}
+.resol-num {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 38px;
+  line-height: 1;
+  margin-bottom: 6px;
+  font-variation-settings: 'opsz' 144;
+}
+.resol-titulo {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* Variante "ASCENSO" — champagne, optimista, como el bloque ganador del Final. */
+.resol-ascenso {
+  background: linear-gradient(180deg,
+    rgba(176, 141, 61, 0.16),
+    rgba(176, 141, 61, 0.04));
+}
+.resol-ascenso .resol-num { color: var(--accent); }
+.resol-ascenso .resol-titulo { color: var(--accent-d); }
+
+/* Variante "DESPIDO" — rojo apagado, amenazante. */
+.resol-despido {
+  background: linear-gradient(180deg,
+    rgba(139, 42, 35, 0.10),
+    rgba(139, 42, 35, 0.03));
+}
+.resol-despido .resol-num { color: var(--stamp); }
+.resol-despido .resol-titulo { color: var(--stamp); }
+/* El cuadro DESPIDO con un sutil "tachado" diagonal — refuerza la amenaza. */
+.resol-despido::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0,
+    transparent 14px,
+    rgba(139, 42, 35, 0.04) 14px,
+    rgba(139, 42, 35, 0.04) 16px
+  );
+  pointer-events: none;
+}
+
+/* ------ SELLO "URGENTE" ------
+   Sello rojo diagonal sobre el bloque de resoluciones. Mismo gesto
+   de caída (scale + rotate + overshoot) que el del Final, con un texto
+   y posición distintos para que se sienta como su contraparte oscura.
+   Rotación +12° (positiva, opuesta a la del Final) — efecto "espejo". */
+/* Posicionado ARRIBA del bloque de cuadros (top negativo) — sobresale
+   por encima sin tapar el contenido. Se ancla por su esquina superior
+   izquierda usando top + left + translate. */
+.stamp-urgente {
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: 4px;
+  color: var(--stamp);
+  border: 3px double var(--stamp);
+  padding: 6px 16px 7px;
+  background: rgba(245, 239, 228, 0.65);
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateX(-50%) rotate(-8deg) scale(1);
+  animation: stampUrgenteIn 720ms cubic-bezier(0.18, 0.85, 0.30, 1.10) forwards;
+  animation-delay: var(--stamp-delay, 0ms);
+  box-shadow:
+    0 0 0 2px rgba(139, 42, 35, 0.06),
+    2px 2px 0 rgba(139, 42, 35, 0.25);
+  z-index: 5;
+  transform-origin: center;
+}
+@keyframes stampUrgenteIn {
+  0%   { opacity: 0; transform: translateX(-50%) scale(2.6) rotate(-30deg); }
+  55%  { opacity: 1; transform: translateX(-50%) scale(0.92) rotate(-4deg); }
+  78%  {              transform: translateX(-50%) scale(1.08) rotate(-9deg); }
+  100% { opacity: 1; transform: translateX(-50%) scale(1)    rotate(-8deg); }
+}
+.intro.skipped .stamp-urgente {
+  animation: none;
+  opacity: 1;
+  transform: translateX(-50%) rotate(-8deg) scale(1);
+}
+
+/* ------ FIRMA ------ */
+.doc-foot {
+  margin-top: 8px;
+  text-align: right;
+  font-size: 11px;
+  color: var(--ink);
+}
+.doc-foot .firma-line {
+  width: 130px;
+  height: 1px;
+  background: var(--ink);
+  margin: 14px 0 6px auto;
+}
+.doc-foot strong {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+}
+.doc-foot .extension {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 1px;
+  color: var(--ink-soft);
+  margin-top: 12px;
+  text-transform: uppercase;
+}
+
+/* ------ ACTIONBAR · continuación visual del documento ------
+   Mismo papel crema + grano + sombra editorial que el .doc, alineado
+   al mismo ancho (margin lateral igual al del .doc-scroll). Se ve
+   literalmente como la mitad inferior del papel donde está el botón
+   de confirmación, no como un "control" fuera del documento. */
+.comunicado-screen .actionbar {
+  background: var(--paper);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.10 0 0 0 0 0.09 0 0 0 0 0.08 0 0 0 0 0.08 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-blend-mode: multiply;
+  border-top: 1.5px dashed rgba(26,22,18,0.30);
+  padding: 18px 18px 22px;
+  margin: 0 12px;
+  position: relative;
+  box-shadow:
+    0 18px 36px rgba(0, 0, 0, 0.50),
+    0 3px 8px rgba(0, 0, 0, 0.30);
+}
+/* Borde interno fino — igual que el .doc::before, completa el "marco"
+   del documento oficial en su parte inferior. */
+.comunicado-screen .actionbar::before {
+  content: '';
+  position: absolute;
+  inset: 0 6px 6px 6px;
+  border: 1px solid rgba(26, 22, 18, 0.18);
+  border-top: 0;
+  pointer-events: none;
+  border-radius: 0 0 1px 1px;
+}
+.comunicado-screen .actionbar .muted-note {
+  color: var(--ink-soft);
+}
+.comunicado-btn {
+  font-size: 14px;
+  padding: 14px;
+  position: relative;
+  z-index: 1;
+}

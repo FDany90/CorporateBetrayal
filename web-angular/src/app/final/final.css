@@ -13,7 +13,17 @@
 /* La "mesa" oscura sobre la que cae el documento — reemplaza el papel
    del shell SOLO en esta pantalla. */
 .final-screen { background: var(--desk); }
-.final-screen .content { background: var(--desk); padding: 22px 12px 28px; }
+.final-screen .content {
+  background: var(--desk);
+  padding: 22px 12px 28px;
+  /* Refuerzo de las propiedades del flex layout — necesario para que el
+     content scrollee internamente y el actionbar siempre quede visible.
+     El global .content ya las tiene, pero el component-scoped CSS de
+     Angular las re-explicita por especificidad. */
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
 
 /* ------ EL DOCUMENTO ------
    Borde casi recto, sombra fuerte editorial, papel crema con grano SVG

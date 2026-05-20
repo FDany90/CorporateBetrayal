@@ -210,7 +210,10 @@ export class GameRoom extends Room<GameState> {
       p.lastDelta = 0;
     }
 
-    this.iniciarRonda(1);
+    // Antes del primer briefing: pantalla "Comunicado oficial" de RR.HH.
+    // que da la premisa narrativa del juego (ascenso + despido en juego).
+    // Requiere ack de todos los jugadores antes de arrancar la ronda 1.
+    this.iniciarFase("comunicado");
     console.log(
       `[GameRoom] partida iniciada · ${this.state.rondasTotal} rondas`
     );
@@ -308,6 +311,7 @@ export class GameRoom extends Room<GameState> {
 
     // Fases de "ack": avanzan cuando todos los conectados confirmaron.
     if (
+      fase === "comunicado" ||
       fase === "briefing" ||
       fase === "meeting" ||
       fase === "result" ||
@@ -317,7 +321,10 @@ export class GameRoom extends Room<GameState> {
       for (const [, p] of this.state.players) {
         if (p.connected && !p.acted) return;
       }
-      if (fase === "briefing") {
+      if (fase === "comunicado") {
+        // Del comunicado oficial a la primera ronda.
+        this.iniciarRonda(1);
+      } else if (fase === "briefing") {
         // Del briefing a la primera fase del minijuego, según su kind.
         const kind = this.challengeActual?.kind;
         if (kind === "llamadas" && this.state.tandasTotal > 0) {

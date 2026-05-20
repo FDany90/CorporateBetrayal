@@ -1,16 +1,8 @@
 <!-- Pantalla Final · "CIRCULAR OFICIAL"
-     El shell (topbar + appheader verde) se mantiene genérico-corporativo
-     porque es parte del chiste. Lo que entra por encima como documento
-     escaneado es la pieza distintiva. Ver final.ts para la coreografía. -->
+     Sin shell (topbar/appheader): la pantalla es 100% documento. Refuerza
+     el carácter teatral y libera espacio vertical para que el botón
+     VOLVER AL LOBBY quede siempre visible. Ver final.ts para la coreografía. -->
 <div class="screen final-screen">
-  <div class="topbar">
-    <span class="brand">
-      SINERGIA<span class="dot">·</span>CORP
-    </span>
-    <span class="pill">💼 {{ yo()?.influence ?? 0 }}</span>
-  </div>
-  <div class="appheader">Aprobaciones · Evaluación de Desempeño</div>
-
   <app-intro [totalMs]="totalMs()">
     <div class="content doc-scroll">
       <!-- El documento. La clase .doc aplica papel crema + grano + tipos. -->

@@ -1,0 +1,90 @@
+<!-- Pantalla Comunicado · "COMUNICADO OFICIAL" de RR.HH.
+     Premisa narrativa del juego. Sin shell (topbar/appheader): la
+     pantalla es 100% documento — refuerza el dramatismo y libera
+     espacio vertical para que el botón ENTENDIDO siempre se vea. -->
+<div class="screen comunicado-screen">
+  <app-intro class="intro-slow" [totalMs]="totalMs()">
+    <div class="content doc-scroll">
+      <article class="doc">
+
+        <!-- ENCABEZADO minimal: solo la marca (sin folio ni departamento) -->
+        <header class="doc-head beat" [style.--i]="beatHead">
+          <div class="doc-brand">SINERGIA·CORP</div>
+          <div class="divider"></div>
+        </header>
+
+        <!-- TÍTULO grande -->
+        <hgroup class="doc-title beat" [style.--i]="beatTitle">
+          <p class="kicker">COMUNICADO OFICIAL</p>
+          <h1>Plan de Optimización<br/>Estructural Q2</h1>
+        </hgroup>
+
+        <!-- Bajada — primer párrafo (versión completa, ahora que el
+             documento se acortó por otros lados y queda espacio). -->
+        <p class="doc-intro beat" [style.--i]="beatIntro">
+          Por la presente, esta Dirección informa a la totalidad de la plantilla
+          que se encuentra en ejecución el <strong>Plan de Optimización
+          Estructural</strong> correspondiente al trimestre en curso. Como
+          resultado del proceso de evaluación de desempeño alineado a los nuevos
+          objetivos estratégicos de la organización, se ha resuelto lo siguiente:
+        </p>
+
+        <!-- Los dos CUADROS destacados — una línea cada uno. -->
+        <section class="resoluciones beat" [style.--i]="beatCuadros">
+          <article class="resol resol-ascenso">
+            <div class="resol-num">01</div>
+            <div class="resol-titulo">ASCENSO</div>
+          </article>
+
+          <article class="resol resol-despido">
+            <div class="resol-num">01</div>
+            <div class="resol-titulo">DESVINCULACIÓN</div>
+          </article>
+
+          <!-- Sello CONFIDENCIAL diagonal por ENCIMA del bloque. -->
+          <div class="stamp-urgente" [style.--stamp-delay.ms]="stampDelayMs()">
+            CONFIDENCIAL
+          </div>
+        </section>
+
+        <!-- Cierre — segundo párrafo (completo). -->
+        <p class="doc-intro beat" [style.--i]="beatCierre">
+          Durante los próximos días se procederá al <strong>monitoreo de la
+          performance individual</strong>, el trabajo colaborativo y el
+          compromiso con los valores institucionales. La decisión final se
+          adoptará exclusivamente sobre la base de métricas objetivas y datos
+          de rendimiento.
+        </p>
+
+        <!-- Firma oficial -->
+        <footer class="doc-foot beat" [style.--i]="beatFirma">
+          <div class="firma-line"></div>
+          <p>
+            Sin más, saluda atte.<br/>
+            <strong>Dirección de RR. HH.</strong>
+          </p>
+          <p class="extension">
+            Por dudas, comunicarse al interno 0042. Estricta confidencialidad.
+          </p>
+        </footer>
+      </article>
+    </div>
+
+    <!-- ACTIONBAR -->
+    <div class="actionbar">
+      @if (yo()?.acted) {
+        <p class="muted-note">
+          Esperando a los demás… ({{ listos() }}/{{ total() }})
+        </p>
+      } @else {
+        <button
+          class="btn comunicado-btn beat"
+          [style.--i]="beatBoton()"
+          (click)="confirmar()"
+        >
+          ENTENDIDO
+        </button>
+      }
+    </div>
+  </app-intro>
+</div>

@@ -9,6 +9,7 @@ import { Marcador } from './marcador/marcador';
 import { Final } from './final/final';
 import { Reunion } from './reunion/reunion';
 import { Votacion } from './votacion/votacion';
+import { Comunicado } from './comunicado/comunicado';
 import { pageAnim } from './animations';
 
 /*
@@ -26,7 +27,7 @@ import { pageAnim } from './animations';
   selector: 'app-root',
   imports: [
     Ingreso, Lobby, Briefing, Desafio, Resultado,
-    Marcador, Final, Reunion, Votacion,
+    Marcador, Final, Reunion, Votacion, Comunicado,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',
