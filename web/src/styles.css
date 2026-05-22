@@ -862,3 +862,202 @@ a:focus-visible,
     scroll-behavior:auto !important;
   }
 }
+
+/* ============================================================
+   DESKTOP — "documento sobre el escritorio"
+   ============================================================
+
+   El target de esta versión es desktop (jugar en la compu del laburo,
+   al lado de Teams). Mobile-first sigue intacto: TODO lo de arriba es
+   la base de celular y no se toca. Acá, como *progressive enhancement*,
+   a partir de un viewport ancho la metáfora se completa:
+
+     - El fondo `--desk` deja de ser "lo que sobra fuera del celular" y
+       pasa a ser una MESA real (vignette + textura sutil).
+     - La columna `.app` deja de ser un celular y se vuelve una HOJA de
+       papel apoyada sobre la mesa: más ancha, con sombra dramática que
+       la levanta, márgenes de documento.
+     - `.desk` envuelve la hoja + la ficha lateral. En mobile es
+       `display:contents` (no existe como caja: `.app` se comporta como
+       hijo directo de body, igual que hoy). En desktop se vuelve un
+       flex row que centra hoja + ficha como un conjunto.
+
+   Breakpoint: 900px. Debajo de eso (celulares, tablets angostas) no
+   pasa NADA de esto — se ve el layout mobile tal cual.
+   ============================================================ */
+
+/* `<app-root>` (el host del componente raíz) es display:inline por defecto.
+   Si forma caja, se interpone entre <body> y `.desk` y rompe el centrado
+   flex del desktop (la hoja no crece aunque tenga max-width:680). Con
+   display:contents NO forma caja: sus hijos (`.desk` y `<app-devbar>`)
+   pasan a ser hijos directos de <body>. En mobile es inofensivo (body es
+   block; la hoja se sigue centrando con margin:auto). */
+app-root{ display:contents; }
+
+/* `.desk` es transparente en mobile: display:contents hace que sus hijos
+   (.app, y la .rail oculta) actúen como hijos directos de body. Así el
+   layout de celular no cambia ni un pixel. */
+.desk{ display:contents; }
+/* La ficha lateral no existe en mobile (el contexto vive en la topbar). */
+.rail{ display:none; }
+
+/* Breakpoint: 760px de ancho CSS. OJO — el ancho CSS NO es el ancho físico
+   de la pantalla: con el escalado de Windows (típico 150-250% en pantallas
+   de alta densidad) un monitor "grande" puede reportar ~800px CSS. Por eso
+   el corte es 760 y NO 900+: queremos que entren las pantallas reales de
+   oficina, no solo monitores enormes sin escalar. La hoja es FLEXIBLE
+   (flex) para llenar el ancho disponible hasta un tope cómodo, así anda
+   bien tanto a 800px como a 1400px. */
+@media (min-width: 760px){
+  /* La MESA: escritorio de madera nogal. Capas (de arriba hacia abajo):
+       1. glow cenital cálido (la luz del techo pegando arriba al centro).
+       2. veta fina vertical (grano de la madera), muy sutil.
+       3. bandas anchas (tablones), apenas perceptibles.
+       4. base degradé nogal oscuro.
+     Todo con gradientes, sin imágenes — liviano y nítido a cualquier DPI. */
+  body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:28px 24px;
+    overflow:hidden;
+    background-color:#20170e;
+    background-image:
+      radial-gradient(130% 80% at 50% -12%, rgba(255,238,205,.11), transparent 58%),
+      repeating-linear-gradient(90deg, rgba(0,0,0,.16) 0 1px, transparent 1px 4px),
+      repeating-linear-gradient(90deg, rgba(150,103,56,.07) 0 26px, rgba(74,48,26,.10) 26px 58px),
+      linear-gradient(180deg, #2c2114 0%, #1c150d 100%);
+  }
+
+  /* El conjunto hoja+ficha + el VADE de cuero sobre el que se apoyan.
+     `.desk` deja de ser solo layout y pasa a ser la "carpeta de escritorio"
+     (secante de cuero oxblood): padding = el cuero que asoma alrededor del
+     papel, sombra propia que la levanta de la madera, y textura/brillo de
+     cuero con gradientes. Las esquineras champagne van en los pseudo. */
+  .desk{
+    display:flex;
+    align-items:stretch;
+    justify-content:center;
+    gap:24px;
+    width:100%;
+    max-width:1000px;
+    height:min(880px, calc(100dvh - 56px));
+    position:relative;
+    padding:26px;
+    border-radius:5px;
+    background-color:#3a1714;
+    background-image:
+      linear-gradient(180deg, rgba(255,255,255,.05), transparent 26%),
+      repeating-linear-gradient(135deg, rgba(0,0,0,.05) 0 3px, transparent 3px 7px),
+      linear-gradient(155deg, #4a211c 0%, #341512 100%);
+    box-shadow:
+      0 20px 55px rgba(0,0,0,.6),          /* el vade proyecta sobre la madera */
+      inset 0 1px 0 rgba(255,255,255,.07), /* filo superior iluminado */
+      inset 0 0 44px rgba(0,0,0,.4);       /* hundido del cuero (profundidad) */
+  }
+  /* Filo del vade: hairline champagne en todo el contorno interior (la
+     costura/borde del cuero). */
+  .desk::before{
+    content:'';
+    position:absolute;
+    inset:11px;
+    border:1px solid rgba(176,141,61,.22);
+    border-radius:3px;
+    pointer-events:none;
+    z-index:0;
+  }
+  /* Esquineras: 4 escuadras champagne que "sujetan" la hoja, como los
+     herrajes de un cartapacio. Cada esquina son 2 barras (8 gradientes). */
+  .desk::after{
+    content:'';
+    position:absolute;
+    inset:11px;
+    pointer-events:none;
+    z-index:0;
+    background-repeat:no-repeat;
+    background-image:
+      linear-gradient(var(--accent),var(--accent)), linear-gradient(var(--accent),var(--accent)),
+      linear-gradient(var(--accent),var(--accent)), linear-gradient(var(--accent),var(--accent)),
+      linear-gradient(var(--accent),var(--accent)), linear-gradient(var(--accent),var(--accent)),
+      linear-gradient(var(--accent),var(--accent)), linear-gradient(var(--accent),var(--accent));
+    background-size:
+      24px 2px, 2px 24px,   /* sup-izq: horizontal, vertical */
+      24px 2px, 2px 24px,   /* sup-der */
+      24px 2px, 2px 24px,   /* inf-izq */
+      24px 2px, 2px 24px;   /* inf-der */
+    background-position:
+      left top, left top,
+      right top, right top,
+      left bottom, left bottom,
+      right bottom, right bottom;
+  }
+
+  /* La HOJA: deja de ser celular a alto completo y pasa a ser un papel
+     sobre la mesa. `flex:1` la hace crecer para llenar el ancho disponible,
+     `max-width` la frena en un ancho de lectura cómodo, `min-width:0` deja
+     que se achique sin desbordar cuando la ficha le come espacio. Sombra en
+     dos capas (contacto + proyección larga) para levantarla; un hairline
+     champagne arriba como "filo" del papel. */
+  .app{
+    flex:1 1 auto;
+    max-width:680px;
+    min-width:0;
+    width:auto;
+    height:100%;
+    margin:0;
+    position:relative;
+    z-index:1;
+    border-radius:3px;
+    box-shadow:
+      0 2px 5px rgba(0,0,0,.32),
+      0 22px 60px rgba(0,0,0,.55);
+  }
+  .app::before{
+    content:'';
+    position:absolute;
+    inset:0 0 auto 0;
+    height:3px;
+    background:linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity:.5;
+    z-index:2;
+    pointer-events:none;
+  }
+
+  /* Márgenes de documento más generosos: una hoja ancha con el texto
+     pegado a los bordes se lee mal. Le damos aire lateral al cuerpo y a
+     las barras para que respire como un papel de verdad. */
+  .topbar{ padding:18px 36px 12px; }
+  .appheader{ padding:10px 36px; }
+  .content{ padding:28px 36px; }
+  .actionbar{ padding:18px 36px 24px; }
+
+  /* ---- La FICHA lateral (carpeta de personal sobre el escritorio) ----
+     Mismo papel que la hoja pero como objeto secundario: más angosta,
+     sombra más leve, y una pestaña champagne arriba a modo de "carpeta".
+     `flex-shrink:0` la mantiene en su ancho; la hoja cede espacio antes.
+     Solo aparece en fases de juego (la monta app.html condicionalmente). */
+  .rail{
+    display:flex;
+    flex-direction:column;
+    width:260px;
+    flex-shrink:0;
+    height:100%;
+    background:var(--paper-soft);
+    border-radius:3px;
+    box-shadow:
+      0 2px 5px rgba(0,0,0,.28),
+      0 16px 40px rgba(0,0,0,.45);
+    overflow:hidden;
+    position:relative;
+    z-index:1;
+  }
+  /* Pestaña de carpeta: banda champagne arriba de la ficha. */
+  .rail::before{
+    content:'';
+    position:absolute;
+    inset:0 0 auto 0;
+    height:4px;
+    background:var(--accent);
+    z-index:2;
+  }
+}

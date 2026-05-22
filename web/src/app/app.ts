@@ -1,5 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { GameService } from './game.service';
+import { DeskContext } from './desk-context/desk-context';
 import { Ingreso } from './ingreso/ingreso';
 import { Lobby } from './lobby/lobby';
 import { Briefing } from './briefing/briefing';
@@ -27,6 +28,7 @@ import { pageAnim } from './animations';
 @Component({
   selector: 'app-root',
   imports: [
+    DeskContext,
     Ingreso, Lobby, Briefing, Desafio, Resultado,
     Marcador, Final, Reunion, Votacion, Comunicado, Devbar,
   ],
@@ -37,4 +39,23 @@ import { pageAnim } from './animations';
 export class App {
   /** protected: lo usa el template, no hace falta exponerlo más. */
   protected readonly juego = inject(GameService);
+
+  /**
+   * Fases en las que se muestra la ficha lateral (solo desktop). Son las
+   * de juego activo donde el contexto persistente (tu Influencia, el día,
+   * la sala) acompaña bien. Se EXCLUYEN a propósito:
+   *  - lobby / ingreso: todavía no hay partida; el lobby ya lista la sala.
+   *  - comunicado / final: momentos teatrales a pantalla plena (la ficha
+   *    al lado le restaría dramatismo al sello/circular).
+   */
+  private static readonly FASES_CON_FICHA = new Set([
+    'briefing', 'calls', 'meeting', 'vote', 'result', 'marcador',
+  ]);
+
+  /** ¿Mostrar la ficha lateral? (la oculta el CSS en mobile igual). */
+  protected readonly mostrarFicha = computed(() => {
+    const e = this.juego.estado();
+    if (!e || e.status === 'lobby') return false;
+    return App.FASES_CON_FICHA.has(e.phase);
+  });
 }

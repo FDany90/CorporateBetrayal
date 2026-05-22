@@ -1,0 +1,159 @@
+/* Ficha de personal (desktop). El host ocupa toda la .rail y scrollea
+   internamente si la sala es larga. La caja/sombra/pestaña las pone .rail
+   (global, en styles.css); acá va la composición interna. */
+:host{
+  display:flex;
+  flex-direction:column;
+  height:100%;
+  min-height:0;
+  overflow-y:auto;
+  padding:22px 20px;
+  gap:18px;
+}
+
+.ficha-head{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  padding-bottom:14px;
+  border-bottom:1px solid var(--ink);
+}
+.ficha-kicker{
+  font-family:var(--font-mono);
+  font-size:9px;font-weight:700;
+  letter-spacing:2.5px;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+}
+.ficha-titulo{
+  font-family:var(--font-display);
+  font-weight:800;font-size:17px;
+  letter-spacing:-0.2px;
+  color:var(--ink);
+  font-variation-settings:'opsz' 24;
+}
+
+/* Legajo: avatar + nombre, alineados. */
+.ficha-yo{
+  display:flex;
+  align-items:center;
+  gap:13px;
+}
+.ficha-yo-info{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  min-width:0;
+}
+.ficha-yo-lbl{
+  font-family:var(--font-mono);
+  font-size:9px;font-weight:700;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+}
+.ficha-yo-nombre{
+  font-family:var(--font-display);
+  font-weight:800;font-size:19px;
+  line-height:1.1;
+  color:var(--ink);
+  font-variation-settings:'opsz' 36;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+/* Influencia — cuadro destacado tipo "sello de monto". */
+.ficha-inf{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+  padding:13px 10px;
+  border:1.5px solid var(--ink);
+  background:var(--paper);
+}
+.ficha-inf-lbl{
+  font-family:var(--font-mono);
+  font-size:9px;font-weight:700;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+}
+.ficha-inf-val{
+  font-family:var(--font-display);
+  font-weight:900;font-size:38px;
+  line-height:1;
+  color:var(--ink);
+  font-variation-settings:'opsz' 144;
+  font-variant-numeric:tabular-nums;
+}
+
+/* Día / tema. */
+.ficha-dia{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  padding-bottom:14px;
+  border-bottom:1px dashed var(--line);
+}
+.ficha-dia-num{
+  font-family:var(--font-mono);
+  font-size:10px;font-weight:700;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--ink);
+}
+.ficha-dia-tema{
+  font-family:var(--font-display);
+  font-weight:600;font-size:14px;
+  color:var(--ink-soft);
+  font-variation-settings:'opsz' 18;
+}
+
+/* Sala — ocupa el resto y scrollea si hace falta. */
+.ficha-sala{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  min-height:0;
+}
+.ficha-sala-head{
+  font-family:var(--font-mono);
+  font-size:9.5px;font-weight:700;
+  letter-spacing:2.5px;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+}
+.ficha-roster{
+  list-style:none;
+  display:flex;
+  flex-direction:column;
+}
+.ficha-row{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:6px 0;
+  border-bottom:1px dashed var(--line);
+}
+.ficha-row:last-child{ border-bottom:0; }
+.ficha-row.off{ opacity:.45; }
+.ficha-row-name{
+  font-family:var(--font-display);
+  font-weight:600;font-size:14px;
+  color:var(--ink);
+  font-variation-settings:'opsz' 18;
+  flex:1;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.ficha-row-off{
+  font-family:var(--font-mono);
+  font-size:8.5px;font-weight:700;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:var(--stamp);
+}

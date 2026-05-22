@@ -7,7 +7,16 @@
        - dispara la animación `pageAnim` (animations.ts) cuando entra al DOM,
          es decir, cada vez que cambia la rama del @if/@else if.
      -->
-<main class="app">
+<!-- `.desk` = el "escritorio" que envuelve la hoja + la ficha lateral.
+     En mobile es display:contents (no existe como caja: .app se comporta
+     como hoy). En desktop se vuelve un flex row centrado (ver styles.css).
+     La ficha (.rail) solo se monta en fases de juego y solo se ve en
+     desktop (display:none en mobile). -->
+<div class="desk">
+  @if (mostrarFicha()) {
+    <aside class="rail"><app-desk-context /></aside>
+  }
+  <main class="app">
   @if (juego.estado(); as estado) {
     @if (estado.status === 'lobby') {
       <div class="page" @pageAnim><app-lobby /></div>
@@ -33,7 +42,8 @@
   } @else {
     <div class="page" @pageAnim><app-ingreso /></div>
   }
-</main>
+  </main>
+</div>
 
 <!-- Atajos de desarrollo — flotante, solo visible durante la partida. -->
 <app-devbar />

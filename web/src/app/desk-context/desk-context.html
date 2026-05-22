@@ -1,0 +1,52 @@
+<!-- Ficha de personal — contexto persistente en desktop.
+     Vive dentro de .rail (la "carpeta" sobre el escritorio); acá solo va
+     el contenido interno. -->
+
+<header class="ficha-head">
+  <span class="ficha-kicker">Sinergia·Corp</span>
+  <span class="ficha-titulo">Ficha de personal</span>
+</header>
+
+<!-- Legajo a tu nombre: tu avatar grande + nombre. -->
+<section class="ficha-yo">
+  <app-avatar [id]="yo()?.avatar ?? ''" [size]="58" />
+  <div class="ficha-yo-info">
+    <span class="ficha-yo-lbl">Legajo</span>
+    <strong class="ficha-yo-nombre">{{ yo()?.nickname }}</strong>
+  </div>
+</section>
+
+<!-- Tu Influencia — el único puntaje que es justo verte siempre. -->
+<section class="ficha-inf">
+  <span class="ficha-inf-lbl">Influencia acumulada</span>
+  <span class="ficha-inf-val">{{ yo()?.influence ?? 0 }}</span>
+</section>
+
+<!-- Día de la jornada + tema del minijuego en curso. -->
+<section class="ficha-dia">
+  <span class="ficha-dia-num">Día {{ dia() }} de {{ diasTotal() }}</span>
+  <span class="ficha-dia-tema">{{ tema() }}</span>
+</section>
+
+<!-- Quién está en la sala — presencia, sin puntaje ajeno. -->
+<section class="ficha-sala">
+  <div class="ficha-sala-head">En sala · {{ enSala() }}</div>
+  <ul class="ficha-roster">
+    @for (p of jugadores(); track p.id) {
+      <li class="ficha-row" [class.off]="!p.connected">
+        <app-avatar [id]="p.avatar" [size]="28" />
+        <span class="ficha-row-name">{{ p.nickname }}</span>
+        @if (p.id === miId()) {
+          <span class="tag">vos</span>
+        } @else if (p.id === hostId()) {
+          <span class="tag host">anfitrión</span>
+        } @else if (p.isBot) {
+          <span class="tag bot">bot</span>
+        }
+        @if (!p.connected) {
+          <span class="ficha-row-off">ausente</span>
+        }
+      </li>
+    }
+  </ul>
+</section>
