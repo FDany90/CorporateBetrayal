@@ -1,0 +1,91 @@
+/* ============================================================
+   Devbar flotante — atajos de desarrollo
+   ============================================================
+   Fija en la esquina inferior derecha. Deliberadamente NO usa el
+   lenguaje editorial (papel crema): es una herramienta de dev, así
+   que va en oscuro/mono para que se distinga del juego y nunca se
+   confunda con UI de producción. z-index alto para quedar sobre todo.
+   ============================================================ */
+
+.devbar {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  /* No bloquear toques fuera de los controles. */
+  pointer-events: none;
+}
+.devbar > * {
+  pointer-events: auto;
+}
+
+/* Botón flotante circular (FAB). Oscuro con borde champagne. */
+.devbar-fab {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent);
+  background: #1a1612;
+  color: #f5efe4;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  font-family: var(--font-mono);
+  touch-action: manipulation;
+}
+.devbar-fab:active { transform: translateY(1px); }
+
+/* Panel desplegado — caja oscura con los atajos apilados. */
+.devbar-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #1a1612;
+  border: 1px solid rgba(245, 239, 228, 0.18);
+  border-radius: 6px;
+  padding: 10px;
+  min-width: 168px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+.devbar-title {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(245, 239, 228, 0.12);
+  margin-bottom: 2px;
+}
+.devbar-action {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-align: left;
+  padding: 9px 10px;
+  min-height: 40px;
+  border: 1px solid rgba(245, 239, 228, 0.22);
+  border-radius: 4px;
+  background: transparent;
+  color: #f5efe4;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.devbar-action:active { transform: translateY(1px); }
+@media (hover: hover) {
+  .devbar-action:hover { background: rgba(245, 239, 228, 0.08); }
+}
+.devbar-danger {
+  border-color: rgba(200, 90, 80, 0.6);
+  color: #e89a92;
+}

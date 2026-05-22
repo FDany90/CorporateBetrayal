@@ -68,7 +68,7 @@
       }
     </div>
 
-    <!-- Anexo técnico: panel dev de bots. -->
+    <!-- Anexo técnico: panel dev de bots + partida rápida. -->
     <div class="dev">
       <div class="devtitle">Anexo técnico · Personal ficticio</div>
       <div class="devrow">
@@ -80,6 +80,28 @@
           (click)="quitarBots()"
         >
           Quitar bots
+        </button>
+      </div>
+
+      <!-- Partida rápida: rellena bots, ficha a todos y arranca. El
+           selector permite saltar directo a un minijuego (una ronda). -->
+      <div class="devtitle" style="margin-top:10px">Partida rápida</div>
+      <div class="devrow">
+        <select
+          class="dev-select"
+          [value]="minijuegoElegido()"
+          (change)="minijuegoElegido.set($any($event.target).value)"
+          aria-label="Minijuego para la partida rápida"
+        >
+          <option value="">Partida normal (todas las rondas)</option>
+          @for (m of minijuegos; track m.id) {
+            <option [value]="m.id">{{ m.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="devrow">
+        <button class="btn sm" (click)="partidaRapida()">
+          ⚡ Empezar ya
         </button>
       </div>
     </div>

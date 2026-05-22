@@ -73,6 +73,34 @@ export class GameRoom extends Room<GameState> {
       }
     });
 
+    /* ---- Atajos de desarrollo para probar pantallas sin fricción ----
+       No validan anfitrión: son herramientas de prueba locales. */
+
+    // Vuelve al lobby desde cualquier fase, sin reiniciar el server.
+    this.onMessage("dev:volverLobby", () => {
+      if (this.state.status === "lobby") return;
+      this.volverLobby();
+      console.log("[GameRoom] dev: vuelta al lobby");
+    });
+
+    // Arranca una partida ya: rellena bots hasta `minJugadores`, ficha a
+    // todos y empieza. Si viene `challengeId`, juega UNA sola ronda con
+    // ese minijuego (para probarlo directo); si no, usa el config normal.
+    this.onMessage(
+      "dev:quickStart",
+      (_c, opts: { challengeId?: string } = {}) => {
+        if (this.state.status !== "lobby") return;
+        this.devQuickStart(opts?.challengeId);
+      }
+    );
+
+    // Fuerza el avance de la fase actual: auto-completa lo que falte
+    // (acks pendientes, decisiones/votos) y dispara el chequeo de avance.
+    this.onMessage("dev:skipPhase", () => {
+      if (this.state.status !== "playing") return;
+      this.devSkipPhase();
+    });
+
     // El anfitrión puede expulsar a un jugador del lobby (p. ej. si se cayó
     // y no queremos esperar el plazo de reconexión para empezar).
     this.onMessage("kick", (client, targetId: string) => {
@@ -302,6 +330,13 @@ export class GameRoom extends Room<GameState> {
       p.decision = "";
       if (p.isBot) p.decision = Math.random() < 0.5 ? "verde" : "rojo";
     }
+
+    // Si todas las parejas de esta tanda quedaron formadas solo por bots
+    // (ej. con 3 jugadores, en la tanda donde el único humano queda sin
+    // pareja), ya decidieron todos y nadie dispararía el avance: lo
+    // chequeamos acá. En el caso normal (parejas con humanos) no avanza
+    // hasta que esos humanos decidan.
+    this.chequearAvance();
   }
 
   /** Cierra la ronda actual: marcador entre rondas, o pantalla final. */
@@ -473,6 +508,67 @@ export class GameRoom extends Room<GameState> {
       p.decision = "";
       p.acted = false;
     }
+  }
+
+  /* ---------- atajos de desarrollo ---------- */
+
+  /** Arranca una partida sin fricción para probar. Rellena bots hasta un
+   *  mínimo jugable, ficha a todos y empieza. Con `challengeId`, juega UNA
+   *  sola ronda de ese minijuego entrando directo a su briefing (sin
+   *  comunicado); sin él, usa el config por defecto (con comunicado). */
+  private devQuickStart(challengeId?: string) {
+    const MIN_JUGADORES = 3; // suficiente para parejas y votación grupal
+    if (this.state.players.size < MIN_JUGADORES) {
+      this.addBots(MIN_JUGADORES - this.state.players.size);
+    }
+    for (const [, p] of this.state.players) p.ready = true;
+
+    this.state.status = "playing";
+    this.usados.clear();
+    this.state.ronda = 0;
+    for (const [, p] of this.state.players) {
+      p.influence = 0;
+      p.lastDelta = 0;
+    }
+
+    const def = challengeId ? CHALLENGE_REGISTRY[challengeId] : null;
+    if (def) {
+      this.config = { rounds: [{ tipo: def.format, challengePool: [def.id] }] };
+      this.state.rondasTotal = 1;
+      this.iniciarRonda(1); // directo al briefing del minijuego elegido
+    } else {
+      this.config = CONFIG_DEFECTO;
+      this.state.rondasTotal = this.config.rounds.length;
+      this.iniciarFase("comunicado");
+    }
+    console.log(
+      `[GameRoom] dev: quick start (${challengeId ?? "config normal"})`
+    );
+  }
+
+  /** Fuerza el avance de la fase actual auto-completando lo que falte:
+   *  decisiones en 'calls', voto+confirmación en 'vote', acks en el resto.
+   *  Luego dispara el chequeo de avance normal. */
+  private devSkipPhase() {
+    const fase = this.state.phase;
+    if (fase === "calls") {
+      for (const [, p] of this.state.players) {
+        if (!p.decision) p.decision = Math.random() < 0.5 ? "verde" : "rojo";
+      }
+    } else if (fase === "vote") {
+      const ids = [...this.state.players.keys()];
+      for (const [, p] of this.state.players) {
+        if (!p.decision) {
+          const otros = ids.filter((id) => id !== p.id);
+          p.decision = otros[Math.floor(Math.random() * otros.length)] ?? "";
+        }
+        p.acted = true;
+      }
+    } else {
+      for (const [, p] of this.state.players) p.acted = true;
+    }
+    this.chequearAvance();
+    console.log(`[GameRoom] dev: salto de fase (${fase})`);
   }
 
   /* ---------- bots de desarrollo · Paso 1 ---------- */

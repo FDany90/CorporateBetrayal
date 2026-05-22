@@ -215,6 +215,24 @@ export class GameService {
     dlog('enviar', 'dev:clearBots');
     this.room?.send('dev:clearBots');
   }
+
+  /* --- atajos de desarrollo --- */
+  /** Vuelve al lobby desde cualquier fase, sin reiniciar el server. */
+  devVolverLobby(): void {
+    dlog('enviar', 'dev:volverLobby');
+    this.room?.send('dev:volverLobby');
+  }
+  /** Arranca una partida ya (bots + fichar + empezar). Con challengeId,
+   *  juega una sola ronda de ese minijuego entrando directo al briefing. */
+  devQuickStart(challengeId?: string): void {
+    dlog('enviar', 'dev:quickStart', challengeId);
+    this.room?.send('dev:quickStart', { challengeId });
+  }
+  /** Fuerza el avance de la fase actual (auto-completa acks/decisiones). */
+  devSkipPhase(): void {
+    dlog('enviar', 'dev:skipPhase');
+    this.room?.send('dev:skipPhase');
+  }
   expulsar(id: string): void {
     dlog('enviar', 'kick', id);
     this.room?.send('kick', id);

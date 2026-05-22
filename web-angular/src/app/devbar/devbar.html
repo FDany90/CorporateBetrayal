@@ -1,0 +1,25 @@
+<!-- Solo visible durante la partida. Colapsado = botón ⚙; abierto =
+     panel con los atajos. position:fixed, no interfiere con el layout. -->
+@if (enPartida()) {
+  <div class="devbar" [class.devbar-open]="abierto()">
+    @if (abierto()) {
+      <div class="devbar-panel">
+        <div class="devbar-title">DEV · fase: {{ fase() }}</div>
+        <button class="devbar-action" (click)="saltarFase()">
+          Saltar fase →
+        </button>
+        <button class="devbar-action devbar-danger" (click)="salirAlLobby()">
+          Salir al lobby
+        </button>
+      </div>
+    }
+    <button
+      class="devbar-fab"
+      (click)="toggle()"
+      [attr.aria-label]="abierto() ? 'Cerrar atajos de desarrollo' : 'Abrir atajos de desarrollo'"
+      [attr.aria-expanded]="abierto()"
+    >
+      {{ abierto() ? '✕' : '⚙' }}
+    </button>
+  </div>
+}

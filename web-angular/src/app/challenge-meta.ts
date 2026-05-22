@@ -23,3 +23,17 @@ const TEMAS: Record<string, string> = {
 export function temaDelDia(challengeId: string): string {
   return TEMAS[challengeId] ?? 'Jornada de Evaluación';
 }
+
+/** Minijuego disponible — para el selector "Partida rápida" del dev panel. */
+export interface MinijuegoMeta {
+  id: string;
+  label: string;
+}
+
+/** Catálogo para el selector dev. Refleja los minijuegos del registry
+ *  del server (server/src/challenges/registry.ts). Si sumás un minijuego
+ *  allá, agregalo acá para poder arrancarlo directo desde el lobby. */
+export const MINIJUEGOS: readonly MinijuegoMeta[] = [
+  { id: 'boton-del-bonus', label: 'El Botón del Bonus (individual)' },
+  { id: 'el-recorte',      label: 'El Recorte (grupal)' },
+];

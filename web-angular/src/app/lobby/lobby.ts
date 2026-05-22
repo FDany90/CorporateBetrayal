@@ -1,6 +1,7 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { GameService } from '../game.service';
 import { Avatar } from '../avatar/avatar';
+import { MINIJUEGOS } from '../challenge-meta';
 import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
 
 /**
@@ -98,5 +99,20 @@ export class Lobby {
   salir(): void {
     dlog('Lobby.salir');
     this.juego.salir();
+  }
+
+  /* ---------- atajos de desarrollo ---------- */
+
+  /** Lista de minijuegos para el selector de "Partida rápida". */
+  readonly minijuegos = MINIJUEGOS;
+  /** Minijuego elegido en el selector ("" = partida normal completa). */
+  readonly minijuegoElegido = signal('');
+
+  /** Arranca una partida sin setup: bots + fichar + empezar. Si hay un
+   *  minijuego elegido, juega una sola ronda de ese minijuego directo. */
+  partidaRapida(): void {
+    const id = this.minijuegoElegido();
+    dlog('Lobby.partidaRapida', id);
+    this.juego.devQuickStart(id || undefined);
   }
 }
