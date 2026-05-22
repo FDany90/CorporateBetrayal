@@ -71,7 +71,7 @@ Roadmap del [GDD §10](GDD.md):
 | **3 — Motor de rondas + marcador + pantalla final** | ✅ **completo (hito actual)** |
 | 4 — Resto del catálogo de minijuegos | 🔄 en curso (2 de 13) |
 | 5 — Pulido (estética, onboarding) | 🔄 en curso (lenguaje editorial aplicado a 7 pantallas) |
-| 6 — Deploy y post-MVP | pendiente |
+| 6 — Deploy y post-MVP | 🔄 en curso (deploy de prueba VIVO: Vercel + Render, ver §5) |
 
 > Además del roadmap, entre el Paso 2 y el 3 se migró el cliente web de
 > Next.js/React a Angular (ver [migracion-angular.md](migracion-angular.md)).
@@ -151,6 +151,18 @@ Todo jugable solo con bots.
 server/        game server — Colyseus (Node + TypeScript)
 web/   cliente — Angular (TypeScript)
 ```
+
+**Producción (deployado 2026-05-21):**
+- **Cliente** (Vercel, root `web/`, output `dist/web/browser`):
+  `https://corporate-betrayal.vercel.app`
+- **Server** (Render, free tier, root `server/`):
+  `wss://corporatebetrayal.onrender.com` — configurado en
+  `web/src/environments/environment.ts`.
+- **Cold start:** el server free de Render duerme tras ~15 min de
+  inactividad; el primer acceso tarda ~30-50s en despertar. Para un
+  playtest, entrá vos primero unos segundos antes de citar a los demás.
+- Ambos redeployan solos al hacer `push` a `main` (auto-deploy de
+  GitHub). El cliente lleva la URL del server horneada en el build.
 
 Correrlo (Node 20+, dos terminales):
 ```bash
