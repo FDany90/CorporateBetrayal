@@ -14,7 +14,7 @@
 El proyecto son **dos programas separados** que se hablan en vivo:
 
 ```
-   web-angular/   ─── habla por WebSocket ───►   server/
+   web/   ─── habla por WebSocket ───►   server/
    (lo que el                                   (el "árbitro":
     jugador ve                                   tiene la verdad
     en el celular)                               de la partida)
@@ -80,10 +80,10 @@ traicionenlaoficina/
 ├── docs/          documentos de diseño (incluido este)
 ├── prototipo/     prototipo HTML estático (descartable, ya no se usa)
 ├── server/        game server — Colyseus (Node + TypeScript)
-└── web-angular/   cliente web — Angular (TypeScript)
+└── web/   cliente web — Angular (TypeScript)
 ```
 
-`server/` y `web-angular/` son **dos proyectos independientes**, cada uno con su
+`server/` y `web/` son **dos proyectos independientes**, cada uno con su
 `package.json` (su lista de dependencias). Se ejecutan a la vez.
 
 ---
@@ -210,13 +210,13 @@ tandas distintas son posibles con `n` jugadores.
 
 ---
 
-## 5. El cliente web (`web-angular/`)
+## 5. El cliente web (`web/`)
 
 Una app **Angular**: muestra las pantallas y le manda las acciones al servidor.
 Toda la lógica de juego está en el servidor; el cliente solo dibuja y avisa.
 
 ```
-web-angular/src/
+web/src/
 ├── index.html              el HTML raíz; carga fonts de Google
 ├── main.ts                 arranca la app
 ├── styles.css              sistema visual editorial (paleta única + primitivas)
@@ -371,7 +371,7 @@ durante el desarrollo. Se quita borrando este archivo y sus usos (`dlog(`).
 ## 6. Cómo se comunican cliente y servidor
 
 ```
-web-angular (navegador)  ──WebSocket──►  server (Colyseus)
+web (navegador)  ──WebSocket──►  server (Colyseus)
    GameService                              GameRoom
 ```
 
@@ -422,7 +422,7 @@ npm install        # solo la primera vez (baja las dependencias)
 npm run dev        # queda corriendo en ws://localhost:2567
 
 # Terminal 2 — la web
-cd web-angular
+cd web
 npm install        # solo la primera vez
 npm start          # queda corriendo en http://localhost:4200
 ```
@@ -435,7 +435,7 @@ Para **probar la partida solo**: en el Lobby, el panel "Modo Desarrollo" agrega
 
 **Verificar que el código compila:**
 - Servidor: `cd server && npm run check`
-- Web: `cd web-angular && npm run build`
+- Web: `cd web && npm run build`
 
 ---
 
@@ -447,7 +447,7 @@ Gracias al registro, es acotado:
    (elegir un `kind` existente: `llamadas` o `votacion`).
 2. Registrarlo en `server/src/challenges/registry.ts`.
 3. Sumar su `id` al `challengePool` de alguna ronda en `config.ts`.
-4. Agregar su nombre a `NOMBRE_CHALLENGE` en `web-angular/src/app/models.ts`.
+4. Agregar su nombre a `NOMBRE_CHALLENGE` en `web/src/app/models.ts`.
 5. Si el minijuego es de un `kind` ya existente, **el motor no se toca** y las
    pantallas ya sirven. Si introduce un `kind` nuevo, hay que sumar su flujo
    en el motor y crear sus pantallas.

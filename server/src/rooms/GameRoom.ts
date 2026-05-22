@@ -5,7 +5,7 @@ import { CONFIG_DEFECTO, GameConfig } from "../config";
 import { CHALLENGE_REGISTRY, ChallengeDefinition } from "../challenges/registry";
 
 // Ids del catálogo de avatares — los dibuja el cliente con SVGs (ver
-// web-angular/src/app/avatars.ts). El server solo persiste el id como
+// web/src/app/avatars.ts). El server solo persiste el id como
 // string opaco; no necesita saber qué dibujo le corresponde.
 const AVATARS = [
   // Empleados "estándar"

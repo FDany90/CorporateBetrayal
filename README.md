@@ -34,7 +34,7 @@ donde cada jugador compite por el ascenso pisándose entre sí.
 Monorepo con dos partes:
 
 - [`server/`](server/) — game server en **Colyseus** (Node + TypeScript).
-- [`web-angular/`](web-angular/) — cliente en **Angular** (TypeScript).
+- [`web/`](web/) — cliente en **Angular** (TypeScript).
 
 ### Cómo correr el proyecto (local)
 
@@ -47,7 +47,7 @@ npm install
 npm run dev          # ws://localhost:2567
 
 # Terminal 2 — app web
-cd web-angular
+cd web
 npm install
 npm start            # http://localhost:4200
 ```

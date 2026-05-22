@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "web-angular": {
+    "web": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -63,10 +63,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "web-angular:build:production"
+              "buildTarget": "web:build:production"
             },
             "development": {
-              "buildTarget": "web-angular:build:development"
+              "buildTarget": "web:build:development"
             }
           },
           "defaultConfiguration": "development"

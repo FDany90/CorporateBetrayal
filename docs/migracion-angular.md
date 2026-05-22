@@ -2,7 +2,7 @@
 
 > Documento de diseño y registro. Versión 1.0 · 2026-05-18
 > **Estado: migración completada** (Incrementos 0–4). El cliente vive en
-> `web-angular/` y `web/` fue eliminada. Los logs de depuración (`dlog`) se
+> `web/` y `web/` fue eliminada. Los logs de depuración (`dlog`) se
 > mantienen a propósito mientras dure el desarrollo activo.
 
 ---
@@ -164,11 +164,11 @@ Puntos clave:
 
 ## 5. Estructura de carpetas
 
-Se crea `web-angular/` **al lado** de `web/`. Así nunca quedamos sin un cliente
+Se crea `web/` **al lado** de `web/`. Así nunca quedamos sin un cliente
 funcionando. `web/` se borra recién al final (Incremento 4).
 
 ```
-web-angular/
+web/
   angular.json
   package.json
   tsconfig.json
@@ -268,7 +268,7 @@ Cada incremento es un commit (o más) en español, push a GitHub.
 3. Sin Angular Router en el MVP — ruteo por estado de fase.
 4. Forms template-driven (`ngModel`).
 5. Plantillas en archivos `.html` separados.
-6. `web-angular/` nuevo al lado de `web/`; `web/` se borra en el Incremento 4.
+6. `web/` nuevo al lado de `web/`; `web/` se borra en el Incremento 4.
 7. `globals.css` se copia sin cambios a `src/styles.css`.
 
 ---

@@ -113,7 +113,7 @@ Roadmap del [GDD §10](GDD.md):
 
 Sistema editorial común a las pantallas de juego:
 - **Appheader** uniforme: `Día X de Y · Tema del día` (sin "Aprobaciones"
-  ni "Ronda"). El "Tema" sale de [`challenge-meta.ts`](../web-angular/src/app/challenge-meta.ts)
+  ni "Ronda"). El "Tema" sale de [`challenge-meta.ts`](../web/src/app/challenge-meta.ts)
   — un mapa cliente `challengeId → tema editorial`. Cubre Briefing,
   Desafío, Votación, Resultado, Marcador.
 - **Lenguaje narrativo del Recorte**: ya no es "recorte de personal", es
@@ -149,13 +149,13 @@ Todo jugable solo con bots.
 
 ```
 server/        game server — Colyseus (Node + TypeScript)
-web-angular/   cliente — Angular (TypeScript)
+web/   cliente — Angular (TypeScript)
 ```
 
 Correrlo (Node 20+, dos terminales):
 ```bash
 cd server      && npm install && npm run dev   # ws://localhost:2567
-cd web-angular && npm install && npm start     # http://localhost:4200
+cd web && npm install && npm start     # http://localhost:4200
 ```
 
 Detalle de cada archivo: [codigo.md](codigo.md).
@@ -216,7 +216,7 @@ Detalle de cada archivo: [codigo.md](codigo.md).
   pestañas** (normal + incógnito) para simular multijugador.
 - **Logs de depuración:** el cliente Angular tiene logs temporales (`dlog`,
   prefijo `[traición·…]` en consola) activos durante el desarrollo. Se quitan
-  borrando `web-angular/src/app/dlog.ts` y sus usos.
+  borrando `web/src/app/dlog.ts` y sus usos.
 - **Problema conocido:** probar en un **celular real por la red local NO
   funciona** (lo bloquea el Firewall de Windows / la red corporativa). **No es
   un bug** — desaparece al deployar (URLs públicas, `wss`/443). Mientras tanto
