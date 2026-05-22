@@ -229,10 +229,10 @@ Detalle de cada archivo: [codigo.md](codigo.md).
 - **Logs de depuración:** el cliente Angular tiene logs temporales (`dlog`,
   prefijo `[traición·…]` en consola) activos durante el desarrollo. Se quitan
   borrando `web/src/app/dlog.ts` y sus usos.
-- **Problema conocido:** probar en un **celular real por la red local NO
-  funciona** (lo bloquea el Firewall de Windows / la red corporativa). **No es
-  un bug** — desaparece al deployar (URLs públicas, `wss`/443). Mientras tanto
-  se prueba en la PC; para probar en celular hay que deployar.
+- **Probar en celular:** usar la URL pública de Vercel (ver §5), no la red
+  local. (Por la red local lo bloquea el Firewall de Windows / la red
+  corporativa — no es un bug; por eso se deployó.) Validado en celular el
+  2026-05-21: se ve y juega bien.
 
 ---
 
@@ -257,16 +257,26 @@ social engancha, antes de seguir expandiendo el catálogo.
 
 **Después del MVP / playtest:**
 
-4. **Temporizadores en pantalla** — desde cero (no existen en server). Cada
+4. **Feedback de botones / latencia percibida** (detectado en el playtest
+   en celular, 2026-05-21): al tocar un botón de acción (ENTENDIDO,
+   CONFIRMAR VOTO, opciones del desafío) no se ve feedback hasta que
+   cambia la pantalla — entre el tap y la respuesta del server hay un
+   round-trip que en producción (Render + red) se nota y se siente
+   "frizado". Solución recomendada: feedback inmediato al tap (animación
+   de "press" que se completa sola) + estado "enviando…" que persiste
+   hasta que llega el nuevo estado. NO retrasar el envío (sumaría lag);
+   mostrar el feedback en paralelo. Alineado con WIG ("spinner during
+   request"). Probablemente un estado `enviando` (signal) reusable.
+5. **Temporizadores en pantalla** — desde cero (no existen en server). Cada
    fase con tiempo límite + contador visible. Plan: server primero
    (timestamp de fin de fase en `GameState` + `setTimeout`), luego UI
    (`<app-timer>` reusable).
-5. **Migrar las últimas pantallas al lenguaje editorial**: **Reunión**,
+6. **Migrar las últimas pantallas al lenguaje editorial**: **Reunión**,
    **Resultado** y **Marcador** ya tienen el appheader unificado y el
    Marcador/Resultado ya tienen animaciones; falta terminar el rediseño
    del contenido (kicker, h1 editorial) en Reunión.
-6. **Resto del catálogo** — quedan minijuegos del GDD, uno por incremento.
-7. **Pendiente del Paso 3** — desempate por **votación directa** en la
+7. **Resto del catálogo** — quedan minijuegos del GDD, uno por incremento.
+8. **Pendiente del Paso 3** — desempate por **votación directa** en la
    pantalla final (hoy, si hay empate en el #1, comparten puesto).
 
 **Decisiones abiertas** pendientes: ver la sección 11 del [GDD](GDD.md)
