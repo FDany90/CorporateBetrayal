@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { Client, Room } from 'colyseus.js';
 import { PairingView, PlayerView, StateView } from './models';
+import { environment } from '../environments/environment';
 import { dlog } from './dlog'; // TEMPORAL: logs de depuración
 
 /**
@@ -54,10 +55,15 @@ export class GameService {
      ============================================================ */
 
   /**
-   * Deriva la URL del game server del host desde el que se abrió la web.
-   * Así funciona igual en `localhost` o entrando por la IP de la red.
+   * URL del game server.
+   *  - Si `environment.serverUrl` está seteado (producción), se usa tal
+   *    cual (la URL pública de Railway, `wss://…` sin puerto).
+   *  - Si no (desarrollo), se deriva del host desde el que se abrió la
+   *    web, apuntando al puerto 2567. Así funciona igual en `localhost`
+   *    o entrando por la IP de la red local.
    */
   private endpointPorDefecto(): string {
+    if (environment.serverUrl) return environment.serverUrl;
     const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     return `${proto}//${window.location.hostname}:2567`;
   }
