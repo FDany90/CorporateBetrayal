@@ -1,0 +1,70 @@
+/* El host es una banda fija dentro del .screen (entre appheader y content).
+   flex-shrink:0 para que no se comprima cuando el contenido scrollea. */
+:host{
+  display:block;
+  flex-shrink:0;
+}
+
+.timer{
+  padding:9px 18px 11px;
+  background:var(--paper-soft);
+  border-bottom:1px solid var(--line);
+}
+
+.timer-row{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  margin-bottom:6px;
+}
+.timer-lbl{
+  font-family:var(--font-mono);
+  font-size:10px;font-weight:700;
+  letter-spacing:2.5px;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+}
+.timer-val{
+  font-family:var(--font-display);
+  font-weight:900;font-size:20px;
+  line-height:1;
+  color:var(--ink);
+  font-variant-numeric:tabular-nums;
+  font-variation-settings:'opsz' 36;
+}
+
+/* Riel de la barra (fondo) + relleno (lo que queda de tiempo). El relleno
+   se vacía de derecha a izquierda al achicarse su ancho. La transición
+   suaviza los saltos de 250ms del intervalo. */
+.timer-track{
+  height:6px;
+  background:var(--paper-edge);
+  border:1px solid var(--line);
+  border-radius:2px;
+  overflow:hidden;
+}
+.timer-fill{
+  height:100%;
+  background:var(--accent);
+  border-radius:1px;
+  transition:width 250ms linear, background-color 200ms ease;
+}
+
+/* Últimos 10 segundos: rojo del sello + pulso del número. */
+.timer-urgente .timer-val{
+  color:var(--stamp);
+  animation:timerPulse 1s ease-in-out infinite;
+}
+.timer-urgente .timer-fill{
+  background:var(--stamp);
+}
+@keyframes timerPulse{
+  0%,100%{ opacity:1; transform:scale(1); }
+  50%    { opacity:.55; transform:scale(1.06); }
+}
+
+/* Respeta reduced-motion: sin pulso (el global ya neutraliza animaciones,
+   pero dejamos el color rojo igual, que no es movimiento). */
+@media (prefers-reduced-motion: reduce){
+  .timer-urgente .timer-val{ animation:none; }
+}

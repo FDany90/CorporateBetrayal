@@ -19,15 +19,12 @@ export interface GameConfig {
 }
 
 /**
- * Config por defecto: 4 rondas con patrón I-G-I-G.
+ * Config por defecto: 2 rondas (G-I) — partida corta para iterar/probar.
  *   I → El Botón del Bonus   ·   G → El Recorte
  */
 export const CONFIG_DEFECTO: GameConfig = {
   rounds: [
     { tipo: "grupal", challengePool: ["el-recorte"] },
     { tipo: "individual", challengePool: ["boton-del-bonus"] },
-    { tipo: "grupal", challengePool: ["el-recorte"] },
-    { tipo: "individual", challengePool: ["boton-del-bonus"] },
-    { tipo: "grupal", challengePool: ["el-recorte"] },
   ],
 };

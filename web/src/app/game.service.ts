@@ -320,6 +320,8 @@ export class GameService {
           ronda?: number;
           rondasTotal?: number;
           rondaTipo?: string;
+          phaseEndsAt?: number;
+          phaseDurationSec?: number;
           players?: { forEach: (cb: (p: PlayerView) => void) => void };
           pairings?: { forEach: (cb: (p: PairingView) => void) => void };
         }
@@ -359,6 +361,8 @@ export class GameService {
       ronda: s?.ronda ?? 0,
       rondasTotal: s?.rondasTotal ?? 0,
       rondaTipo: s?.rondaTipo ?? '',
+      phaseEndsAt: s?.phaseEndsAt ?? 0,
+      phaseDurationSec: s?.phaseDurationSec ?? 0,
       players,
       pairings,
     };

@@ -1,6 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { GameService } from '../game.service';
 import { Avatar } from '../avatar/avatar';
+import { Timer } from '../timer/timer';
 import { temaDelDia } from '../challenge-meta';
 import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
 
@@ -23,7 +24,7 @@ import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
  */
 @Component({
   selector: 'app-votacion',
-  imports: [Avatar],
+  imports: [Avatar, Timer],
   templateUrl: './votacion.html',
   styleUrl: './votacion.css',
 })
@@ -42,6 +43,12 @@ export class Votacion {
   );
   readonly dia = computed(() => this.juego.estado()?.ronda ?? 0);
   readonly diasTotal = computed(() => this.juego.estado()?.rondasTotal ?? 0);
+
+  /** Timer de la fase (lo publica el server): fin y duración total. */
+  readonly phaseEndsAt = computed(() => this.juego.estado()?.phaseEndsAt ?? 0);
+  readonly phaseDuration = computed(
+    () => this.juego.estado()?.phaseDurationSec ?? 0,
+  );
 
   /** Mi voto actual (id del votado, o "" si todavía no voté). */
   readonly miVoto = computed(() => this.yo()?.decision ?? '');

@@ -51,4 +51,7 @@ export interface StateView {
   ronda: number;        // ronda actual (1-based; 0 = no empezó)
   rondasTotal: number;  // total de rondas de la partida
   rondaTipo: string;    // "individual" | "grupal"
+  // --- timers de fase ---
+  phaseEndsAt: number;     // epoch ms de fin de fase (0 = sin timer)
+  phaseDurationSec: number; // duración total de la fase (para la barra)
 }

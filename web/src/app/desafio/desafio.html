@@ -13,6 +13,8 @@
     Llamada {{ llamada() }} de {{ llamadasTotal() }}
   </div>
 
+  <app-timer [endsAt]="phaseEndsAt()" [totalSeconds]="phaseDuration()" />
+
   @if (partner(); as colega) {
     <!-- Caso normal: me tocó un colega. -->
     <div class="content">

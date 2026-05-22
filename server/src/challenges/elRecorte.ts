@@ -20,5 +20,6 @@ export const EL_RECORTE: ChallengeDefinition = {
   format: "grupal",
   kind: "votacion",
   callRounds: 0,
+  voteSeconds: 120, // 2 minutos máximo para la votación grupal
   voteDelta: -5, // el más votado pierde 5 de Influencia
 };

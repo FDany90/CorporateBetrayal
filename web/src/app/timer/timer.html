@@ -1,0 +1,13 @@
+<!-- Banner de tiempo: etiqueta + m:ss + barra que se vacía. Solo se
+     renderiza si hay un timer activo (endsAt > 0). -->
+@if (activo()) {
+  <div class="timer" [class.timer-urgente]="urgente()" role="timer">
+    <div class="timer-row">
+      <span class="timer-lbl">Tiempo</span>
+      <span class="timer-val" aria-live="off">{{ mmss() }}</span>
+    </div>
+    <div class="timer-track" aria-hidden="true">
+      <div class="timer-fill" [style.width.%]="pct()"></div>
+    </div>
+  </div>
+}

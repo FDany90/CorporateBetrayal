@@ -48,4 +48,13 @@ export class GameState extends Schema {
   @type("number") ronda = 0;       // Paso 3 — ronda actual (1-based)
   @type("number") rondasTotal = 0; // Paso 3 — total de rondas de la partida
   @type("string") rondaTipo = "";  // Paso 3 — "individual" | "grupal"
+  // --- timers de fase ---
+  // Reloj autoritativo del server. `phaseEndsAt` es el epoch ms (Date.now)
+  // en que vence la fase con tiempo límite; 0 = la fase actual no tiene
+  // timer. `phaseDurationSec` es la duración total, para que el cliente
+  // pueda dibujar la barra de progreso (restante / total). El server tiene
+  // su propio setTimeout que fuerza el avance al vencer — el cliente solo
+  // muestra la cuenta regresiva.
+  @type("number") phaseEndsAt = 0;
+  @type("number") phaseDurationSec = 0;
 }

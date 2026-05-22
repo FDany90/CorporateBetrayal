@@ -1,6 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { GameService } from '../game.service';
 import { Avatar } from '../avatar/avatar';
+import { Timer } from '../timer/timer';
 import { temaDelDia } from '../challenge-meta';
 import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
 
@@ -17,7 +18,7 @@ import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
  */
 @Component({
   selector: 'app-desafio',
-  imports: [Avatar],
+  imports: [Avatar, Timer],
   templateUrl: './desafio.html',
   styleUrl: './desafio.css',
 })
@@ -47,6 +48,12 @@ export class Desafio {
   );
   readonly yo = computed(() =>
     this.jugadores().find((p) => p.id === this.miId()),
+  );
+
+  /** Timer de la fase (lo publica el server): fin y duración total. */
+  readonly phaseEndsAt = computed(() => this.juego.estado()?.phaseEndsAt ?? 0);
+  readonly phaseDuration = computed(
+    () => this.juego.estado()?.phaseDurationSec ?? 0,
   );
 
   /** La pareja que me tocó (o undefined si quedé libre esta ronda). */

@@ -31,6 +31,12 @@ export interface ChallengeDefinition {
   puntuarPareja?: (decA: string, decB: string) => [number, number];
   /** Influencia que gana/pierde el más votado (kind 'votacion'). */
   voteDelta?: number;
+  /** Segundos límite de cada tanda de llamadas (kind 'llamadas'). 0/undefined
+   *  = sin límite. Al vencer, quien no decidió queda en "verde" (cooperar). */
+  callSeconds?: number;
+  /** Segundos límite de la votación (kind 'votacion'). 0/undefined = sin
+   *  límite. Al vencer, cuenta el voto ya elegido; si no eligió, se abstiene. */
+  voteSeconds?: number;
 }
 
 /** Catálogo de minijuegos implementados. Se agregan acá. */

@@ -13,6 +13,8 @@
     Día {{ dia() }} de {{ diasTotal() }} · {{ tema() }}
   </div>
 
+  <app-timer [endsAt]="phaseEndsAt()" [totalSeconds]="phaseDuration()" />
+
   <div class="content">
     <p class="kicker">Acta interna · Voto secreto</p>
     <h1 class="doc-h1">¿A quién le quitamos el bono?</h1>

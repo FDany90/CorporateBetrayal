@@ -50,6 +50,10 @@ export class GameRoom extends Room<GameState> {
   private usados = new Set<string>();
   /** Calendario de parejas por tanda (round-robin, sin repetir). Paso 2.5. */
   private schedule: ParejaPlana[][] = [];
+  /** Handle del timer de la fase con tiempo límite (calls/vote). undefined
+   *  = no hay timer corriendo. Es el reloj AUTORITATIVO: al vencer, el
+   *  server fuerza el avance (no depende del cliente). */
+  private faseTimer?: ReturnType<typeof setTimeout>;
 
   onCreate(options: JoinOptions) {
     this.state = new GameState();
@@ -299,9 +303,63 @@ export class GameRoom extends Room<GameState> {
     this.iniciarFase("briefing");
   }
 
+  /* ---------- timers de fase (reloj autoritativo) ---------- */
+
+  /** Arranca el timer de la fase actual: publica `phaseEndsAt`/`phaseDurationSec`
+   *  en el estado (para que el cliente muestre la cuenta regresiva) y programa
+   *  el avance forzado al vencer. Limpia cualquier timer previo. */
+  private armarTimer(segundos: number) {
+    this.limpiarTimer();
+    if (segundos <= 0) return;
+    this.state.phaseDurationSec = segundos;
+    this.state.phaseEndsAt = Date.now() + segundos * 1000;
+    this.faseTimer = setTimeout(() => this.alExpirarFase(), segundos * 1000);
+  }
+
+  /** Cancela el timer de fase y limpia los campos del estado. */
+  private limpiarTimer() {
+    if (this.faseTimer) {
+      clearTimeout(this.faseTimer);
+      this.faseTimer = undefined;
+    }
+    this.state.phaseEndsAt = 0;
+    this.state.phaseDurationSec = 0;
+  }
+
+  /** Se ejecuta cuando el tiempo de la fase se agota. Auto-completa lo que
+   *  falte según la fase y dispara el avance normal:
+   *   - calls: quien no decidió queda en "verde" (cooperar).
+   *   - vote : quien no confirmó queda confirmado; cuenta su voto actual
+   *            (si no eligió a nadie, decision="" = abstención). */
+  private alExpirarFase() {
+    this.faseTimer = undefined;
+    const fase = this.state.phase;
+    if (fase === "calls") {
+      for (const pr of this.state.pairings) {
+        for (const id of [pr.aId, pr.bId]) {
+          const p = this.state.players.get(id);
+          if (p && !p.decision) p.decision = "verde";
+        }
+      }
+      this.chequearAvance();
+    } else if (fase === "vote") {
+      for (const [, p] of this.state.players) {
+        if (p.connected && !p.acted) p.acted = true;
+      }
+      this.chequearAvance();
+    }
+  }
+
+  /** Limpieza al cerrarse la sala (evita timers colgados). */
+  onDispose() {
+    this.limpiarTimer();
+  }
+
   /** Entra a una fase de "ack" (briefing/result/marcador/final): resetea
-   *  `acted` y deja a los bots ya confirmados. */
+   *  `acted` y deja a los bots ya confirmados. Estas fases no tienen tiempo
+   *  límite, así que cualquier timer activo se cancela. */
   private iniciarFase(fase: string) {
+    this.limpiarTimer();
     this.state.phase = fase;
     for (const [, p] of this.state.players) {
       p.acted = false;
@@ -330,6 +388,11 @@ export class GameRoom extends Room<GameState> {
       p.decision = "";
       if (p.isBot) p.decision = Math.random() < 0.5 ? "verde" : "rojo";
     }
+
+    // Tiempo límite de la llamada (1 min en El Botón). Si todos los humanos
+    // deciden antes, la fase avanza sola y el timer se cancela en la
+    // transición (iniciarFase limpia). Si se agota, alExpirarFase resuelve.
+    this.armarTimer(this.challengeActual?.callSeconds ?? 0);
 
     // Si todas las parejas de esta tanda quedaron formadas solo por bots
     // (ej. con 3 jugadores, en la tanda donde el único humano queda sin
@@ -461,6 +524,11 @@ export class GameRoom extends Room<GameState> {
         p.acted = true; // los bots votan y confirman al instante
       }
     }
+
+    // Tiempo límite de la votación (2 min en El Recorte). Al vencer,
+    // alExpirarFase confirma a los que no confirmaron (su voto actual cuenta;
+    // sin voto = abstención) y resuelve.
+    this.armarTimer(this.challengeActual?.voteSeconds ?? 0);
   }
 
   /** Cuenta los votos: el más votado recibe `voteDelta` (negativo en El
@@ -491,6 +559,7 @@ export class GameRoom extends Room<GameState> {
   }
 
   private volverLobby() {
+    this.limpiarTimer();
     this.state.status = "lobby";
     this.state.phase = "lobby";
     this.state.challengeId = "";

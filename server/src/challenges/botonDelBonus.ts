@@ -35,5 +35,6 @@ export const BOTON_DEL_BONUS: ChallengeDefinition = {
   format: "individual",
   kind: "llamadas",
   callRounds: 3,
+  callSeconds: 60, // 1 minuto máximo por llamada (tanda)
   puntuarPareja: puntuarBoton,
 };
