@@ -826,6 +826,59 @@ app-intro.intro{
 
 
 /* ============================================================
+   REVEAL ORQUESTADO — intro con efecto máquina de escribir
+   (ver reveal.ts + intro.ts). Solo se activa donde se usa la
+   directiva `appReveal`; el resto de las pantallas siguen con los
+   beats CSS de arriba.
+   ============================================================ */
+
+/* Todo elemento con appReveal arranca oculto (evita el flash del
+   contenido completo antes de que la directiva tome el control). */
+[appReveal]{ opacity:0; }
+
+/* El elemento de tipeo es visible (pero con el texto vaciado) ni bien la
+   directiva lo prepara; lo que "aparece" son los caracteres uno a uno. */
+.reveal-type.reveal-ready{ opacity:1; }
+
+/* Los modos de animación reusan los MISMOS keyframes que los beats, pero
+   se disparan cuando el orquestador agrega `.reveal-on` (en su turno). */
+.reveal-on{ opacity:1; }
+.reveal-on.reveal-fade  { animation: beatIn 600ms cubic-bezier(.2,.7,.2,1) both; }
+.reveal-on.reveal-stamp { animation: stampSoftIn 800ms both; }
+.reveal-on.reveal-slide { animation: titleSlideIn 900ms cubic-bezier(.16,1,.3,1) both; filter:none; }
+.reveal-on.reveal-kicker{ animation: kickerIn 450ms both; }
+
+/* Caret de máquina de escribir: barrita champagne que parpadea al final
+   del texto mientras se está tipeando (clase .tw-typing). */
+.tw-typing::after{
+  content:'';
+  display:inline-block;
+  width:0.55ch;
+  height:1.02em;
+  margin-left:2px;
+  transform:translateY(0.16em);
+  background:var(--accent);
+  animation:twCaret 0.9s steps(1,end) infinite;
+}
+@keyframes twCaret{
+  0%,49.9%  { opacity:1; }
+  50%,100%  { opacity:0; }
+}
+@media (prefers-reduced-motion: reduce){
+  .tw-typing::after{ animation:none; opacity:0; }
+}
+
+/* Tap para saltar (modo orquestado): todo aparece al instante en su estado
+   final, sin animación ni tipeo. El texto completo lo rellena la directiva
+   (completar); acá solo forzamos visibilidad y cortamos animaciones. Los
+   transforms base de cada elemento YA son el estado de reposo (el sello
+   queda en su rotación final, etc.), así que con animation:none alcanza. */
+.intro.skipped [appReveal]{
+  opacity:1 !important;
+  animation:none !important;
+}
+
+/* ============================================================
    Accesibilidad — focus visible + reduced motion
    ============================================================ */
 

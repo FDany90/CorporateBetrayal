@@ -2,27 +2,30 @@
      Premisa narrativa del juego. Sin shell (topbar/appheader): la
      pantalla es 100% documento — refuerza el dramatismo. El botón
      ENTENDIDO vive DENTRO del .doc (no como actionbar flotante)
-     para que el papel se sienta como una pieza única. -->
+     para que el papel se sienta como una pieza única.
+
+     Reveal: orquestado por appReveal (ver reveal.ts). Los dos párrafos
+     se ESCRIBEN (máquina de escribir); el resto aparece con animación;
+     el sello "CONFIDENCIAL" cae al final. El orden lo fija [revealOrder]. -->
 <div class="screen comunicado-screen">
-  <app-intro class="intro-slow" [totalMs]="totalMs()">
+  <app-intro>
     <div class="content doc-scroll">
       <article class="doc">
 
         <!-- ENCABEZADO minimal: solo la marca (sin folio ni departamento) -->
-        <header class="doc-head beat" [style.--i]="beatHead">
+        <header class="doc-head" appReveal="fade" [revealOrder]="0">
           <div class="doc-brand">SINERGIA·CORP</div>
           <div class="divider"></div>
         </header>
 
         <!-- TÍTULO grande -->
-        <hgroup class="doc-title beat" [style.--i]="beatTitle">
+        <hgroup class="doc-title" appReveal="fade" [revealOrder]="1">
           <p class="kicker">COMUNICADO OFICIAL</p>
           <h1>Plan de Optimización<br/>Estructural Q2</h1>
         </hgroup>
 
-        <!-- Bajada — primer párrafo (versión completa, ahora que el
-             documento se acortó por otros lados y queda espacio). -->
-        <p class="doc-intro beat" [style.--i]="beatIntro">
+        <!-- Bajada — primer párrafo (se escribe). -->
+        <p class="doc-intro" appReveal="type" [revealOrder]="2">
           Por la presente, esta Dirección informa a la totalidad de la plantilla
           que se encuentra en ejecución el <strong>Plan de Optimización
           Estructural</strong> correspondiente al trimestre en curso. Como
@@ -31,7 +34,7 @@
         </p>
 
         <!-- Los dos CUADROS destacados — una línea cada uno. -->
-        <section class="resoluciones beat" [style.--i]="beatCuadros">
+        <section class="resoluciones" appReveal="fade" [revealOrder]="3">
           <article class="resol resol-ascenso">
             <div class="resol-num">01</div>
             <div class="resol-titulo">ASCENSO</div>
@@ -42,14 +45,14 @@
             <div class="resol-titulo">DESVINCULACIÓN</div>
           </article>
 
-          <!-- Sello CONFIDENCIAL diagonal por ENCIMA del bloque. -->
-          <div class="stamp-urgente" [style.--stamp-delay.ms]="stampDelayMs()">
+          <!-- Sello CONFIDENCIAL diagonal — cae al final (revealOrder alto). -->
+          <div class="stamp-urgente" appReveal="sello" [revealOrder]="6">
             CONFIDENCIAL
           </div>
         </section>
 
-        <!-- Cierre — segundo párrafo (completo). -->
-        <p class="doc-intro beat" [style.--i]="beatCierre">
+        <!-- Cierre — segundo párrafo (se escribe). -->
+        <p class="doc-intro" appReveal="type" [revealOrder]="4">
           Durante los próximos días se procederá al <strong>monitoreo de la
           performance individual</strong>, el trabajo colaborativo y el
           compromiso con los valores institucionales. La decisión final se
@@ -58,7 +61,7 @@
         </p>
 
         <!-- Firma oficial -->
-        <footer class="doc-foot beat" [style.--i]="beatFirma">
+        <footer class="doc-foot" appReveal="fade" [revealOrder]="5">
           <div class="firma-line"></div>
           <p>
             Sin más, saluda atte.<br/>
@@ -78,8 +81,9 @@
             </p>
           } @else {
             <button
-              class="comunicado-btn beat"
-              [style.--i]="beatBoton()"
+              class="comunicado-btn"
+              appReveal="fade"
+              [revealOrder]="7"
               (click)="confirmar()"
             >
               ENTENDIDO

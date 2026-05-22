@@ -3,27 +3,30 @@
      el carácter teatral y libera espacio vertical para que el botón
      VOLVER AL LOBBY quede siempre visible. Ver final.ts para la coreografía. -->
 <div class="screen final-screen">
-  <app-intro [totalMs]="totalMs()">
+  <app-intro>
     <div class="content doc-scroll">
-      <!-- El documento. La clase .doc aplica papel crema + grano + tipos. -->
+      <!-- El documento. La clase .doc aplica papel crema + grano + tipos.
+           Reveal orquestado por appReveal: el orden de aparición lo fija
+           [revealOrder] (NO el orden del DOM), para conservar el suspenso
+           (la plantilla se revela de abajo hacia arriba, el ganador después,
+           el sello cae al final). La bajada se ESCRIBE (máquina de escribir). -->
       <article class="doc">
-        <!-- ENCABEZADO: folio + departamento + marca grande del documento.
-             Beat 0: es lo primero que se "imprime". -->
-        <header class="doc-head beat" [style.--i]="beatHead">
+        <!-- ENCABEZADO: folio + departamento + marca grande del documento. -->
+        <header class="doc-head" appReveal="fade" [revealOrder]="beatHead">
           <div class="folio">Nº 2026-Q2-EVAL-0042</div>
           <div class="dept">DEPARTAMENTO DE RECURSOS HUMANOS</div>
           <div class="doc-brand">SINERGIA·CORP</div>
           <div class="divider"></div>
         </header>
 
-        <!-- TÍTULO: "CIRCULAR OFICIAL / Evaluación trimestral". Beat 1. -->
-        <hgroup class="doc-title beat" [style.--i]="beatTitle">
+        <!-- TÍTULO: "CIRCULAR OFICIAL / Evaluación trimestral". -->
+        <hgroup class="doc-title" appReveal="fade" [revealOrder]="beatTitle">
           <p class="kicker">CIRCULAR OFICIAL · INTERNA</p>
           <h1>Evaluación<br/>de Desempeño</h1>
         </hgroup>
 
-        <!-- BAJADA: párrafo introductorio. Beat 2. -->
-        <p class="doc-intro beat" [style.--i]="beatIntro">
+        <!-- BAJADA: párrafo introductorio (se escribe). -->
+        <p class="doc-intro" appReveal="type" [revealOrder]="beatIntro">
           Por la presente, esta Dirección informa el escalafón resultante de
           la jornada y reconoce públicamente al colaborador destacado:
         </p>
@@ -31,7 +34,7 @@
         <!-- BLOQUE GANADOR (#1). Aparece tarde (beatGanador) pero visualmente
              está arriba en el documento — refuerza que es la conclusión que
              "se imprimió al final" pero se lee primero. -->
-        <section class="winner beat" [style.--i]="beatGanador()">
+        <section class="winner" appReveal="fade" [revealOrder]="beatGanador()">
           <p class="winner-kicker">— EMPLEADO DEL MES —</p>
           <div class="winner-card">
             <app-avatar class="winner-av" [id]="ganador().avatar" [size]="84" />
@@ -44,26 +47,24 @@
               <span class="val">{{ ganador().influence }}</span>
             </div>
           </div>
-          <!-- Sello rojo. Tiene su propia variable de delay, calculada
-               desde TS para que caiga DESPUÉS del fade del bloque ganador.
-               No usa el sistema de .beat porque su animación es distinta
-               (rotate + scale + overshoot) y no debe cancelarse con .skip
-               de cualquier forma — la cancela solo la clase .skipped. -->
-          <div class="stamp" [style.--stamp-delay.ms]="stampDelayMs()">
+          <!-- Sello rojo "ASCENSO APROBADO": cae justo después del ganador
+               (revealOrder = beatGanador + 1). Su animación (rotate + scale +
+               overshoot) la dispara la directiva appReveal="sello". -->
+          <div class="stamp" appReveal="sello" [revealOrder]="beatGanador() + 1">
             ASCENSO APROBADO
           </div>
         </section>
 
         <!-- PLANTILLA GENERAL (#2 .. #N). La revelamos del peor al mejor
              para crear suspenso: la última fila del DOM (que es la #2,
-             la mejor de la plantilla) tiene el beat MÁS BAJO. -->
+             la mejor de la plantilla) tiene el revealOrder MÁS BAJO. -->
         <section class="plantilla">
-          <header class="section-head beat" [style.--i]="beatPlantillaHead">
+          <header class="section-head" appReveal="fade" [revealOrder]="beatPlantillaHead">
             Plantilla general
           </header>
 
           @for (p of plantilla(); track p.id; let i = $index) {
-            <div class="row beat" [style.--i]="beatFila(i)">
+            <div class="row" appReveal="fade" [revealOrder]="beatFila(i)">
               <span class="row-puesto">{{ p.puesto.toString().padStart(2, '0') }}</span>
               <app-avatar [id]="p.avatar" [size]="32" />
               <span class="row-name">
@@ -83,7 +84,7 @@
         </section>
 
         <!-- FIRMA: cierra el documento, aparece después del sello. -->
-        <footer class="doc-foot beat" [style.--i]="beatFirma()">
+        <footer class="doc-foot" appReveal="fade" [revealOrder]="beatFirma()">
           <div class="firma-line"></div>
           <p>
             Firmado:<br/>
@@ -97,7 +98,7 @@
     </div>
 
     <!-- ACTIONBAR: queda en el shell, sobre fondo del shell (no del papel).
-         El botón es el último beat — un beat más después de la firma. -->
+         El botón es el último paso — un paso más después de la firma. -->
     <div class="actionbar">
       @if (yo()?.acted) {
         <p class="muted-note" aria-live="polite" aria-atomic="true">
@@ -105,8 +106,9 @@
         </p>
       } @else {
         <button
-          class="btn final-btn beat"
-          [style.--i]="beatFirma() + 1"
+          class="btn final-btn"
+          appReveal="fade"
+          [revealOrder]="beatFirma() + 1"
           (click)="volver()"
         >
           VOLVER AL LOBBY

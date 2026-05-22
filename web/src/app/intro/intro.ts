@@ -1,4 +1,5 @@
 import {
+  AfterContentInit,
   Component,
   ElementRef,
   HostBinding,
@@ -8,6 +9,17 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
+
+/** Forma mínima de un paso de aparición (lo implementa la directiva
+ *  `appReveal`). Se tipa acá con una interfaz para NO importar `Reveal` y
+ *  evitar un ciclo de imports (Reveal ya importa Intro para el DI). */
+export interface RevealStep {
+  readonly host: HTMLElement;
+  /** Orden explícito; si es undefined se usa la posición en el DOM. */
+  readonly order?: number;
+  play(): Promise<void>;
+  completar(): void;
+}
 
 /**
  * `<app-intro>` — orquestador del "intro dramático" de las pantallas
@@ -59,7 +71,7 @@ import {
   // El host es el propio <app-intro>. Le ponemos clase .intro siempre;
   // la clase .skipped la agrega/saca el binding de abajo según el signal.
 })
-export class Intro implements OnInit, OnDestroy {
+export class Intro implements OnInit, AfterContentInit, OnDestroy {
   /**
    * Duración aproximada de la secuencia (ms). El componente programa un
    * `setTimeout(totalMs)` que marca `skipped = true` al final — eso libera
@@ -74,9 +86,18 @@ export class Intro implements OnInit, OnDestroy {
    */
   @Input() totalMs = 2600;
 
+  /** Gap (ms) entre pasos cuando orquestamos `appReveal` (modo typewriter). */
+  @Input() gapMs = 150;
+
   /** Signal interno: ¿ya se completó (por timer o tap-skip)? */
   private readonly skipped = signal(false);
   private timer?: ReturnType<typeof setTimeout>;
+
+  /** Pasos `appReveal` registrados (modo orquestado). Si queda vacío, el
+   *  intro funciona como siempre (beats CSS por `--i`). */
+  private readonly pasos: RevealStep[] = [];
+  private orquestando = false;
+  private destruido = false;
 
   // Host bindings: aplican atributos/clases al propio <app-intro>.
   // Equivalente Angular del "host" antiguo (Angular 16+) en formato de
@@ -87,22 +108,65 @@ export class Intro implements OnInit, OnDestroy {
   // Click en cualquier parte del intro → skip. Si el usuario tocó el
   // botón ENTENDIDO, el evento burbujea hasta acá y también dispara
   // skip(), pero como ya estará skipped, el setter es idempotente.
+  // En modo orquestado, además completa todos los pasos al instante.
   @HostListener('click') onClick(): void {
     this.skipped.set(true);
+    if (this.orquestando) {
+      for (const p of this.pasos) p.completar();
+    }
   }
 
   constructor(_el: ElementRef<HTMLElement>) {}
 
+  /** Llamado por cada directiva `appReveal` al inicializarse. */
+  registrar(paso: RevealStep): void {
+    this.pasos.push(paso);
+  }
+
   ngOnInit(): void {
-    // Programamos el "final natural": cuando termina la secuencia,
-    // marcamos skipped=true para dejar pointer-events normales y poder,
-    // más adelante, emitir un evento `done` si lo necesitamos.
-    this.timer = setTimeout(() => this.skipped.set(true), this.totalMs);
+    // (El arranque se decide en ngAfterContentInit, cuando ya se
+    // registraron los pasos `appReveal` proyectados — si los hay.)
+  }
+
+  ngAfterContentInit(): void {
+    if (this.pasos.length > 0) {
+      // Modo orquestado (typewriter): reproducimos los pasos en orden.
+      this.orquestando = true;
+      void this.reproducirSecuencia();
+    } else {
+      // Modo legacy (beats CSS por `--i`): al terminar la secuencia,
+      // marcamos skipped=true para normalizar pointer-events.
+      this.timer = setTimeout(() => this.skipped.set(true), this.totalMs);
+    }
+  }
+
+  /** Reproduce los pasos uno tras otro (cada uno espera al anterior).
+   *  Orden: si TODOS los pasos declaran `order`, se ordena por ese número
+   *  (coreografías fuera de orden, ej. el Final); si no, por posición en el
+   *  DOM (caso típico, ej. el Briefing). */
+  private async reproducirSecuencia(): Promise<void> {
+    const todosConOrden = this.pasos.every((p) => p.order !== undefined);
+    const ordenados = [...this.pasos].sort((a, b) => {
+      if (todosConOrden) return (a.order ?? 0) - (b.order ?? 0);
+      return a.host.compareDocumentPosition(b.host) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+        ? -1
+        : 1;
+    });
+    for (const paso of ordenados) {
+      if (this.destruido || this.skipped()) break;
+      await paso.play();
+      if (this.destruido || this.skipped()) break;
+      if (this.gapMs > 0) {
+        await new Promise<void>((r) => setTimeout(r, this.gapMs));
+      }
+    }
   }
 
   ngOnDestroy(): void {
     // Evitar fugas: si el componente se destruye antes (cambio de fase,
     // reconexión, etc.), cancelamos el timer pendiente.
+    this.destruido = true;
     if (this.timer) clearTimeout(this.timer);
   }
 }

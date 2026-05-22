@@ -1,6 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { GameService } from '../game.service';
 import { Intro } from '../intro/intro';
+import { Reveal } from '../reveal/reveal';
 import { Avatar } from '../avatar/avatar';
 import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
 
@@ -37,7 +38,7 @@ import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
  */
 @Component({
   selector: 'app-final',
-  imports: [Intro, Avatar],
+  imports: [Intro, Reveal, Avatar],
   templateUrl: './final.html',
   styleUrl: './final.css',
 })
@@ -98,31 +99,14 @@ export class Final {
     return this.BEAT_PLANTILLA_START + (n - 1 - indiceEnPlantilla);
   }
 
-  /** Beat del bloque GANADOR — justo después de la última fila de plantilla. */
+  /** Orden del bloque GANADOR — justo después de la última fila de plantilla.
+   *  El sello cae en `beatGanador()+1` y la firma en `beatFirma()` (ver html). */
   readonly beatGanador = computed(
     () => this.BEAT_PLANTILLA_START + this.plantilla().length,
   );
 
-  /**
-   * Delay del sello (ms) — empieza DESPUÉS del beat del ganador.
-   * El ganador entra con la animación del título (1400ms); le damos 400ms
-   * extra de pausa antes de que caiga el sello, para que se "respire".
-   * Los gaps/duraciones coinciden con el CSS `.intro .beat` (delay 0.7s,
-   * título 1400ms). No cambia la animación de caída del sello, solo
-   * CUÁNDO empieza — sigue el reveal más lento.
-   */
-  readonly stampDelayMs = computed(
-    () => this.beatGanador() * 700 + 1400 + 400,
-  );
-
-  /** Beat de la firma — después del sello, con un beat extra de pausa. */
+  /** Orden de la firma — después del sello (ganador + 2). */
   readonly beatFirma = computed(() => this.beatGanador() + 2);
-
-  /**
-   * Duración total estimada de la secuencia (para el <app-intro [totalMs]>).
-   * = beat de firma × 700ms + duración del fade + colchón.
-   */
-  readonly totalMs = computed(() => this.beatFirma() * 700 + 1200 + 600);
 
   volver(): void {
     dlog('Final.volver');

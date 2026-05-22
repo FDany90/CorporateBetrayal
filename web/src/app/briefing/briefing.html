@@ -1,9 +1,9 @@
-<!-- Briefing del minijuego — "Memo interno" del día.
+<!-- Briefing del minijuego — "Memo interno" del día, que se ESCRIBE solo.
      El topbar y el appheader son parte del "shell" y aparecen al instante.
-     Todo lo que está dentro de <app-intro> se revela escalonado (beats con
-     style="--i:N"). Tap en cualquier parte del intro salta la secuencia.
-     Se usa la variante `intro-slow` (700ms entre beats) porque es lectura,
-     no UI rápida — el mismo ritmo del Comunicado. -->
+     Todo lo de adentro de <app-intro> se revela en secuencia (orquestado
+     por la directiva appReveal): la prosa (kicker/lead/cierre) se tipea
+     letra por letra; el título y la matriz usan animación. Cada paso espera
+     al anterior. Un tap en cualquier parte completa todo al instante. -->
 <div class="screen briefing-screen">
   <div class="topbar">
     <span class="brand">
@@ -15,16 +15,16 @@
     Día {{ dia() }} de {{ diasTotal() }} · {{ tema() }}
   </div>
 
-  <app-intro class="intro-slow" [totalMs]="totalMs()">
+  <app-intro>
     <div class="content">
       @switch (challengeId()) {
         @case ('boton-del-bonus') {
-          <p class="kicker beat beat-kicker" style="--i:0">
+          <p class="kicker" appReveal="type">
             Memo interno · Desempeño individual
           </p>
-          <h1 class="doc-h1 beat beat-slide" style="--i:1">El Botón del Bonus</h1>
+          <h1 class="doc-h1" appReveal="slide">El Botón del Bonus</h1>
 
-          <p class="briefing-lead beat" style="--i:1.7">
+          <p class="briefing-lead" appReveal="type">
             La Dirección libera un <strong>bono compartible</strong> entre
             dos colegas. Cada uno decide, <strong>en secreto y por
             separado</strong>, si lo <em class="verde">comparte</em> o
@@ -32,14 +32,14 @@
             recién al cerrar la llamada.
           </p>
 
-          <!-- El contenedor NO es beat: la caja aparece de una y se va
-               "llenando" — la cabecera y cada fila son beats sucesivos. -->
+          <!-- El contenedor NO se anima: la caja aparece de una y se va
+               "llenando" — la cabecera y cada fila son pasos sucesivos. -->
           <div class="matrix">
-            <div class="matrix-head beat" style="--i:2.7">
+            <div class="matrix-head" appReveal="fade">
               Matriz de pagos · Influencia
             </div>
 
-            <div class="matrix-row beat beat-stamp" style="--i:3.7">
+            <div class="matrix-row" appReveal="stamp">
               <div class="matrix-label">Ambos cooperan</div>
               <div class="matrix-cells">
                 <span class="cell verde">Compartir <span class="cell-val">+3</span></span>
@@ -51,7 +51,7 @@
               </p>
             </div>
 
-            <div class="matrix-row beat beat-stamp" style="--i:4.7">
+            <div class="matrix-row" appReveal="stamp">
               <div class="matrix-label">Uno traiciona</div>
               <div class="matrix-cells">
                 <span class="cell rojo">Quedárselo <span class="cell-val">+5</span></span>
@@ -64,7 +64,7 @@
               </p>
             </div>
 
-            <div class="matrix-row beat beat-stamp" style="--i:5.7">
+            <div class="matrix-row" appReveal="stamp">
               <div class="matrix-label">Nadie confía</div>
               <div class="matrix-cells">
                 <span class="cell rojo">Quedárselo <span class="cell-val">+1</span></span>
@@ -77,19 +77,19 @@
             </div>
           </div>
 
-          <p class="briefing-cierre beat" style="--i:6.7">
+          <p class="briefing-cierre" appReveal="type">
             Vas a tener <strong>varias llamadas</strong> con colegas
             distintos. Gana quien acumula más Influencia al cerrar el día.
           </p>
         }
 
         @case ('el-recorte') {
-          <p class="kicker beat beat-kicker" style="--i:0">
+          <p class="kicker" appReveal="type">
             Memo interno · Decisión grupal
           </p>
-          <h1 class="doc-h1 beat beat-slide" style="--i:1">El Recorte</h1>
+          <h1 class="doc-h1" appReveal="slide">El Recorte</h1>
 
-          <p class="briefing-lead beat" style="--i:1.7">
+          <p class="briefing-lead" appReveal="type">
             La Dirección informa un <strong>recorte de presupuesto</strong>:
             el trimestre no cierra y <em>no alcanza para todos los bonos</em>.
             Entre todos hay que decidir a quién se le <em>quita</em>.
@@ -98,7 +98,7 @@
           <!-- Instrucción destacada: ícono multi-persona + título +
                bajada. Es el momento clave de este minijuego — todos
                tienen que entrar a la misma llamada. -->
-          <aside class="meeting-call beat" style="--i:2.7">
+          <aside class="meeting-call" appReveal="fade">
             <svg viewBox="0 0 24 24" width="40" height="40" fill="none"
                  stroke="currentColor" stroke-width="1.6"
                  stroke-linecap="round" stroke-linejoin="round"
@@ -116,28 +116,28 @@
             </div>
           </aside>
 
-          <p class="briefing-lead beat" style="--i:3.7">
+          <p class="briefing-lead" appReveal="type">
             Es el momento de <strong>defenderse, acusar y negociar</strong>.
             Al cerrar la reunión, cada uno <strong>vota en secreto</strong>
             a quién dejar sin bono.
           </p>
 
-          <p class="briefing-cierre beat" style="--i:4.7">
+          <p class="briefing-cierre" appReveal="type">
             El más votado <strong>pierde Influencia</strong>. Nadie queda
             eliminado: el juego sigue, pero el golpe pesa.
           </p>
         }
 
         @default {
-          <p class="kicker beat beat-kicker" style="--i:0">
+          <p class="kicker" appReveal="type">
             Memo interno · Jornada de evaluación
           </p>
-          <h1 class="doc-h1 beat beat-slide" style="--i:1">Día grupal</h1>
-          <p class="briefing-lead beat" style="--i:1.7">
+          <h1 class="doc-h1" appReveal="slide">Día grupal</h1>
+          <p class="briefing-lead" appReveal="type">
             Este desafío grupal todavía no está implementado. El día se
             saltea hasta sumar el minijuego.
           </p>
-          <p class="briefing-cierre beat" style="--i:2.7">
+          <p class="briefing-cierre" appReveal="type">
             Tocá «ENTENDIDO» para continuar.
           </p>
         }
@@ -151,9 +151,8 @@
           Esperando a los demás… ({{ listos() }}/{{ total() }})
         </p>
       } @else {
-        <!-- El botón es el último beat del intro: aparece tras los textos.
-             Su --i depende del minijuego (ver beatBoton en briefing.ts). -->
-        <button class="btn beat" [style.--i]="beatBoton()" (click)="confirmar()">
+        <!-- El botón es el último paso del intro: aparece tras los textos. -->
+        <button class="btn" appReveal="fade" (click)="confirmar()">
           ENTENDIDO
         </button>
       }
