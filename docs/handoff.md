@@ -3,7 +3,7 @@
 > Documento de traspaso. Si abrís el proyecto en otra PC o en una sesión
 > nueva (de Claude o tuya), **empezá por acá**.
 
-**Última actualización:** 2026-05-21 · **Hito actual:** Paso 3 completo ·
+**Última actualización:** 2026-05-22 · **Hito actual:** Paso 3 completo ·
 2 minijuegos · cliente Angular con lenguaje visual editorial aplicado a
 **7 pantallas** (Ingreso / Lobby / Comunicado / Final / Briefing /
 Desafío / Votación) · nomenclatura editorial **"Día X de Y · Tema del
@@ -12,10 +12,18 @@ Confirmar Voto y reordenamiento animado** · **sistema de animaciones**
 (variantes de beat reusables, count-up numérico, reveals escalonados) ·
 **herramientas de desarrollo** (devbar flotante: partida rápida, salir al
 lobby, saltar fase, arrancar en un minijuego) · sistema de avatars (15
-SVGs + modal) · a11y/UX mobile-first auditada (WIG Vercel)
+SVGs + modal) · a11y/UX mobile-first auditada (WIG Vercel) · **layout
+DESKTOP** (escritorio de nogal + vade de cuero + hoja de papel + ficha
+lateral de personal) como progressive enhancement sobre el mobile.
 
-**Próximo objetivo:** MVP de **4 minijuegos** (2 individuales + 2 grupales)
-→ **deploy + playtest** con amigos. Ver §9.
+**PIVOTE (2026-05-22):** el target de esta versión pasó a ser **desktop**
+(se juega en la compu del laburo, al lado de Teams). El playtest será en
+desktop. La integración mobile real con llamadas será **otro proyecto**
+futuro (app nativa). Ver §7 y §9.
+
+**Próximo objetivo:** **terminar la adaptación desktop** (propagar +
+afinar en las pantallas restantes) → MVP de **4 minijuegos** (2 indiv. +
+2 grupales, naciendo ya responsive) → **playtest en desktop**. Ver §9.
 
 ---
 
@@ -141,6 +149,28 @@ Guidelines, ver el skill `/web-design-guidelines`):
 - `aria-live="polite"` en zonas async ("Esperando a los demás…").
 - `tabular-nums` en columnas numéricas, `text-wrap: balance` en headings.
 
+**Layout DESKTOP** (nuevo, 2026-05-22) — *progressive enhancement* sobre el
+mobile-first, todo en `web/src/styles.css` dentro de `@media (min-width:760px)`
+(el corte es 760px de ancho **CSS**, no físico: con el escalado de Windows un
+monitor grande puede reportar ~800px CSS — por eso 760 y no 900+):
+- **Escritorio de nogal**: el fondo `--desk` se vuelve una mesa de madera
+  (gradientes CSS: veta vertical + tablones + luz cenital cálida).
+- **Vade de cuero oxblood/bordó**: el wrapper `.desk` es la carpeta de
+  escritorio sobre la que se apoya todo, con **esquineras champagne** (8
+  gradientes en `::after`) y filo de cuero (`::before`). Sombra propia.
+- **Hoja de papel**: `.app` deja de ser columna-celular y se vuelve una hoja
+  flexible (crece hasta 680px) con sombra dramática. `app-root` es
+  `display:contents` para que el centrado flex funcione.
+- **Ficha de personal lateral** (`<app-desk-context>`, en `web/src/app/desk-context/`):
+  panel de contexto persistente (Legajo + avatar, Influencia, Día X de Y +
+  tema, En sala). Se monta en `app.html` **solo en desktop y solo en fases
+  de juego** (briefing/calls/meeting/vote/result/marcador). Se EXCLUYE en
+  lobby/ingreso (van solo-hoja) y en comunicado/final (momentos teatrales a
+  pantalla plena). NO muestra Influencia ajena (hay minijuegos de marcador
+  oculto; el marcador se revela en su pantalla).
+- **Mobile intacto**: por debajo de 760px se ve exactamente el layout de
+  celular de siempre (la ficha desaparece, `display:contents` es no-op).
+
 Todo jugable solo con bots.
 
 ---
@@ -163,6 +193,12 @@ web/   cliente — Angular (TypeScript)
   playtest, entrá vos primero unos segundos antes de citar a los demás.
 - Ambos redeployan solos al hacer `push` a `main` (auto-deploy de
   GitHub). El cliente lleva la URL del server horneada en el build.
+- **Ojo (pendiente de configurar):** Vercel es inteligente y solo
+  reconstruye cuando cambian archivos de `web/`. **Render, por defecto,
+  redeploya el server en CADA push a `main`**, aunque el cambio sea 100%
+  web — innecesario (resetea el cold-start, server no cambió). Fix: en el
+  panel de Render → Settings → **Build Filters** → *Included Paths* =
+  `server/**`, para que el server solo redeploye cuando cambia `server/`.
 
 Correrlo (Node 20+, dos terminales):
 ```bash
@@ -204,10 +240,21 @@ Detalle de cada archivo: [codigo.md](codigo.md).
 - **MVP:** catálogo de 6 individuales + 7 grupales; estructura de rondas
   **parametrizable** (`config.ts`) — por defecto 4 rondas I-G-I-G; **un solo
   recurso** (Influencia); **sin** Misión Personal ni Sospecha (post-MVP).
+- **Target de plataforma (decidido 2026-05-22):** **DESKTOP** para esta
+  versión (se juega en la compu del laburo, al lado de Teams; las empresas
+  no suelen bloquear una web nueva que no parece "un juego"). El playtest
+  será en desktop. La integración mobile real con llamadas será **otro
+  proyecto** futuro (app nativa iPhone/Android, encarado de nuevo). El
+  desarrollo sigue siendo **mobile-first** en el código (el desktop es
+  progressive enhancement encima), pero el desktop dejó de ser pulido
+  post-MVP y es **parte del MVP** (antes del playtest).
 - **Visual:** lenguaje **"Editorial Sinergia"** — sátira corporativa con
   estética de documentos internos (papel crema, tinta carbón, acento champagne,
   rojo apagado para el sello). Fonts: **Fraunces** (display, serif editorial)
-  + **JetBrains Mono** (body, "sistema interno"). **Mobile First**.
+  + **JetBrains Mono** (body, "sistema interno"). **Mobile First** en código.
+  En desktop, metáfora de **"documento sobre escritorio"**: hoja de papel
+  sobre un vade de cuero oxblood, sobre una mesa de nogal, con ficha de
+  personal al costado (decidido y construido 2026-05-22).
   Las paletas conmutables Azul/Verde se retiraron — paleta única definitiva.
   Intensidad modulada: pantallas funcionales con papel claro; pantalla Final
   con grano + sombra dramática + sello rojo (pico teatral del juego).
@@ -224,8 +271,21 @@ Detalle de cada archivo: [codigo.md](codigo.md).
 
 - **Server:** `npm run check` (typecheck con `tsc --noEmit`).
 - **Web:** `npm run build` / `ng build` (compila + typecheck).
-- **Manual:** en la PC, con `F12 → emulación mobile` para el layout, y **varias
-  pestañas** (normal + incógnito) para simular multijugador.
+- **Manual:** en la PC, con `F12 → emulación mobile` para el layout mobile, y
+  **varias pestañas** (normal + incógnito) para simular multijugador.
+- **Probar DESKTOP:** simplemente con la ventana ancha (el layout escritorio
+  arranca en **760px de ancho CSS**). OJO: el ancho **CSS** no es el físico —
+  con el escalado de Windows (150-250%) un monitor grande reporta ~800px CSS.
+  Para verificar en consola: `window.innerWidth` y
+  `getComputedStyle(document.querySelector('.app')).maxWidth` (debe dar
+  `680px` en desktop, `440px` en mobile). La ficha lateral solo aparece en
+  fases de juego (arrancá una partida con la devbar para verla).
+- **Gotcha del dev server (nos comió tiempo el 2026-05-22):** Angular
+  (`npm start`) a veces sigue sirviendo el **CSS viejo** al editar
+  `styles.css` global o agregar componentes — recargar el browser NO alcanza.
+  Hay que **matar el proceso** de `npm start` (Ctrl+C; o matar el puerto 4200)
+  y volver a levantarlo, esperar `Compiled successfully`, y Ctrl+Shift+R. Si
+  persiste, borrar `web/.angular/cache`.
 - **Logs de depuración:** el cliente Angular tiene logs temporales (`dlog`,
   prefijo `[traición·…]` en consola) activos durante el desarrollo. Se quitan
   borrando `web/src/app/dlog.ts` y sus usos.
@@ -238,22 +298,33 @@ Detalle de cada archivo: [codigo.md](codigo.md).
 
 ## 9. Próximos pasos
 
-**Objetivo inmediato: MVP de 4 minijuegos → deploy → playtest.** Decisión
-de scope (2026-05-21): con 4 juegos (2 individuales + 2 grupales) alcanza
-para un primer playtest entre amigos. Recién ahí se valida que el loop
-social engancha, antes de seguir expandiendo el catálogo.
+**Objetivo inmediato: terminar desktop → 4 minijuegos → playtest en
+desktop.** El deploy ya está hecho (Vercel + Render, §5). Con el pivote a
+desktop (§7), el orden quedó:
 
-1. **Sumar 2 minijuegos** (de a uno por incremento):
+1. **Terminar la adaptación desktop** (EN CURSO — lo próximo al volver):
+   - El shell desktop ya está (escritorio + vade + hoja + ficha lateral, §4).
+   - **Propagar y afinar** pantalla por pantalla: revisar cómo se ve cada
+     una en desktop con la hoja a 680px y la ficha al lado (Briefing,
+     Desafío, Votación, Reunión, Resultado, Marcador, Comunicado, Final,
+     Lobby, Ingreso). Algunas pantallas pensadas para columna angosta
+     pueden quedar con mucho aire o desbalanceadas en la hoja ancha —
+     ajustar dónde convenga (multi-columna donde sume, anchos máximos de
+     bloques, etc.). Iterar como siempre, una pantalla a la vez.
+   - Afinar detalles del escritorio según gusto (saturación del bordó,
+     grosor de las esquineras, cuánto cuero asoma = `padding` del `.desk`).
+2. **Sumar 2 minijuegos** (de a uno por incremento, **naciendo ya responsive**):
    - Otro **individual** (kind `llamadas`, como El Botón del Bonus).
    - Otro **grupal** (kind `votacion`, como El Recorte).
    Ambos son de *kinds* ya existentes → **no tocan el motor**: solo una
    `ChallengeDefinition` nueva en `server/src/challenges/` + registro,
    su entrada en `challenge-meta.ts` (tema + selector dev) y los textos
-   de su briefing.
-2. **Deploy** — hosting estático (web) + Railway/Fly (server). Habilita
-   probar en celulares reales (hoy bloqueado por el firewall en red local).
-3. **Playtest** con 3-5 amigos. Observar si el debate/voto en la llamada
-   funciona; ajustar balance y copy según lo que pase.
+   de su briefing. (Dani dijo que ya tiene en mente cuáles; falta elegir.)
+3. **Playtest en desktop** con 3-5 amigos. Observar si el debate/voto en la
+   llamada funciona; ajustar balance y copy según lo que pase.
+
+> **Config pendiente (no bloquea):** poner el Build Filter de Render
+> (`server/**`) para que los pushes web no redeployen el server (§5).
 
 **Después del MVP / playtest:**
 
