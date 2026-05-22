@@ -1,6 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { GameService } from '../game.service';
 import { Avatar } from '../avatar/avatar';
+import { CountUp } from '../count-up';
 import { NOMBRE_CHALLENGE } from '../models';
 import { temaDelDia } from '../challenge-meta';
 import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
@@ -11,7 +12,7 @@ import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
  */
 @Component({
   selector: 'app-resultado',
-  imports: [Avatar],
+  imports: [Avatar, CountUp],
   templateUrl: './resultado.html',
 })
 export class Resultado {
@@ -37,6 +38,11 @@ export class Resultado {
   readonly delta = computed(() => this.yo()?.lastDelta ?? 0);
   /** Signo a mostrar delante del delta ("+" si fue positivo). */
   readonly signo = computed(() => (this.delta() > 0 ? '+' : ''));
+
+  /** Influencia actual y la previa al desafío (actual − delta). El conteo
+   *  va de la previa a la actual: sube si ganaste, baja si perdiste. */
+  readonly influencia = computed(() => this.yo()?.influence ?? 0);
+  readonly influenciaPrevia = computed(() => this.influencia() - this.delta());
 
   /** Tanda actual y total de tandas del desafío. */
   readonly tanda = computed(() => this.juego.estado()?.tanda ?? 0);

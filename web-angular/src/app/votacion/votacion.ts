@@ -64,9 +64,9 @@ export class Votacion {
   });
 
   /**
-   * Todos los jugadores, ordenados con los más votados arriba. Yo
-   * aparezco también (para ver cuántos votos me llevan), pero con una
-   * marca "vos" y deshabilitado.
+   * Todos los jugadores ordenados con los más votados arriba. Se usa
+   * SOLO para calcular el "rank" (puesto) de cada uno — no para ordenar
+   * el DOM. Ver `jugadoresEstables` + `rankDe`.
    */
   readonly filas = computed(() => {
     const c = this.conteoVotos();
@@ -74,6 +74,28 @@ export class Votacion {
       (a, b) => (c.get(b.id) ?? 0) - (c.get(a.id) ?? 0),
     );
   });
+
+  /**
+   * Altura fija de cada fila (px). DEBE coincidir con `.voto-row height`
+   * en votacion.css: se usa para posicionar cada fila por transform.
+   */
+  readonly ALTURA_FILA = 64;
+
+  /**
+   * Jugadores en orden ESTABLE (por id) — este es el orden del DOM, que
+   * NUNCA cambia. El reordenamiento por votos se hace moviendo cada fila
+   * con `transform: translateY(rank * ALTURA)`, así CSS anima el cambio
+   * de puesto. Como el DOM no se reordena, votos simultáneos no rompen
+   * ni el orden ni las animaciones (la transición CSS reanima sola).
+   */
+  readonly jugadoresEstables = computed(() =>
+    [...this.jugadores()].sort((a, b) => a.id.localeCompare(b.id)),
+  );
+
+  /** Puesto actual (0 = arriba) de un jugador según los votos. */
+  rankDe(id: string): number {
+    return this.filas().findIndex((p) => p.id === id);
+  }
 
   /** Progreso: cuántos conectados ya confirmaron. */
   readonly confirmados = computed(
@@ -91,6 +113,17 @@ export class Votacion {
   /** ¿Esta fila soy yo? (no se puede votar a uno mismo). */
   esMia(id: string): boolean {
     return id === this.miId();
+  }
+
+  /** Etiqueta accesible de una fila: nombre + conteo de votos. El conteo
+   *  visual está aria-hidden (es decorativo en columna), así que lo
+   *  exponemos acá para lectores de pantalla. */
+  ariaVoto(nombre: string, id: string): string {
+    const n = this.votosDe(id);
+    const votos = `${n} ${n === 1 ? 'voto' : 'votos'}`;
+    return this.esMia(id)
+      ? `${nombre} (vos), ${votos}`
+      : `Votar a ${nombre}, ${votos}`;
   }
 
   /** Toca una fila para votar (cambia mi voto). Bloqueado tras confirmar. */

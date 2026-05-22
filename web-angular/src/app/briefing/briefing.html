@@ -15,16 +15,16 @@
     Día {{ dia() }} de {{ diasTotal() }} · {{ tema() }}
   </div>
 
-  <app-intro class="intro-slow">
+  <app-intro class="intro-slow" [totalMs]="totalMs()">
     <div class="content">
       @switch (challengeId()) {
         @case ('boton-del-bonus') {
-          <p class="kicker beat" style="--i:0">
+          <p class="kicker beat beat-kicker" style="--i:0">
             Memo interno · Desempeño individual
           </p>
-          <h1 class="doc-h1 beat" style="--i:1">El Botón del Bonus</h1>
+          <h1 class="doc-h1 beat beat-slide" style="--i:1">El Botón del Bonus</h1>
 
-          <p class="briefing-lead beat" style="--i:2">
+          <p class="briefing-lead beat" style="--i:1.7">
             La Dirección libera un <strong>bono compartible</strong> entre
             dos colegas. Cada uno decide, <strong>en secreto y por
             separado</strong>, si lo <em class="verde">comparte</em> o
@@ -32,10 +32,14 @@
             recién al cerrar la llamada.
           </p>
 
-          <div class="matrix beat" style="--i:3">
-            <div class="matrix-head">Matriz de pagos · Influencia</div>
+          <!-- El contenedor NO es beat: la caja aparece de una y se va
+               "llenando" — la cabecera y cada fila son beats sucesivos. -->
+          <div class="matrix">
+            <div class="matrix-head beat" style="--i:2.7">
+              Matriz de pagos · Influencia
+            </div>
 
-            <div class="matrix-row">
+            <div class="matrix-row beat beat-stamp" style="--i:3.7">
               <div class="matrix-label">Ambos cooperan</div>
               <div class="matrix-cells">
                 <span class="cell verde">Compartir <span class="cell-val">+3</span></span>
@@ -47,7 +51,7 @@
               </p>
             </div>
 
-            <div class="matrix-row">
+            <div class="matrix-row beat beat-stamp" style="--i:4.7">
               <div class="matrix-label">Uno traiciona</div>
               <div class="matrix-cells">
                 <span class="cell rojo">Quedárselo <span class="cell-val">+5</span></span>
@@ -60,7 +64,7 @@
               </p>
             </div>
 
-            <div class="matrix-row">
+            <div class="matrix-row beat beat-stamp" style="--i:5.7">
               <div class="matrix-label">Nadie confía</div>
               <div class="matrix-cells">
                 <span class="cell rojo">Quedárselo <span class="cell-val">+1</span></span>
@@ -73,19 +77,19 @@
             </div>
           </div>
 
-          <p class="briefing-cierre beat" style="--i:4">
+          <p class="briefing-cierre beat" style="--i:6.7">
             Vas a tener <strong>varias llamadas</strong> con colegas
             distintos. Gana quien acumula más Influencia al cerrar el día.
           </p>
         }
 
         @case ('el-recorte') {
-          <p class="kicker beat" style="--i:0">
+          <p class="kicker beat beat-kicker" style="--i:0">
             Memo interno · Decisión grupal
           </p>
-          <h1 class="doc-h1 beat" style="--i:1">El Recorte</h1>
+          <h1 class="doc-h1 beat beat-slide" style="--i:1">El Recorte</h1>
 
-          <p class="briefing-lead beat" style="--i:2">
+          <p class="briefing-lead beat" style="--i:1.7">
             La Dirección informa un <strong>recorte de presupuesto</strong>:
             el trimestre no cierra y <em>no alcanza para todos los bonos</em>.
             Entre todos hay que decidir a quién se le <em>quita</em>.
@@ -94,7 +98,7 @@
           <!-- Instrucción destacada: ícono multi-persona + título +
                bajada. Es el momento clave de este minijuego — todos
                tienen que entrar a la misma llamada. -->
-          <aside class="meeting-call beat" style="--i:3">
+          <aside class="meeting-call beat" style="--i:2.7">
             <svg viewBox="0 0 24 24" width="40" height="40" fill="none"
                  stroke="currentColor" stroke-width="1.6"
                  stroke-linecap="round" stroke-linejoin="round"
@@ -112,28 +116,28 @@
             </div>
           </aside>
 
-          <p class="briefing-lead beat" style="--i:4">
+          <p class="briefing-lead beat" style="--i:3.7">
             Es el momento de <strong>defenderse, acusar y negociar</strong>.
             Al cerrar la reunión, cada uno <strong>vota en secreto</strong>
             a quién dejar sin bono.
           </p>
 
-          <p class="briefing-cierre beat" style="--i:5">
+          <p class="briefing-cierre beat" style="--i:4.7">
             El más votado <strong>pierde Influencia</strong>. Nadie queda
             eliminado: el juego sigue, pero el golpe pesa.
           </p>
         }
 
         @default {
-          <p class="kicker beat" style="--i:0">
+          <p class="kicker beat beat-kicker" style="--i:0">
             Memo interno · Jornada de evaluación
           </p>
-          <h1 class="doc-h1 beat" style="--i:1">Día grupal</h1>
-          <p class="briefing-lead beat" style="--i:2">
+          <h1 class="doc-h1 beat beat-slide" style="--i:1">Día grupal</h1>
+          <p class="briefing-lead beat" style="--i:1.7">
             Este desafío grupal todavía no está implementado. El día se
             saltea hasta sumar el minijuego.
           </p>
-          <p class="briefing-cierre beat" style="--i:3">
+          <p class="briefing-cierre beat" style="--i:2.7">
             Tocá «ENTENDIDO» para continuar.
           </p>
         }
@@ -147,8 +151,9 @@
           Esperando a los demás… ({{ listos() }}/{{ total() }})
         </p>
       } @else {
-        <!-- El botón es el último beat del intro: aparece tras los textos. -->
-        <button class="btn beat" style="--i:6" (click)="confirmar()">
+        <!-- El botón es el último beat del intro: aparece tras los textos.
+             Su --i depende del minijuego (ver beatBoton en briefing.ts). -->
+        <button class="btn beat" [style.--i]="beatBoton()" (click)="confirmar()">
           ENTENDIDO
         </button>
       }

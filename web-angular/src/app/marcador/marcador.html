@@ -9,32 +9,47 @@
     Día {{ dia() }} de {{ diasTotal() }} · {{ tema() }}
   </div>
 
-  <div class="content">
-    <h2>Día {{ dia() }} de {{ diasTotal() }} — cerrado</h2>
-    <p class="muted-note">Así va el marcador antes del próximo día.</p>
+  <app-intro [totalMs]="totalMs()">
+    <div class="content">
+      <h2 class="beat" style="--i:0">
+        Día {{ dia() }} de {{ diasTotal() }} — cerrado
+      </h2>
+      <p class="muted-note beat" style="--i:1">
+        Así va el marcador antes del próximo día.
+      </p>
 
-    <div class="card pad0">
-      @for (p of ranking(); track p.id; let i = $index) {
-        <div class="player">
-          <span class="pos">{{ i + 1 }}</span>
-          <app-avatar [id]="p.avatar" [size]="36" />
-          <span class="nm">
-            {{ p.nickname }}
-            @if (p.id === miId()) { <span class="tag">vos</span> }
-          </span>
-          <span class="st">💼 {{ p.influence }}</span>
-        </div>
+      <!-- Cada fila del ranking es un beat: aparece una tras otra.
+           El --i arranca en 2 (después del título y la bajada). -->
+      <div class="card pad0">
+        @for (p of ranking(); track p.id; let i = $index) {
+          <div class="player beat" [style.--i]="i + 2">
+            <span class="pos">{{ i + 1 }}</span>
+            <app-avatar [id]="p.avatar" [size]="36" />
+            <span class="nm">
+              {{ p.nickname }}
+              @if (p.id === miId()) { <span class="tag">vos</span> }
+            </span>
+            <!-- El emoji queda fijo; el número cuenta de 0 al valor,
+                 arrancando cuando aparece su fila (mismo delay del beat). -->
+            <span class="st">💼
+              <span [appCountUp]="p.influence" [countDelay]="(i + 2) * 700"></span>
+            </span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="actionbar">
+      @if (yo()?.acted) {
+        <p class="muted-note" aria-live="polite" aria-atomic="true">
+          Esperando a los demás… ({{ listos() }}/{{ total() }})
+        </p>
+      } @else {
+        <!-- El botón aparece al final, tras revelar todo el ranking. -->
+        <button class="btn beat" [style.--i]="beatBoton()" (click)="continuar()">
+          CONTINUAR
+        </button>
       }
     </div>
-  </div>
-
-  <div class="actionbar">
-    @if (yo()?.acted) {
-      <p class="muted-note" aria-live="polite" aria-atomic="true">
-        Esperando a los demás… ({{ listos() }}/{{ total() }})
-      </p>
-    } @else {
-      <button class="btn" (click)="continuar()">CONTINUAR</button>
-    }
-  </div>
+  </app-intro>
 </div>

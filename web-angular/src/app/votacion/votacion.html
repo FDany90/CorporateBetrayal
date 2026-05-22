@@ -32,7 +32,12 @@
         <span class="planilla-head-votos">Votos</span>
       </div>
 
-      @for (p of filas(); track p.id) {
+      <!-- Orden del DOM ESTABLE (jugadoresEstables). El puesto se aplica
+           con transform: la fila se desliza a su lugar cuando cambian los
+           votos — CSS anima el reordenamiento. La altura del contenedor
+           se fija para que las filas absolute no colapsen el layout. -->
+      <div class="voto-list" [style.height.px]="jugadoresEstables().length * ALTURA_FILA">
+      @for (p of jugadoresEstables(); track p.id) {
         <button
           type="button"
           class="voto-row"
@@ -41,6 +46,8 @@
           [class.voto-row-locked]="confirmado()"
           [disabled]="esMia(p.id) || confirmado()"
           [attr.aria-pressed]="miVoto() === p.id"
+          [attr.aria-label]="ariaVoto(p.nickname, p.id)"
+          [style.transform]="'translateY(' + rankDe(p.id) * ALTURA_FILA + 'px)'"
           (click)="votar(p.id)"
         >
           <app-avatar [id]="p.avatar" [size]="40" />
@@ -70,6 +77,7 @@
           </span>
         </button>
       }
+      </div>
     </div>
   </div>
 

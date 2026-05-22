@@ -47,13 +47,16 @@ export class Comunicado {
   // el sello tiene su propio delay calculado para caer DESPUÉS del beat
   // de la firma; el botón aparece al último.
 
-  // El comunicado usa la variante "intro-slow": gap entre beats = 700ms
-  // (vs. 350ms del intro normal). Le da más tiempo a leer cada sección
+  // El comunicado usa la variante "intro-slow": gap entre beats = 1400ms
+  // (vs. 700ms del intro normal). Le da más tiempo a leer cada sección
   // y se siente más "ceremonial" — un documento que se lee con calma,
   // no una secuencia de UI.
-  private readonly GAP_MS = 700;
-  private readonly DURACION_BEAT_MS = 600;
-  private readonly DURACION_TITULO_MS = 1000;
+  // OJO: estos valores DEBEN coincidir con los del CSS `.intro.intro-slow`
+  // en styles.css (delay 1.4s, duración beat 1200ms, título 2000ms);
+  // se usan acá para coordinar la caída del sello y el corte de skipped.
+  private readonly GAP_MS = 1400;
+  private readonly DURACION_BEAT_MS = 1200;
+  private readonly DURACION_TITULO_MS = 2000;
 
   readonly beatHead = 0;
   readonly beatTitle = 1;

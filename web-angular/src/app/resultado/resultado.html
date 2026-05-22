@@ -20,7 +20,15 @@
     <div class="big">
       <div class="lbl">TU INFLUENCIA</div>
       <div class="val">
-        {{ yo()?.influence ?? 0 }}
+        <!-- El número cuenta desde la influencia previa a la actual:
+             sube si ganaste, baja si perdiste. Más lento que el del
+             marcador para que el cambio se "sienta". -->
+        <span
+          [appCountUp]="influencia()"
+          [from]="influenciaPrevia()"
+          [countDelay]="350"
+          [countDuration]="1400"
+        ></span>
         <!-- up/down colorea el delta según sea ganancia o pérdida. -->
         <span [class.up]="delta() >= 0" [class.down]="delta() < 0">
           ({{ signo() }}{{ delta() }})

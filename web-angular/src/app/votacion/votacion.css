@@ -66,29 +66,42 @@
   color: var(--ink-soft);
 }
 
+/* ------ LISTA de candidatos ------
+   Contenedor con posición relativa; las filas se posicionan absolutas
+   por transform según su puesto. La altura la fija el template
+   (jugadores × ALTURA_FILA) para que no colapse. */
+.voto-list {
+  position: relative;
+}
+
 /* ------ FILA de candidato ------
-   Botón flex con avatar · nombre · (tag "Tu voto") · tally. */
+   Botón flex con avatar · nombre · (tag "Tu voto") · tally.
+   ABSOLUTA: su puesto en el ranking se aplica con transform:translateY
+   desde el template. Como el orden del DOM es estable, el cambio de
+   puesto se anima con la transición del transform — y votos simultáneos
+   no rompen nada (la transición CSS reanima sola desde donde esté). */
 .voto-row {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 64px; /* DEBE coincidir con ALTURA_FILA en votacion.ts */
   display: flex;
   align-items: center;
   gap: 12px;
-  width: 100%;
-  padding: 10px 2px;
-  background: transparent;
+  padding: 0 2px;
+  background: var(--paper-soft);
   border: 0;
   border-bottom: 1px dashed var(--line-dash);
   font: inherit;
   color: inherit;
   cursor: pointer;
   text-align: left;
+  will-change: transform;
   transition:
+    transform 360ms cubic-bezier(.2, .8, .2, 1),
     background-color 180ms ease,
-    opacity 180ms ease,
-    transform 100ms ease;
-}
-.voto-row:last-child { border-bottom: 0; }
-.voto-row:active:not(:disabled) {
-  transform: translateY(1px);
+    opacity 180ms ease;
 }
 @media (hover: hover) {
   .voto-row:hover:not(:disabled):not(.voto-row-elegida) {
@@ -179,15 +192,18 @@
 .voto-row-mia {
   cursor: not-allowed;
   opacity: 0.72;
-  /* Fondo distinto para señalar "este eres tú" — papel con borde
-     punteado interno sutil (similar al panel .dev del Ingreso). */
-  background: repeating-linear-gradient(
-    -45deg,
-    transparent 0,
-    transparent 6px,
-    rgba(26, 22, 18, 0.025) 6px,
-    rgba(26, 22, 18, 0.025) 8px
-  );
+  /* Rayado diagonal sutil para señalar "este eres tú", SOBRE papel
+     opaco — las filas se superponen al cruzarse, así que el fondo no
+     puede ser transparente. */
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      transparent 0,
+      transparent 6px,
+      rgba(26, 22, 18, 0.025) 6px,
+      rgba(26, 22, 18, 0.025) 8px
+    ),
+    var(--paper-soft);
 }
 .voto-row-mia .voto-row-nombre {
   color: var(--ink-soft);

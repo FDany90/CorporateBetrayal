@@ -3,13 +3,19 @@
 > Documento de traspaso. Si abrís el proyecto en otra PC o en una sesión
 > nueva (de Claude o tuya), **empezá por acá**.
 
-**Última actualización:** 2026-05-20 · **Hito actual:** Paso 3 completo ·
+**Última actualización:** 2026-05-21 · **Hito actual:** Paso 3 completo ·
 2 minijuegos · cliente Angular con lenguaje visual editorial aplicado a
 **7 pantallas** (Ingreso / Lobby / Comunicado / Final / Briefing /
 Desafío / Votación) · nomenclatura editorial **"Día X de Y · Tema del
-día"** en todos los appheaders de juego · votación con **conteo en vivo
-y Confirmar Voto** · sistema de avatars (15 SVGs + modal pantalla-completa)
-· pasada completa de a11y/UX mobile-first (Tandas 1-4 WIG Vercel)
+día"** en todos los appheaders de juego · votación con **conteo en vivo,
+Confirmar Voto y reordenamiento animado** · **sistema de animaciones**
+(variantes de beat reusables, count-up numérico, reveals escalonados) ·
+**herramientas de desarrollo** (devbar flotante: partida rápida, salir al
+lobby, saltar fase, arrancar en un minijuego) · sistema de avatars (15
+SVGs + modal) · a11y/UX mobile-first auditada (WIG Vercel)
+
+**Próximo objetivo:** MVP de **4 minijuegos** (2 individuales + 2 grupales)
+→ **deploy + playtest** con amigos. Ver §9.
 
 ---
 
@@ -220,24 +226,36 @@ Detalle de cada archivo: [codigo.md](codigo.md).
 
 ## 9. Próximos pasos
 
-1. **Temporizadores en pantalla** — implementar **desde cero** (no existen
-   aún en server). Cada fase de juego (briefing, votación, reunión, etc.)
-   debería tener un tiempo límite y un contador visible en la UI. Plan:
-   primero el server (timestamp de fin de fase en el `GameState` +
-   `setTimeout` para forzar avance si vence), después la UI (componente
-   `<app-timer>` reusable con cuenta regresiva visual).
-2. **Migrar las últimas pantallas al lenguaje editorial.** Quedan:
-   **Reunión** (la llamada grupal previa al voto del Recorte), **Resultado**
-   (parcial entre tandas y final del minijuego) y **Marcador** (entre
-   rondas). Las tres ya tienen el appheader unificado "Día X de Y · Tema";
-   falta el rediseño del contenido (kicker, h1 editorial, planillas).
-3. **Paso 4** — Resto del catálogo: más minijuegos, **uno por incremento**.
-   Quedan 5 individuales y 6 grupales. Un minijuego de un *kind* ya existente
-   (`llamadas` / `votacion`) no toca el motor.
-4. **Pendiente del Paso 3** — desempate por **votación directa** en la pantalla
-   final (hoy, si hay empate en el #1, comparten puesto).
-5. **Deploy** — hosting estático (web) + Railway/Fly (server); habilita probar
-   en celulares reales. Se puede adelantar cuando se quiera mostrar a otros.
+**Objetivo inmediato: MVP de 4 minijuegos → deploy → playtest.** Decisión
+de scope (2026-05-21): con 4 juegos (2 individuales + 2 grupales) alcanza
+para un primer playtest entre amigos. Recién ahí se valida que el loop
+social engancha, antes de seguir expandiendo el catálogo.
+
+1. **Sumar 2 minijuegos** (de a uno por incremento):
+   - Otro **individual** (kind `llamadas`, como El Botón del Bonus).
+   - Otro **grupal** (kind `votacion`, como El Recorte).
+   Ambos son de *kinds* ya existentes → **no tocan el motor**: solo una
+   `ChallengeDefinition` nueva en `server/src/challenges/` + registro,
+   su entrada en `challenge-meta.ts` (tema + selector dev) y los textos
+   de su briefing.
+2. **Deploy** — hosting estático (web) + Railway/Fly (server). Habilita
+   probar en celulares reales (hoy bloqueado por el firewall en red local).
+3. **Playtest** con 3-5 amigos. Observar si el debate/voto en la llamada
+   funciona; ajustar balance y copy según lo que pase.
+
+**Después del MVP / playtest:**
+
+4. **Temporizadores en pantalla** — desde cero (no existen en server). Cada
+   fase con tiempo límite + contador visible. Plan: server primero
+   (timestamp de fin de fase en `GameState` + `setTimeout`), luego UI
+   (`<app-timer>` reusable).
+5. **Migrar las últimas pantallas al lenguaje editorial**: **Reunión**,
+   **Resultado** y **Marcador** ya tienen el appheader unificado y el
+   Marcador/Resultado ya tienen animaciones; falta terminar el rediseño
+   del contenido (kicker, h1 editorial) en Reunión.
+6. **Resto del catálogo** — quedan minijuegos del GDD, uno por incremento.
+7. **Pendiente del Paso 3** — desempate por **votación directa** en la
+   pantalla final (hoy, si hay empate en el #1, comparten puesto).
 
 **Decisiones abiertas** pendientes: ver la sección 11 del [GDD](GDD.md)
 (balance de puntajes, sets de palabras/tarjetas, etc.).

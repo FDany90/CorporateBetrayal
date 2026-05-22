@@ -105,11 +105,14 @@ export class Final {
 
   /**
    * Delay del sello (ms) — empieza DESPUÉS del beat del ganador.
-   * El ganador entra con la animación del título (700ms); le damos 200ms
+   * El ganador entra con la animación del título (1400ms); le damos 400ms
    * extra de pausa antes de que caiga el sello, para que se "respire".
+   * Los gaps/duraciones coinciden con el CSS `.intro .beat` (delay 0.7s,
+   * título 1400ms). No cambia la animación de caída del sello, solo
+   * CUÁNDO empieza — sigue el reveal más lento.
    */
   readonly stampDelayMs = computed(
-    () => this.beatGanador() * 350 + 700 + 200,
+    () => this.beatGanador() * 700 + 1400 + 400,
   );
 
   /** Beat de la firma — después del sello, con un beat extra de pausa. */
@@ -117,9 +120,9 @@ export class Final {
 
   /**
    * Duración total estimada de la secuencia (para el <app-intro [totalMs]>).
-   * = beat de firma × 350ms + duración del fade + colchón.
+   * = beat de firma × 700ms + duración del fade + colchón.
    */
-  readonly totalMs = computed(() => this.beatFirma() * 350 + 600 + 300);
+  readonly totalMs = computed(() => this.beatFirma() * 700 + 1200 + 600);
 
   volver(): void {
     dlog('Final.volver');
