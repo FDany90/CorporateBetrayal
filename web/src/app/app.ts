@@ -8,10 +8,10 @@ import { Desafio } from './desafio/desafio';
 import { Resultado } from './resultado/resultado';
 import { Marcador } from './marcador/marcador';
 import { Final } from './final/final';
-import { Reunion } from './reunion/reunion';
 import { Votacion } from './votacion/votacion';
 import { Comunicado } from './comunicado/comunicado';
 import { TableroScrum } from './tablero-scrum/tablero-scrum';
+import { Reconocimiento } from './reconocimiento/reconocimiento';
 import { Devbar } from './devbar/devbar';
 import { pageAnim } from './animations';
 
@@ -31,7 +31,8 @@ import { pageAnim } from './animations';
   imports: [
     DeskContext,
     Ingreso, Lobby, Briefing, Desafio, Resultado,
-    Marcador, Final, Reunion, Votacion, Comunicado, TableroScrum, Devbar,
+    Marcador, Final, Votacion, Comunicado, TableroScrum,
+    Reconocimiento, Devbar,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',
@@ -76,7 +77,8 @@ export class App implements OnInit {
    *    al lado le restaría dramatismo al sello/circular).
    */
   private static readonly FASES_CON_FICHA = new Set([
-    'briefing', 'calls', 'meeting', 'vote', 'tablero', 'result', 'marcador',
+    'briefing', 'calls', 'vote', 'tablero', 'reconocimiento',
+    'result', 'marcador',
   ]);
 
   /** ¿Mostrar la ficha lateral? (la oculta el CSS en mobile igual). */

@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, computed, signal } from '@angular/core';
 import { Client, Room } from 'colyseus.js';
 import { CardView, PairingView, PlayerView, StateView } from './models';
 import { environment } from '../environments/environment';
@@ -67,6 +67,19 @@ export class GameService {
    *  la barra `.enviando-bar` del shell para puentear el round-trip. */
   readonly enviando = this._enviando.asReadonly();
 
+  /** Nombre de la empresa de la partida actual — el que configuró el
+   *  anfitrión al crear la sala, o el default "Sinergia Corp" si quedó
+   *  vacío. Lo usan todos los topbars / encabezados de memos. */
+  readonly companyName = computed(
+    () => this._estado()?.companyName?.trim() || 'Sinergia Corp',
+  );
+  /** Mismo nombre partido por espacios — útil para que el template
+   *  renderice un `<span class="dot">·</span>` entre palabras y la marca
+   *  conserve la estética champagne (ej. "ACME·CORP"). */
+  readonly companyNameParts = computed(() =>
+    this.companyName().split(/\s+/).filter((s) => s.length > 0),
+  );
+
   constructor() {
     dlog('service', 'GameService creado');
     // Al arrancar la app, intentar reconectar a una sala previa (si la hay).
@@ -100,9 +113,15 @@ export class GameService {
      Conexión a la sala
      ============================================================ */
 
-  /** Crea una sala nueva y entra como anfitrión. */
-  async crearSala(nickname: string, avatar: string): Promise<void> {
-    dlog('crearSala', { nickname, avatar });
+  /** Crea una sala nueva y entra como anfitrión. `companyName` es opcional:
+   *  si queda vacío, el server lo guarda como "" y el cliente cae al
+   *  default visual "Sinergia Corp". */
+  async crearSala(
+    nickname: string,
+    avatar: string,
+    companyName?: string,
+  ): Promise<void> {
+    dlog('crearSala', { nickname, avatar, companyName });
     this._error.set(null);
     this._cargando.set(true);
     try {
@@ -111,6 +130,7 @@ export class GameService {
         nickname,
         avatar,
         playerToken: this.getPlayerToken(),
+        companyName: companyName?.trim() ?? '',
       });
       this.attach(room);
     } catch {
@@ -317,6 +337,14 @@ export class GameService {
     this.room?.send('decidir', idVotado);
   }
 
+  /** Selecciona destinatario del Reconocimiento del Mes (solo si soy el
+   *  jefe). El server valida que sea otro jugador. Se puede cambiar hasta
+   *  confirmar con `confirmar()`. */
+  regalar(idDestinatario: string): void {
+    dlog('enviar', 'decidir(regalo)', idDestinatario);
+    this.room?.send('decidir', idDestinatario);
+  }
+
   /** Estimación de una tarjeta del Tablero SCRUM. `valor = 0` borra (sin
    *  estimar). Actualiza también la copia local optimistamente. */
   estimar(cardId: string, valor: number): void {
@@ -398,6 +426,7 @@ export class GameService {
           code?: string;
           status?: string;
           hostId?: string;
+          companyName?: string;
           phase?: string;
           challengeId?: string;
           tanda?: number;
@@ -407,6 +436,7 @@ export class GameService {
           rondaTipo?: string;
           phaseEndsAt?: number;
           phaseDurationSec?: number;
+          bossId?: string;
           players?: { forEach: (cb: (p: PlayerView) => void) => void };
           pairings?: { forEach: (cb: (p: PairingView) => void) => void };
           cards?: {
@@ -461,6 +491,7 @@ export class GameService {
       code: s?.code ?? '',
       status: s?.status ?? 'lobby',
       hostId: s?.hostId ?? '',
+      companyName: s?.companyName ?? '',
       phase: s?.phase ?? 'lobby',
       challengeId: s?.challengeId ?? '',
       tanda: s?.tanda ?? 0,
@@ -470,6 +501,7 @@ export class GameService {
       rondaTipo: s?.rondaTipo ?? '',
       phaseEndsAt: s?.phaseEndsAt ?? 0,
       phaseDurationSec: s?.phaseDurationSec ?? 0,
+      bossId: s?.bossId ?? '',
       players,
       pairings,
       cards,

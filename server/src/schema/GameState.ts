@@ -51,6 +51,9 @@ export class GameState extends Schema {
   @type("string") code = "";                                 // Paso 1
   @type("string") status = "lobby";                          // Paso 1
   @type("string") hostId = "";                               // Paso 1 — anfitrión: único que puede empezar
+  /** Nombre de la empresa configurado por el anfitrión al crear la sala.
+   *  "" = el cliente cae al default visual ("Sinergia Corp"). */
+  @type("string") companyName = "";
   @type({ map: Player }) players = new MapSchema<Player>();   // Paso 1
   @type("string") phase = "lobby";                           // Paso 2
   @type("string") challengeId = "";                          // Paso 2 — minijuego de la ronda actual ("" = placeholder)
@@ -74,4 +77,9 @@ export class GameState extends Schema {
   // de ese minijuego. Durante 'tablero': cada Card.valorReal = 0 (oculto);
   // al resolver, el server pone el valor real para el reveal.
   @type([Card]) cards = new ArraySchema<Card>();
+  // --- Reconocimiento del Mes (kind 'reconocimiento') ---
+  // Id del jugador que es "el jefe del mes" en la ronda actual. "" fuera
+  // de la fase 'reconocimiento'. Es público (todos lo ven) para que la
+  // vista "del resto" muestre quién está decidiendo.
+  @type("string") bossId = "";
 }

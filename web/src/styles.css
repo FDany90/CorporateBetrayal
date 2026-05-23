@@ -134,6 +134,9 @@ app-tablero-scrum{
   color:var(--ink);
   line-height:1;
   font-variation-settings:'opsz' 60;
+  /* Cualquier nombre configurado por el anfitrión se renderiza en CAPS
+     para mantener la estética de logo corporativo. */
+  text-transform:uppercase;
 }
 .brand .dot{color:var(--accent);}
 .pill{
@@ -239,12 +242,15 @@ p{
 }
 .doc-head .dept{margin-bottom:10px;}
 .doc-head .doc-brand{
+  display:block;
   font-family:var(--font-display);
   font-weight:900;font-size:22px;
   letter-spacing:-0.5px;
   color:var(--ink);
   font-variation-settings:'opsz' 96;
+  text-transform:uppercase;
 }
+.doc-head .doc-brand .dot{color:var(--accent);}
 .divider{
   height:1px;background:var(--ink);
   margin:10px 0 14px;

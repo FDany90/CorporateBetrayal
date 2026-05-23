@@ -15,9 +15,10 @@
 
 /** Mapa challengeId → "tema del día" para el appheader. */
 const TEMAS: Record<string, string> = {
-  'boton-del-bonus': 'Bono de Equipo',
-  'el-recorte':      'Recorte de Presupuesto',
-  'tablero-scrum':   'Tablero del Sprint',
+  'boton-del-bonus':         'Bono Compartido',
+  'el-recorte':              'Recorte de Presupuesto',
+  'tablero-scrum':           'Tablero del Sprint',
+  'reconocimiento-del-mes':  'Reconocimiento del Mes',
 };
 
 /** Texto del día para el appheader. Mayúsculas las pone el CSS. */
@@ -35,7 +36,8 @@ export interface MinijuegoMeta {
  *  del server (server/src/challenges/registry.ts). Si sumás un minijuego
  *  allá, agregalo acá para poder arrancarlo directo desde el lobby. */
 export const MINIJUEGOS: readonly MinijuegoMeta[] = [
-  { id: 'boton-del-bonus', label: 'El Botón del Bonus (individual)' },
-  { id: 'el-recorte',      label: 'El Recorte (grupal)' },
-  { id: 'tablero-scrum',   label: 'El Tablero SCRUM (individual)' },
+  { id: 'boton-del-bonus',         label: 'Bono Compartido (individual)' },
+  { id: 'el-recorte',              label: 'El Recorte (grupal)' },
+  { id: 'tablero-scrum',           label: 'El Tablero SCRUM (individual)' },
+  { id: 'reconocimiento-del-mes',  label: 'El Reconocimiento del Mes (grupal)' },
 ];

@@ -40,8 +40,10 @@ export interface CardView {
 
 /** Nombre legible de cada minijuego, por su id (para títulos de la UI). */
 export const NOMBRE_CHALLENGE: Record<string, string> = {
-  'boton-del-bonus': 'El Botón del Bonus',
+  'boton-del-bonus': 'Bono Compartido',
   'el-recorte': 'El Recorte',
+  'tablero-scrum': 'El Tablero SCRUM',
+  'reconocimiento-del-mes': 'El Reconocimiento del Mes',
 };
 
 /** El estado completo de la partida que ve la UI. */
@@ -49,6 +51,9 @@ export interface StateView {
   code: string;
   status: string;
   hostId: string;
+  /** Nombre de la empresa (configurable por el anfitrión al crear la sala).
+   *  "" = caer al default visual "Sinergia Corp". */
+  companyName: string;
   phase: string;
   challengeId: string;
   players: PlayerView[];
@@ -65,4 +70,9 @@ export interface StateView {
   phaseDurationSec: number; // duración total de la fase (para la barra)
   // --- Tablero SCRUM (kind 'tablero') ---
   cards: CardView[];
+  // --- Reconocimiento del Mes (kind 'reconocimiento') ---
+  // Id del jugador designado "jefe del mes" en la ronda actual ("" fuera
+  // de la fase 'reconocimiento'). Es público — la vista del resto lo usa
+  // para destacar al jefe.
+  bossId: string;
 }

@@ -1,5 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { GameService } from '../game.service';
+import { Brand } from '../brand/brand';
 import { Timer } from '../timer/timer';
 import { temaDelDia } from '../challenge-meta';
 import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
@@ -21,7 +22,7 @@ import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
  */
 @Component({
   selector: 'app-tablero-scrum',
-  imports: [Timer],
+  imports: [Brand, Timer],
   templateUrl: './tablero-scrum.html',
   styleUrl: './tablero-scrum.css',
 })

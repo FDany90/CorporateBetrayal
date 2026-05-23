@@ -6,9 +6,7 @@
          marcador. La pantalla Marcador (siguiente) refina el ranking. -->
 <div class="screen">
   <div class="topbar">
-    <span class="brand">
-      SINERGIA<span class="dot">·</span>CORP
-    </span>
+    <app-brand />
     <span class="pill" [attr.aria-label]="'Tu Influencia: ' + (yo()?.influence ?? 0)">
       <span aria-hidden="true">💼</span> {{ yo()?.influence ?? 0 }}
     </span>
@@ -17,7 +15,120 @@
     Día {{ dia() }} de {{ diasTotal() }} · {{ tema() }}
   </div>
 
-  @if (esTablero()) {
+  @if (esReconocimiento()) {
+    <!-- ============ Result del Reconocimiento del Mes ============
+         "Memo oficial · RRHH" que confirma a quién se le otorgó el
+         Reconocimiento. Si soy el destinatario, ve mi +8; si no, el
+         marcador me deja ver dónde quedó cada uno. -->
+    <app-intro>
+      <div class="content">
+        <p class="kicker" appReveal="type">Memo oficial · RRHH</p>
+        <h1 class="doc-h1" appReveal="slide">El Reconocimiento del Mes</h1>
+
+        @if (destinatario(); as d) {
+          <!-- Ficha grande del destinatario con sello "+8". -->
+          <article class="reco-otorgado" appReveal="stamp" [revealOrder]="1">
+            <p class="reco-otorgado-label">Otorgado a</p>
+            <div class="reco-otorgado-frame">
+              <app-avatar [id]="d.avatar" [size]="112" />
+            </div>
+            <h2 class="reco-otorgado-nombre">
+              {{ d.nickname }}
+              @if (d.id === miId()) { <span class="tag">vos</span> }
+            </h2>
+            <div class="reco-otorgado-sello" aria-hidden="true">
+              +8 <span class="reco-otorgado-icon">💼</span>
+            </div>
+            @if (jefe(); as j) {
+              <p class="reco-otorgado-pie">
+                Por decisión de <strong>{{ j.nickname }}</strong>,
+                líder del mes.
+              </p>
+            }
+          </article>
+        } @else {
+          <!-- Caso degenerado: el jefe no eligió a nadie (timer venció
+               sin destinatario válido). Lo mostramos como "no otorgado". -->
+          <p
+            class="briefing-lead"
+            appReveal="type"
+            [revealOrder]="1"
+          >
+            El líder del mes no llegó a otorgar el Reconocimiento. Nadie
+            se lleva la Influencia esta jornada.
+          </p>
+        }
+
+        <!-- Resumen con count-up — útil para el destinatario; los demás
+             ven 0 cambio pero el bloque mantiene continuidad con las
+             otras pantallas de resultado. -->
+        <div class="reveal-resumen" appReveal="fade" [revealOrder]="2">
+          <div class="big">
+            <div class="lbl">TU INFLUENCIA</div>
+            <div class="val">
+              <span
+                [appCountUp]="influencia()"
+                [from]="influenciaPrevia()"
+                [countDelay]="350"
+                [countDuration]="1400"
+              ></span>
+              <span [class.up]="delta() >= 0" [class.down]="delta() < 0">
+                ({{ formatDelta(delta()) }})
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Marcador general (mismo formato que en Tablero). -->
+        <div class="reveal-marcador" appReveal="fade" [revealOrder]="3">
+          <h2 class="reveal-marcador-titulo">Marcador</h2>
+          <div class="card pad0">
+            @for (p of ranking(); track p.id; let i = $index) {
+              <div class="player">
+                <span class="pos">{{ i + 1 }}</span>
+                <app-avatar [id]="p.avatar" [size]="36" />
+                <span class="nm">
+                  {{ p.nickname }}
+                  @if (p.id === miId()) { <span class="tag">vos</span> }
+                </span>
+                <span class="st"
+                      [attr.aria-label]="'Influencia ' + p.influence + (p.lastDelta !== 0 ? ' (' + formatDelta(p.lastDelta) + ' esta jornada)' : '')">
+                  <span aria-hidden="true">💼</span> {{ p.influence }}
+                  @if (p.lastDelta !== 0) {
+                    <span
+                      class="delta-chip"
+                      [class.up]="p.lastDelta > 0"
+                      [class.down]="p.lastDelta < 0"
+                      aria-hidden="true"
+                    >
+                      ({{ formatDelta(p.lastDelta) }})
+                    </span>
+                  }
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="actionbar">
+        @if (yo()?.acted) {
+          <p class="muted-note" aria-live="polite" aria-atomic="true">
+            Esperando a los demás… ({{ acks() }}/{{ total() }})
+          </p>
+        } @else {
+          <button
+            class="btn"
+            appReveal="fade"
+            [revealOrder]="4"
+            (click)="confirmar()"
+          >
+            CONTINUAR
+          </button>
+        }
+      </div>
+    </app-intro>
+  } @else if (esTablero()) {
     <!-- ============ Result del Tablero SCRUM ============ -->
     <app-intro>
       <div class="content">

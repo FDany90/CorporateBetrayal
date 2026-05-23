@@ -1,5 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { GameService } from '../game.service';
+import { Brand } from '../brand/brand';
 import { Intro } from '../intro/intro';
 import { Reveal } from '../reveal/reveal';
 import { temaDelDia } from '../challenge-meta';
@@ -22,7 +23,7 @@ import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
  */
 @Component({
   selector: 'app-briefing',
-  imports: [Intro, Reveal],
+  imports: [Brand, Intro, Reveal],
   templateUrl: './briefing.html',
   styleUrl: './briefing.css',
 })

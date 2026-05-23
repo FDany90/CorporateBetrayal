@@ -39,6 +39,20 @@
           (ngModelChange)="setCode($event)"
         />
       </div>
+    } @else {
+      <div class="field">
+        <label for="company-input">Empresa (opcional)</label>
+        <input
+          id="company-input"
+          type="text"
+          maxlength="30"
+          autocomplete="organization"
+          spellcheck="false"
+          placeholder="Sinergia Corp"
+          [ngModel]="companyName()"
+          (ngModelChange)="companyName.set($event)"
+        />
+      </div>
     }
 
     <div class="field">

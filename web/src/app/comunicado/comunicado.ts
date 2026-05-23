@@ -1,5 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { GameService } from '../game.service';
+import { Brand } from '../brand/brand';
 import { Intro } from '../intro/intro';
 import { Reveal } from '../reveal/reveal';
 import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
@@ -28,7 +29,7 @@ import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
  */
 @Component({
   selector: 'app-comunicado',
-  imports: [Intro, Reveal],
+  imports: [Brand, Intro, Reveal],
   templateUrl: './comunicado.html',
   styleUrl: './comunicado.css',
 })

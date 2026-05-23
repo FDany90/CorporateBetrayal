@@ -3,29 +3,32 @@
 > Documento de traspaso. Si abrís el proyecto en otra PC o en una sesión
 > nueva (de Claude o tuya), **empezá por acá**.
 
-**Última actualización:** 2026-05-23 · **Hito actual:** **3 minijuegos
-jugables** (Botón / Recorte / **Tablero SCRUM**) · cliente Angular con
-lenguaje visual editorial aplicado a **8 pantallas** + nueva pantalla
-del Tablero · nomenclatura editorial **"Día X de Y · Tema del día"** ·
-**sistema de timers de fase** (reloj autoritativo en server, banner con
-barra de progreso) · votación con **conteo en vivo, Confirmar Voto y
-reordenamiento animado** · **efecto máquina de escribir** (directiva
-appReveal + Intro como orquestador secuencial) en Briefing/Comunicado/
-Final · **post-its escritos a mano** (Caveat) en el Tablero SCRUM ·
-**feedback de latencia** (barra enviando + thud de press global, puentea
-el round-trip de Render) · sistema de avatars (15 SVGs + modal) ·
-**layout DESKTOP** (escritorio de nogal + vade de cuero + hoja de papel
-+ ficha lateral de personal) como progressive enhancement sobre el
-mobile · a11y auditada y corregida (WIG Vercel, segunda pasada
-2026-05-23).
+**Última actualización:** 2026-05-23 · **Hito actual:** **MVP de 4
+minijuegos completo** (Bono Compartido / Recorte / Tablero SCRUM /
+**Reconocimiento del Mes**) — listo para playtest en desktop · cliente
+Angular con lenguaje visual editorial aplicado a **9 pantallas** +
+pantalla del Reconocimiento con dos ramas (jefe / espectador) +
+**reveal "Memo oficial · RRHH"** en el resultado · **nombre de empresa
+parametrizable** por el anfitrión (componente `<app-brand>` centraliza
+el render en CAPS con `·` champagne) · **El Recorte ahora va briefing
+→ vote directo** (eliminada la fase 'meeting' intermedia, redundante) ·
+nomenclatura editorial **"Día X de Y · Tema del día"** · **sistema de
+timers de fase** (reloj autoritativo en server) · votación con
+**conteo en vivo + Confirmar Voto + reordenamiento animado** · **efecto
+máquina de escribir** (directiva appReveal + Intro orquestador) en
+Briefing/Comunicado/Final · **post-its escritos a mano** (Caveat) en el
+Tablero SCRUM · **feedback de latencia** (barra enviando + thud de press
+global) · sistema de avatars (15 SVGs + modal) · **layout DESKTOP**
+(escritorio + vade + hoja + ficha lateral) como progressive enhancement
+sobre el mobile · **devbar y anexo técnico ocultos a no-anfitriones** ·
+a11y auditada (WIG Vercel, segunda pasada 2026-05-23).
 
 **PIVOTE (2026-05-22):** el target de esta versión es **desktop** (se
 juega en la compu del laburo, al lado de Teams). El playtest será en
 desktop. La integración mobile real con llamadas será **otro proyecto**
 futuro (app nativa). Ver §7 y §9.
 
-**Próximo objetivo:** sumar el **4° minijuego (otro grupal)** para
-cerrar el MVP de 4 → **playtest en desktop**. Ver §9.
+**Próximo objetivo:** **playtest en desktop** con 3-5 amigos. Ver §9.
 
 ---
 
@@ -79,7 +82,7 @@ Roadmap del [GDD §10](GDD.md):
 | 1 — Esqueleto (lobby en tiempo real) | ✅ completo |
 | 2 — Bucle base (El Botón del Bonus) | ✅ completo |
 | **3 — Motor de rondas + marcador + pantalla final** | ✅ **completo (hito actual)** |
-| 4 — Resto del catálogo de minijuegos | 🔄 en curso (3 de 13 — falta un 4° grupal para cerrar MVP) |
+| 4 — Resto del catálogo de minijuegos | 🔄 en curso (4 de 13 — MVP cerrado) |
 | 5 — Pulido (estética, onboarding) | 🔄 en curso (lenguaje editorial aplicado a 7 pantallas) |
 | 6 — Deploy y post-MVP | 🔄 en curso (deploy de prueba VIVO: Vercel + Render, ver §5) |
 
@@ -88,17 +91,38 @@ Roadmap del [GDD §10](GDD.md):
 
 **Qué funciona hoy:** la partida corre de punta a punta:
 - **Lobby:** crear/unirse por código, lista en vivo, reconexión, anfitrión,
-  expulsar jugadores, bots de desarrollo.
+  expulsar jugadores. **El anexo técnico** (bots + Partida rápida) y la
+  **devbar flotante** (Saltar fase / Salir al lobby) **solo las ve el
+  anfitrión** — los invitados no pueden pisar la partida.
+- **Nombre de empresa parametrizable** (input opcional al crear sala,
+  default "Sinergia Corp", máx 30 chars). Se sincroniza vía `state.companyName`;
+  el cliente lo renderiza en CAPS con `·` champagne entre palabras a través
+  del componente reusable `<app-brand>` (también variante `[doc]="true"`
+  para los memos de Comunicado/Final).
 - **Motor de rondas:** estructura parametrizable en `server/src/config.ts`
-  (hoy I-G-I = 3 rondas; partida corta para iterar/probar). Marcador entre
-  rondas y pantalla final.
-- **3 minijuegos:** *El Botón del Bonus* (individual, llamadas 1-a-1 en
-  tandas sin repetir pareja), *El Recorte* (grupal, votación) y
-  ***El Tablero SCRUM*** (individual, información asimétrica + adivinar).
+  (hoy G-I-G-I = 4 rondas: Reconocimiento, Bono Compartido, Recorte,
+  Tablero). Marcador entre rondas y pantalla final.
+- **4 minijuegos (MVP cerrado):**
+  - *Bono Compartido* (kind `llamadas`, individual): dilema 1-a-1 en
+    tandas sin repetir pareja.
+  - *El Recorte* (kind `votacion`, grupal): voto secreto, conteo en vivo.
+    **Ya no tiene fase 'meeting' intermedia** — del briefing va directo a
+    la planilla de voto; el debate por Teams sucede sobre la pantalla del
+    voto mismo (timer 2 min, tally en vivo).
+  - *El Tablero SCRUM* (kind `tablero`, individual): info asimétrica +
+    adivinar.
+  - ***El Reconocimiento del Mes*** (kind `reconocimiento`, grupal):
+    asimetría total — un jugador sorteado es el "jefe del mes" y elige a
+    quién regalarle +8 💼. **Pre-selección en vivo visible para toda la
+    sala** (el `Player.decision` del jefe se sincroniza, espectadores ven
+    en tiempo real a quién está considerando; el jefe sabe que su elección
+    es pública). Si el jefe es bot, "piensa" 6-10 s al azar antes de
+    decidir (sin esto la fase se cerraba al instante).
 - **Sistema de timers de fase** (reloj autoritativo en server, ver
   `phaseEndsAt`/`phaseDurationSec` en `GameState`): 60s por llamada del
-  Botón, 120s en el voto del Recorte, 120s en el Tablero. Banner con
-  barra de progreso + estado urgente en los últimos 10s (`<app-timer>`).
+  Bono Compartido, 120s en el voto del Recorte, 120s en el Tablero,
+  180s en el Reconocimiento. Banner con barra de progreso + estado
+  urgente en los últimos 10s (`<app-timer>`).
 
 **El Tablero SCRUM (kind `tablero`):** información asimétrica + adivinar.
 - **3-6 tarjetas** del sprint (K = `clamp(3, ceil(N/2)+2, 6)` con tope
@@ -359,30 +383,58 @@ Detalle de cada archivo: [codigo.md](codigo.md).
 
 ## 9. Próximos pasos
 
-**Objetivo inmediato: 4° minijuego (otro grupal) → playtest en desktop.**
-Hoy hay 3 minijuegos jugables (Botón, Recorte, Tablero SCRUM); falta UNO
-grupal para cerrar el MVP de 4. El deploy ya está hecho (Vercel + Render,
-§5).
+**Objetivo inmediato: playtest en desktop con 3-5 amigos.** El MVP de 4
+minijuegos ya está cerrado (Botón, Recorte, Tablero SCRUM, Reconocimiento
+del Mes). El deploy está vivo (Vercel + Render, §5).
 
-1. **Sumar el 4° minijuego (otro grupal)** — un solo incremento, **naciendo
-   ya responsive y con look post-it o editorial según corresponda**.
-   Candidatos del [GDD §6.B](GDD.md): *Votación de Reconocimiento*
-   (espejo positivo del Recorte: voteDelta +, el más votado GANA Influencia,
-   reusa el kind `votacion` y el motor), *El Deploy del Viernes* (más
-   complejo: requiere pozo + probabilidad — toca el motor),
-   *El Reconocimiento del Mes* (un jefe regala un punto), *El Marrón*
-   (hot potato; toca el motor con timer aleatorio). El más simple = la
-   Votación de Reconocimiento — **reusa el kind `votacion` y solo es una
-   nueva `ChallengeDefinition` + entry en `challenge-meta.ts`**. Si Dani
-   prefiere algo más visual, ver lista.
-2. **Playtest en desktop** con 3-5 amigos. Observar si el debate / voto /
+1. **Playtest en desktop** con 3-5 amigos. Observar si el debate / voto /
    negociación por Teams funciona; ajustar balance, timings, copy.
+   Llevar la lista de fricciones detectadas y un par de partidas grabadas
+   si se puede.
 
 > **Config pendiente (no bloquea):** poner el Build Filter de Render
 > (`server/**`) para que los pushes web no redeployen el server (§5).
 
 **Hecho recientemente** (al 2026-05-23):
 
+- ✅ ~~Nombre de empresa parametrizable~~ — input opcional al crear sala
+  ("Empresa (opcional)" en Ingreso, placeholder "Sinergia Corp"). Se
+  sincroniza vía `state.companyName`; el cliente lo renderiza con
+  `<app-brand>` (CSS `text-transform: uppercase` + `·` champagne entre
+  palabras). Variante `[doc]="true"` para los memos del Comunicado/Final.
+- ✅ ~~Devbar y anexo técnico ocultos a invitados~~ — el panel
+  "Anexo técnico" del lobby (bots + Partida rápida) y el ⚙ flotante con
+  Saltar fase / Salir al lobby ahora solo aparecen para el anfitrión
+  (computed `soyHost`). Los invitados ya no pueden pisar la partida.
+- ✅ ~~Eliminada la fase 'meeting' del Recorte~~ — era un paso intermedio
+  redundante ("entren a Teams y debatan, después tocá IR A VOTAR"). Ahora
+  el briefing va directo a `iniciarVotacion()` y el debate sucede sobre
+  la planilla de voto misma. Borrado componente `web/src/app/reunion/`.
+- ✅ ~~Rename "Botón del Bonus" → "Bono Compartido"~~ — solo strings
+  user-facing (h1 del briefing, NOMBRE_CHALLENGE, label del devbar, tema
+  editorial del appheader). El id `boton-del-bonus` y el `.nombre` del
+  registry server-side quedan intactos (referencias técnicas).
+- ✅ ~~Pre-selección en vivo del Reconocimiento del Mes~~ — la vista del
+  resto (espectadores) muestra en tiempo real el bloque "Considerando a
+  X" con avatar + nombre del candidato actual, que se actualiza cuando
+  el jefe cambia de idea. Variantes: borde grueso + chip "vos" si soy el
+  casi-elegido (tensión específica); look "confirmada" cuando el jefe
+  oprime OTORGAR. Copy del jefe ajustado: "Tu pre-selección es **visible
+  en sala**".
+- ✅ ~~Reveal "Memo oficial · RRHH" en el Resultado del Reconocimiento~~
+  — nueva rama en `resultado.html` con ficha grande del destinatario
+  (avatar 128px + marco doble champagne), sello rotado "+8 💼" verde
+  aprobado, pie "Por decisión de X, líder del mes". Caso degenerado
+  (jefe no eligió): mensaje "no se otorgó".
+- ✅ ~~Bug del bot-jefe instantáneo~~ — cuando el sorteo del Reconocimiento
+  caía en un bot, decidía y confirmaba al instante y nadie veía la fase.
+  Fix: `bossBotTimer` con setTimeout aleatorio de 6-10s antes de decidir
+  (sensación de "está pensando"). Guards defensivos por phase/bossId.
+- ✅ ~~Reconocimiento del Mes~~ — nuevo kind `reconocimiento` (asimetría
+  total: un único jefe sorteado elige destinatario, +8 Influencia, no
+  puede auto-elegirse). Una sola fase de 3 min. Pantalla con dos ramas:
+  vista jefe (grilla de candidatos + confirmar) y vista resto (avatar
+  grande del jefe con pulso único al aparecer).
 - ✅ ~~Feedback de botones / latencia percibida~~ — resuelto con
   `.enviando-bar` global + thud `.btn.is-pressing` global (mouse + touch
   + teclado). Ver §4 "Feedback de latencia".

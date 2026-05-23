@@ -25,6 +25,15 @@ export class Devbar {
   readonly enPartida = computed(
     () => this.juego.estado()?.status === 'playing',
   );
+  /** ¿Soy el anfitrión? Los atajos (saltar fase, salir al lobby) afectan
+   *  a TODA la sala, así que solo se le muestran al anfitrión — el resto
+   *  no debería poder pisar la partida de los demás. */
+  readonly soyHost = computed(() => {
+    const e = this.juego.estado();
+    return !!e && e.hostId === this.juego.miId();
+  });
+  /** ¿Mostrar la devbar? Partida en curso + soy anfitrión. */
+  readonly mostrar = computed(() => this.enPartida() && this.soyHost());
   /** Fase actual — para mostrarla en la barra como referencia. */
   readonly fase = computed(() => this.juego.estado()?.phase ?? '');
 

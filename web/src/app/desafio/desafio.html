@@ -3,9 +3,7 @@
      con pareja y sin pareja. El contenido cambia según partner(). -->
 <div class="screen desafio-screen">
   <div class="topbar">
-    <span class="brand">
-      SINERGIA<span class="dot">·</span>CORP
-    </span>
+    <app-brand />
     <span class="pill" [attr.aria-label]="'Tu Influencia: ' + (yo()?.influence ?? 0)">
       <span aria-hidden="true">💼</span> {{ yo()?.influence ?? 0 }}
     </span>

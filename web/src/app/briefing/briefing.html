@@ -6,9 +6,7 @@
      al anterior. Un tap en cualquier parte completa todo al instante. -->
 <div class="screen briefing-screen">
   <div class="topbar">
-    <span class="brand">
-      SINERGIA<span class="dot">·</span>CORP
-    </span>
+    <app-brand />
     <span class="pill" [attr.aria-label]="'Tu Influencia: ' + (yo()?.influence ?? 0)">
       <span aria-hidden="true">💼</span> {{ yo()?.influence ?? 0 }}
     </span>
@@ -24,7 +22,7 @@
           <p class="kicker" appReveal="type">
             Memo interno · Desempeño individual
           </p>
-          <h1 class="doc-h1" appReveal="slide">El Botón del Bonus</h1>
+          <h1 class="doc-h1" appReveal="slide">Bono Compartido</h1>
 
           <p class="briefing-lead" appReveal="type">
             La Dirección libera un <strong>bono compartible</strong> entre
@@ -129,6 +127,52 @@
             sumás Influencia; por cada una que <em class="rojo">errás</em>,
             restás. El que mejor lee a los demás —y mejor miente— se lleva
             la jornada.
+          </p>
+        }
+
+        @case ('reconocimiento-del-mes') {
+          <p class="kicker" appReveal="type">
+            Memo interno · Reconocimiento mensual
+          </p>
+          <h1 class="doc-h1" appReveal="slide">El Reconocimiento del Mes</h1>
+
+          <p class="briefing-lead" appReveal="type">
+            La Dirección autoriza a entregar un <strong>Reconocimiento del
+            Mes</strong> con valor de <strong>+8 <span aria-hidden="true">💼</span> de
+            Influencia</strong>. Al inicio de la jornada se designa al azar
+            a un <em>líder del mes</em> — única persona habilitada para
+            otorgarlo.
+          </p>
+
+          <!-- Instrucción destacada: el lobby pasa por Teams. -->
+          <aside class="meeting-call" appReveal="fade">
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="none"
+                 stroke="currentColor" stroke-width="1.6"
+                 stroke-linecap="round" stroke-linejoin="round"
+                 aria-hidden="true">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <div class="meeting-text">
+              <strong>Reunión obligatoria en Teams</strong>
+              <span>
+                Si no sos el líder, tu única arma es la palabra: convencé.
+              </span>
+            </div>
+          </aside>
+
+          <p class="briefing-lead" appReveal="type">
+            El líder <strong>no puede auto-otorgarse</strong> el
+            Reconocimiento: tiene que elegir a un colega. Puede cambiar de
+            idea hasta confirmar.
+          </p>
+
+          <p class="briefing-cierre" appReveal="type">
+            Al cerrar la jornada, el elegido se lleva <strong>+8 <span aria-hidden="true">💼</span> de
+            Influencia</strong>. El resto, una lección sobre cómo
+            <em>vender</em> el propio trabajo.
           </p>
         }
 

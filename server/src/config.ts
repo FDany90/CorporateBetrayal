@@ -36,9 +36,10 @@ export interface GameConfig {
  */
 export const CONFIG_DEFECTO: GameConfig = {
   rounds: [
-    { tipo: "individual", challengePool: [ "boton-del-bonus"] },
+    { tipo: "individual", challengePool: ["boton-del-bonus"] },
     { tipo: "grupal", challengePool: ["el-recorte"] },
     { tipo: "individual", challengePool: ["tablero-scrum"] },
+     { tipo: "grupal", challengePool: ["reconocimiento-del-mes"] },
     
     
   ],

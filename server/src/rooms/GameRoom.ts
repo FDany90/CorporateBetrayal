@@ -28,6 +28,10 @@ interface JoinOptions {
   nickname?: string;
   avatar?: string;
   playerToken?: string;
+  /** Solo aplica al CREAR la sala (primer cliente). Si se omite o queda
+   *  vacío, el cliente muestra el default ("Sinergia Corp"). Truncado a
+   *  30 caracteres en el server por seguridad. */
+  companyName?: string;
 }
 
 /**
@@ -55,6 +59,11 @@ export class GameRoom extends Room<GameState> {
    *  = no hay timer corriendo. Es el reloj AUTORITATIVO: al vencer, el
    *  server fuerza el avance (no depende del cliente). */
   private faseTimer?: ReturnType<typeof setTimeout>;
+  /** Handle del "tiempo de decisión" del bot-jefe del Reconocimiento. Lo
+   *  usamos para que la fase no se cierre al instante cuando el sorteo cae
+   *  sobre un bot — los humanos tienen que poder ver la pantalla del
+   *  jefe/espectador antes de que se resuelva. */
+  private bossBotTimer?: ReturnType<typeof setTimeout>;
   /* ---------- Tablero SCRUM (kind 'tablero') ---------- */
   /** Dueño de cada tarjeta: playerId → cardId. Es secreto: NO se sincroniza
    *  al cliente; cada humano recibe SU `ownedCardId` por mensaje privado. */
@@ -70,6 +79,7 @@ export class GameRoom extends Room<GameState> {
   onCreate(options: JoinOptions) {
     this.state = new GameState();
     this.state.code = (options.code || genCode()).toUpperCase();
+    this.state.companyName = (options.companyName ?? "").trim().slice(0, 30);
     this.setMetadata({ code: this.state.code });
 
     // --- mensajes de lobby · Paso 1 ---
@@ -144,6 +154,12 @@ export class GameRoom extends Room<GameState> {
       // esta validación, alguien podría confirmar sin votar y bloquear
       // el avance (el server seguiría esperando que vote).
       if (this.state.phase === "vote" && !p.decision) return;
+      // En 'reconocimiento', el "ack" solo lo manda el jefe para confirmar
+      // el destinatario elegido. Validamos: es el jefe y eligió a alguien.
+      if (this.state.phase === "reconocimiento") {
+        if (client.sessionId !== this.state.bossId) return;
+        if (!p.decision) return;
+      }
       p.acted = true;
       this.chequearAvance();
     });
@@ -191,6 +207,15 @@ export class GameRoom extends Room<GameState> {
         if (value !== "verde" && value !== "rojo") return;
         p.decision = value;
         this.chequearAvance();
+      } else if (this.state.phase === "reconocimiento") {
+        // Solo el jefe puede regalar; debe elegir a otro jugador (no a sí
+        // mismo); puede cambiar de idea hasta confirmar (`acted`).
+        if (client.sessionId !== this.state.bossId) return;
+        if (p.acted) return;
+        if (value === client.sessionId) return;
+        if (!this.state.players.has(value)) return;
+        p.decision = value;
+        // No tocamos `acted`: el avance lo dispara el handler "ack".
       } else if (this.state.phase === "vote") {
         // En vote, el voto se puede cambiar libremente hasta que el
         // jugador confirme (`ack`). Una vez confirmado, queda firme:
@@ -361,6 +386,8 @@ export class GameRoom extends Room<GameState> {
 
     // Limpiar tarjetas/estimaciones de un Tablero previo (si lo hubo).
     this.limpiarTablero();
+    // Limpiar el jefe del Reconocimiento de una ronda previa (si lo hubo).
+    this.state.bossId = "";
 
     // Si el minijuego es de llamadas, armar el calendario de tandas.
     this.schedule = [];
@@ -429,12 +456,39 @@ export class GameRoom extends Room<GameState> {
         if (p.connected && !p.acted) p.acted = true;
       }
       this.chequearAvance();
+    } else if (fase === "reconocimiento") {
+      // Si el jefe no eligió (o no confirmó), el server elige por él al
+      // azar entre los OTROS jugadores y confirma. Si solo hay 1 jugador
+      // (el propio jefe), no hay destinatario posible → cero efecto.
+      const jefe = this.state.players.get(this.state.bossId);
+      if (jefe && !jefe.acted) {
+        if (!jefe.decision) {
+          const otros = [...this.state.players.keys()].filter(
+            (id) => id !== this.state.bossId,
+          );
+          if (otros.length > 0) {
+            jefe.decision = otros[Math.floor(Math.random() * otros.length)];
+          }
+        }
+        jefe.acted = true;
+      }
+      this.chequearAvance();
     }
   }
 
   /** Limpieza al cerrarse la sala (evita timers colgados). */
   onDispose() {
     this.limpiarTimer();
+    this.limpiarBossBotTimer();
+  }
+
+  /** Cancela el timer del bot-jefe (si lo había). Se llama en cualquier
+   *  transición fuera de la fase 'reconocimiento'. */
+  private limpiarBossBotTimer() {
+    if (this.bossBotTimer) {
+      clearTimeout(this.bossBotTimer);
+      this.bossBotTimer = undefined;
+    }
   }
 
   /** Entra a una fase de "ack" (briefing/result/marcador/final): resetea
@@ -502,7 +556,6 @@ export class GameRoom extends Room<GameState> {
     if (
       fase === "comunicado" ||
       fase === "briefing" ||
-      fase === "meeting" ||
       fase === "result" ||
       fase === "marcador" ||
       fase === "final"
@@ -519,14 +572,16 @@ export class GameRoom extends Room<GameState> {
         if (kind === "llamadas" && this.state.tandasTotal > 0) {
           this.iniciarTanda(1);
         } else if (kind === "votacion") {
-          this.iniciarFase("meeting");
+          // El Recorte va directo del briefing al voto: el debate sucede
+          // sobre la pantalla del voto mismo (tally en vivo, con timer).
+          this.iniciarVotacion();
         } else if (kind === "tablero") {
           this.iniciarTablero();
+        } else if (kind === "reconocimiento") {
+          this.iniciarReconocimiento();
         } else {
           this.terminarRonda(); // ronda placeholder, sin minijuego
         }
-      } else if (fase === "meeting") {
-        this.iniciarVotacion(); // de la reunión al voto
       } else if (fase === "result") {
         // ¿Quedan tandas en este minijuego? → siguiente; si no, fin de ronda.
         if (this.state.tanda < this.state.tandasTotal) {
@@ -577,6 +632,16 @@ export class GameRoom extends Room<GameState> {
         if (p.connected && !p.acted) return;
       }
       this.resolverTablero();
+      return;
+    }
+
+    if (fase === "reconocimiento") {
+      // Avanza cuando el jefe confirmó (acted=true). Los demás no actúan;
+      // su rol es lobbear por voz. El handler `ack` solo deja confirmar
+      // al jefe con destinatario válido (ver onMessage("ack")).
+      const jefe = this.state.players.get(this.state.bossId);
+      if (jefe && jefe.connected && !jefe.acted) return;
+      this.resolverReconocimiento();
     }
   }
 
@@ -745,6 +810,86 @@ export class GameRoom extends Room<GameState> {
     console.log("[GameRoom] Tablero SCRUM resuelto");
   }
 
+  /* ---------- Reconocimiento del Mes (kind 'reconocimiento') ---------- */
+
+  /** Entra a la fase 'reconocimiento': elige un jefe al azar entre los
+   *  jugadores, deja a los demás como espectadores, y arma el timer.
+   *
+   *  Si el jefe es un bot, NO decide al instante: programamos una espera
+   *  de 6-10 s para que los humanos puedan ver la pantalla del jefe/
+   *  espectador antes de que la fase cierre (sensación de "está
+   *  pensando"). Si no, la fase se resolvería sin que nadie vea nada. */
+  private iniciarReconocimiento() {
+    this.limpiarBossBotTimer();
+    this.state.phase = "reconocimiento";
+    this.state.pairings.clear();
+
+    const ids = [...this.state.players.keys()];
+    if (ids.length === 0) {
+      this.terminarRonda();
+      return;
+    }
+    // Elegir jefe al azar.
+    const bossId = ids[Math.floor(Math.random() * ids.length)];
+    this.state.bossId = bossId;
+
+    for (const [, p] of this.state.players) {
+      p.acted = false;
+      p.decision = "";
+      p.lastDelta = 0;
+    }
+
+    // Timer de la fase (3 min por defecto). Al vencer, alExpirarFase
+    // elige por el jefe si no eligió y resuelve.
+    this.armarTimer(this.challengeActual?.bossSeconds ?? 0);
+
+    // Si el jefe es bot, agendamos su "decisión" en 6-10 s. Si en el
+    // medio sale de la fase (devSkipPhase, volverLobby, expira el timer),
+    // limpiamos el timer con limpiarBossBotTimer().
+    const jefe = this.state.players.get(bossId);
+    if (jefe?.isBot) {
+      const espera = 6000 + Math.floor(Math.random() * 4000);
+      this.bossBotTimer = setTimeout(() => {
+        this.bossBotTimer = undefined;
+        // Validar que seguimos en la misma fase con el mismo jefe (puede
+        // haber pasado un devSkipPhase o el jefe haberse desconectado).
+        if (this.state.phase !== "reconocimiento") return;
+        if (this.state.bossId !== bossId) return;
+        const j = this.state.players.get(bossId);
+        if (!j || j.acted) return;
+        const otros = [...this.state.players.keys()].filter(
+          (id) => id !== bossId,
+        );
+        if (otros.length > 0) {
+          j.decision = otros[Math.floor(Math.random() * otros.length)];
+        }
+        j.acted = true;
+        this.chequearAvance();
+      }, espera);
+    }
+  }
+
+  /** Resuelve el Reconocimiento: el destinatario elegido por el jefe gana
+   *  `bossDelta` Influencia. Si no hay destinatario (caso degenerado), nadie
+   *  gana nada. El jefe NO se lleva el punto. */
+  private resolverReconocimiento() {
+    this.limpiarBossBotTimer();
+    for (const [, p] of this.state.players) p.lastDelta = 0;
+
+    const jefe = this.state.players.get(this.state.bossId);
+    const delta = this.challengeActual?.bossDelta ?? 0;
+    if (jefe && jefe.decision && delta !== 0) {
+      const destinatario = this.state.players.get(jefe.decision);
+      if (destinatario && destinatario.id !== this.state.bossId) {
+        destinatario.influence += delta;
+        destinatario.lastDelta = delta;
+      }
+    }
+
+    this.iniciarFase("result");
+    console.log("[GameRoom] Reconocimiento del Mes resuelto");
+  }
+
   /** Limpia tarjetas + dueños + valores + estimaciones del Tablero. Se
    *  llama al cerrar el minijuego (terminar ronda, volver al lobby) y al
    *  entrar a una nueva instancia de tablero. */
@@ -794,10 +939,12 @@ export class GameRoom extends Room<GameState> {
 
   private volverLobby() {
     this.limpiarTimer();
+    this.limpiarBossBotTimer();
     this.limpiarTablero();
     this.state.status = "lobby";
     this.state.phase = "lobby";
     this.state.challengeId = "";
+    this.state.bossId = "";
     this.state.pairings.clear();
     this.state.tanda = 0;
     this.state.tandasTotal = 0;
@@ -868,6 +1015,16 @@ export class GameRoom extends Room<GameState> {
         }
         p.acted = true;
       }
+    } else if (fase === "reconocimiento") {
+      // Auto-elegir destinatario al azar para el jefe (y confirmar). Los
+      // demás también quedan acted=true por simetría (no afecta nada).
+      const ids = [...this.state.players.keys()];
+      const jefe = this.state.players.get(this.state.bossId);
+      if (jefe && !jefe.decision) {
+        const otros = ids.filter((id) => id !== this.state.bossId);
+        jefe.decision = otros[Math.floor(Math.random() * otros.length)] ?? "";
+      }
+      for (const [, p] of this.state.players) p.acted = true;
     } else {
       for (const [, p] of this.state.players) p.acted = true;
     }

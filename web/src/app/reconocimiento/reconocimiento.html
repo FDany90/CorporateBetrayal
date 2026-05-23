@@ -1,0 +1,158 @@
+<!-- Pantalla del Reconocimiento del Mes — "Memo confidencial · Líder del mes".
+     Dos ramas según el rol:
+       - Soy el jefe: grilla con todos los colegas para elegir destinatario,
+         botón "Otorgar Reconocimiento" para confirmar (igual al patrón
+         confirmar/voto de El Recorte).
+       - Soy el resto: ficha grande del jefe con un pulso al aparecer.
+         El juego pasa en la llamada de Teams. -->
+<div class="screen reconocimiento-screen">
+  <div class="topbar">
+    <app-brand />
+    <span class="pill" [attr.aria-label]="'Tu Influencia: ' + (yo()?.influence ?? 0)">
+      <span aria-hidden="true">💼</span> {{ yo()?.influence ?? 0 }}
+    </span>
+  </div>
+  <div class="appheader">
+    Día {{ dia() }} de {{ diasTotal() }} · {{ tema() }}
+  </div>
+
+  <app-timer [endsAt]="phaseEndsAt()" [totalSeconds]="phaseDuration()" />
+
+  @if (soyJefe()) {
+    <!-- ============ VISTA JEFE ============ -->
+    <div class="content">
+      <p class="kicker">Memo confidencial · Líder del mes</p>
+      <h1 class="doc-h1">Otorgá el Reconocimiento</h1>
+
+      <p class="reco-lead">
+        Has sido designado/a <strong>líder del mes</strong>. Elegí al colega
+        que mejor lo merezca: ganará <strong>+8 <span aria-hidden="true">💼</span> de
+        Influencia</strong>. Podés cambiar de idea hasta confirmar.
+      </p>
+
+      <!-- Grilla de candidatos. Cada uno es un botón "tarjeta" con avatar +
+           nombre + Influencia actual. Al tocarlo, el server registra mi
+           selección en `Player.decision` (sincronizado en vivo); la tarjeta
+           seleccionada muestra el sello "Elegido". -->
+      <div class="candidatos">
+        @for (p of candidatos(); track p.id) {
+          <button
+            type="button"
+            class="candidato"
+            [class.candidato-on]="destinatarioId() === p.id"
+            [class.candidato-locked]="confirmado()"
+            [disabled]="confirmado()"
+            [attr.aria-pressed]="destinatarioId() === p.id"
+            [attr.aria-label]="ariaCandidato(p.nickname, p.influence, destinatarioId() === p.id)"
+            (click)="elegir(p.id)"
+          >
+            <app-avatar [id]="p.avatar" [size]="64" />
+            <span class="candidato-nombre">{{ p.nickname }}</span>
+            <span class="candidato-inf" aria-hidden="true">
+              <span class="candidato-inf-icon">💼</span>
+              <span class="candidato-inf-num">{{ p.influence }}</span>
+            </span>
+            @if (destinatarioId() === p.id) {
+              <span class="candidato-stamp" aria-hidden="true">Elegido</span>
+            }
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="actionbar">
+      @if (confirmado()) {
+        <p class="muted-note" aria-live="polite" aria-atomic="true">
+          Reconocimiento otorgado. Cerrando jornada…
+        </p>
+      } @else if (destinatarioId()) {
+        <button class="btn" (click)="confirmar()">OTORGAR RECONOCIMIENTO</button>
+        <p class="muted-note" aria-live="polite" aria-atomic="true">
+          Tu pre-selección es <strong>visible en sala</strong>. Podés
+          cambiarla libremente hasta confirmar.
+        </p>
+      } @else {
+        <button class="btn" disabled>OTORGAR RECONOCIMIENTO</button>
+        <p class="muted-note" aria-live="polite" aria-atomic="true">
+          Elegí un colega para otorgar el Reconocimiento.
+        </p>
+      }
+    </div>
+  } @else {
+    <!-- ============ VISTA RESTO ============ -->
+    <div class="content reconocimiento-resto">
+      <p class="role-kicker">El líder del mes</p>
+
+      @if (jefe(); as j) {
+        <article class="boss">
+          <!-- Marco editorial con avatar grande. El pulso (CSS) se ejecuta
+               UNA sola vez al aparecer (no en loop). -->
+          <div class="boss-frame">
+            <app-avatar [id]="j.avatar" [size]="128" />
+          </div>
+
+          <!-- Section-head con trofeo: dos líneas finas que abrazan el
+               SVG centrado. Es el equivalente del "teléfono" en Desafío. -->
+          <div class="boss-trophy" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="34" height="34" fill="none"
+                 stroke="currentColor" stroke-width="1.6"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 21h8"/>
+              <path d="M12 17v4"/>
+              <path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/>
+              <path d="M17 5h2.5a1.5 1.5 0 0 1 0 3H17"/>
+              <path d="M7 5H4.5a1.5 1.5 0 0 0 0 3H7"/>
+            </svg>
+          </div>
+
+          <h1 class="boss-name">{{ j.nickname }}</h1>
+
+          <p class="boss-instruction">
+            Tiene un <strong>Reconocimiento del Mes</strong> para otorgar
+            (+8 <span aria-hidden="true">💼</span> de Influencia). Convencelo/a por la llamada de
+            Teams: tu única arma es la palabra.
+          </p>
+        </article>
+      }
+
+      <!-- Considerando en vivo: pre-selección del jefe que ve toda la
+           sala (su Player.decision se sincroniza). Genera tensión social
+           en la llamada — el "casi-elegido" puede pedir confirmación, los
+           demás pueden contra-lobbear, etc. Se anima la entrada/cambio
+           con un fade-in sobre el `track` por id del destinatario. -->
+      @if (destinatario(); as d) {
+        <aside
+          class="considerando"
+          [class.considerando-confirmada]="confirmado()"
+          [class.considerando-yo]="meEstaEligiendo()"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          <p class="considerando-label">
+            @if (confirmado()) {
+              Reconocimiento otorgado a
+            } @else {
+              Está considerando a
+            }
+          </p>
+          <!-- key por id del destinatario: si cambia, Angular re-monta
+               el bloque y se re-anima el fade. -->
+          <div class="considerando-pick" [attr.data-pick]="d.id">
+            <app-avatar [id]="d.avatar" [size]="56" />
+            <span class="considerando-nombre">{{ d.nickname }}</span>
+            @if (meEstaEligiendo()) {
+              <span class="considerando-vos" aria-hidden="true">vos</span>
+            }
+          </div>
+          @if (!confirmado()) {
+            <p class="considerando-hint">Sin confirmar — puede cambiar</p>
+          }
+        </aside>
+      } @else {
+        <p class="boss-state" aria-live="polite" aria-atomic="true">
+          {{ jefe()?.nickname }} está decidiendo…
+        </p>
+      }
+    </div>
+  }
+</div>

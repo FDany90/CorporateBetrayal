@@ -4,9 +4,7 @@
      convocados, botones como sellos. -->
 <div class="screen">
   <div class="topbar">
-    <span class="brand">
-      SINERGIA<span class="dot">·</span>CORP
-    </span>
+    <app-brand />
     <span class="pill">Expte. {{ code() }}</span>
   </div>
   <div class="appheader">Convocatoria interna · Plantilla</div>
@@ -68,43 +66,47 @@
       }
     </div>
 
-    <!-- Anexo técnico: panel dev de bots + partida rápida. -->
-    <div class="dev">
-      <div class="devtitle">Anexo técnico · Personal ficticio</div>
-      <div class="devrow">
-        <button class="btn ghost sm" (click)="agregarBots(1)">+ 1 bot</button>
-        <button class="btn ghost sm" (click)="agregarBots(3)">+ 3 bots</button>
-        <button
-          class="btn ghost sm"
-          [disabled]="!hayBots()"
-          (click)="quitarBots()"
-        >
-          Quitar bots
-        </button>
-      </div>
+    <!-- Anexo técnico: panel dev de bots + partida rápida. Solo el
+         anfitrión lo ve — el resto no tiene por qué poder rellenar la sala
+         de bots ni saltar a un minijuego puntual. -->
+    @if (soyHost()) {
+      <div class="dev">
+        <div class="devtitle">Anexo técnico · Personal ficticio</div>
+        <div class="devrow">
+          <button class="btn ghost sm" (click)="agregarBots(1)">+ 1 bot</button>
+          <button class="btn ghost sm" (click)="agregarBots(3)">+ 3 bots</button>
+          <button
+            class="btn ghost sm"
+            [disabled]="!hayBots()"
+            (click)="quitarBots()"
+          >
+            Quitar bots
+          </button>
+        </div>
 
-      <!-- Partida rápida: rellena bots, ficha a todos y arranca. El
-           selector permite saltar directo a un minijuego (una ronda). -->
-      <div class="devtitle" style="margin-top:10px">Partida rápida</div>
-      <div class="devrow">
-        <select
-          class="dev-select"
-          [value]="minijuegoElegido()"
-          (change)="minijuegoElegido.set($any($event.target).value)"
-          aria-label="Minijuego para la partida rápida"
-        >
-          <option value="">Partida normal (todas las rondas)</option>
-          @for (m of minijuegos; track m.id) {
-            <option [value]="m.id">{{ m.label }}</option>
-          }
-        </select>
+        <!-- Partida rápida: rellena bots, ficha a todos y arranca. El
+             selector permite saltar directo a un minijuego (una ronda). -->
+        <div class="devtitle" style="margin-top:10px">Partida rápida</div>
+        <div class="devrow">
+          <select
+            class="dev-select"
+            [value]="minijuegoElegido()"
+            (change)="minijuegoElegido.set($any($event.target).value)"
+            aria-label="Minijuego para la partida rápida"
+          >
+            <option value="">Partida normal (todas las rondas)</option>
+            @for (m of minijuegos; track m.id) {
+              <option [value]="m.id">{{ m.label }}</option>
+            }
+          </select>
+        </div>
+        <div class="devrow">
+          <button class="btn sm" (click)="partidaRapida()">
+            ⚡ Empezar ya
+          </button>
+        </div>
       </div>
-      <div class="devrow">
-        <button class="btn sm" (click)="partidaRapida()">
-          ⚡ Empezar ya
-        </button>
-      </div>
-    </div>
+    }
   </div>
 
   <div class="actionbar">

@@ -1,0 +1,419 @@
+/* ============================================================
+   Pantalla del Reconocimiento del Mes
+   ============================================================
+   Dos ramas visuales:
+     - Vista JEFE: kicker + h1 editorial, bajada narrativa, grilla de
+       "tarjetas" de candidatos (avatar + nombre + Influencia), botón
+       grande para confirmar.
+     - Vista RESTO: misma gramática que la ficha del colega en Desafío
+       (marco doble + avatar grande + nombre display + bajada), pero
+       con ícono de trofeo en lugar de teléfono. Un pulso UNA sola vez
+       al aparecer le da vida sin distraer.
+   ============================================================ */
+
+.reconocimiento-screen .content {
+  padding: 18px 18px 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* h1 editorial — misma rotunda que Briefing/Recorte. */
+.reconocimiento-screen .doc-h1 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 30px;
+  line-height: 1.05;
+  letter-spacing: -0.5px;
+  color: var(--ink);
+  margin: 0 0 14px;
+  font-variation-settings: 'opsz' 96;
+  text-wrap: balance;
+}
+
+.reco-lead {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink);
+  margin: 0 0 18px;
+  text-wrap: balance;
+}
+.reco-lead strong {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 11.5px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent-d);
+  padding: 0 2px;
+}
+
+/* ============================================================
+   VISTA JEFE — Grilla de candidatos
+   ============================================================ */
+
+.candidatos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+/* Cada candidato es una "tarjeta sello" — mismo lenguaje que las
+   .option del Botón pero con avatar al centro. Sombra offset como
+   sello apilado. */
+.candidato {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 10px 12px;
+  background: var(--paper-soft);
+  border: 1.5px solid var(--ink);
+  border-radius: 2px;
+  cursor: pointer;
+  color: var(--ink);
+  font: inherit;
+  min-height: 140px;
+  box-shadow: 3px 3px 0 var(--line);
+  transition:
+    transform 100ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+.candidato:active {
+  transform: translateY(2px);
+  box-shadow: 1px 1px 0 var(--line);
+}
+@media (hover: hover) {
+  .candidato:hover:not(:active):not(.candidato-on):not(:disabled) {
+    background: var(--paper);
+  }
+}
+
+.candidato-nombre {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.1;
+  color: var(--ink);
+  font-variation-settings: 'opsz' 24;
+  text-align: center;
+  text-wrap: balance;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Pill chico de Influencia adentro de la tarjeta — mono caps, igual
+   gramática que el pill del topbar. */
+.candidato-inf {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--paper);
+}
+.candidato-inf-icon { font-style: normal; }
+.candidato-inf-num {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+/* Estado SELECCIONADO — borde champagne grueso + fondo apagado +
+   sombra del color. Igual que .option-verde.option-on pero en champagne
+   (porque acá no hay decisión moral, es un favor). */
+.candidato-on {
+  border-color: var(--accent-d);
+  border-width: 2.5px;
+  background: var(--accent-soft);
+  box-shadow: 3px 3px 0 var(--accent-d);
+}
+.candidato-on .candidato-nombre { color: var(--accent-d); }
+
+/* Atenuar los no elegidos cuando hay uno seleccionado. */
+.candidatos:has(.candidato-on) .candidato:not(.candidato-on) {
+  opacity: 0.5;
+}
+
+/* Estado LOCKED (post-confirmación). */
+.candidato-locked {
+  cursor: default;
+}
+.candidato-locked:not(.candidato-on) {
+  opacity: 0.4;
+}
+
+/* Sello "Elegido" — chico, girado, esquina superior derecha. Mismo
+   golpe de sello que .option-stamp pero adaptado al champagne. */
+.candidato-stamp {
+  position: absolute;
+  top: -10px;
+  right: -8px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 3px 8px 4px;
+  border: 1.5px solid var(--accent-d);
+  color: var(--accent-d);
+  background: var(--paper);
+  transform: rotate(8deg);
+  white-space: nowrap;
+  pointer-events: none;
+  animation: candidatoSello 360ms cubic-bezier(.2, .8, .2, 1.3) both;
+}
+@keyframes candidatoSello {
+  0%   { opacity: 0; transform: rotate(8deg) scale(1.6); }
+  60%  { opacity: 1; transform: rotate(8deg) scale(.9);  }
+  100% { opacity: 1; transform: rotate(8deg) scale(1);   }
+}
+
+/* ============================================================
+   VISTA RESTO — Ficha del jefe
+   ============================================================ */
+
+.reconocimiento-resto {
+  justify-content: center;
+  flex: 1;
+}
+
+/* Kicker mono caps con punto champagne pulsante — reusa la gramática
+   de .role-kicker de Desafío para coherencia. */
+.reconocimiento-resto .role-kicker {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent-d);
+  text-align: center;
+  margin: 0 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.reconocimiento-resto .role-kicker::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+/* Ficha del jefe — marco doble (champagne offset) + avatar grande.
+   Misma gramática que .partner-frame de Desafío. */
+.boss {
+  text-align: center;
+  margin: 0 0 14px;
+}
+.boss-frame {
+  width: 144px;
+  height: 144px;
+  margin: 0 auto 16px;
+  background: var(--paper-soft);
+  border: 1.5px solid var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  /* PULSO UNA SOLA VEZ — onda champagne que se expande y desvanece al
+     aparecer. No es infinite (decisión: que no distraiga). */
+  animation: bossPulse 1400ms ease-out 200ms 1 both;
+}
+@keyframes bossPulse {
+  0%   { box-shadow: 0 0 0 0   rgba(199, 162, 105, 0.55); }
+  100% { box-shadow: 0 0 0 28px rgba(199, 162, 105, 0);    }
+}
+/* Doble borde champagne offset detrás del marco, como en Desafío. */
+.boss-frame::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  z-index: -1;
+  transform: translate(4px, 4px);
+  animation: bossSelloCae 520ms cubic-bezier(.2, .8, .2, 1.08) both;
+  animation-delay: 140ms;
+}
+@keyframes bossSelloCae {
+  0%   { opacity: 0; transform: translate(4px, -18px); }
+  100% { opacity: 1; transform: translate(4px, 4px);   }
+}
+
+/* Section-head con trofeo — dos líneas que abrazan el SVG centrado. */
+.boss-trophy {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 8px;
+  color: var(--ink-soft);
+}
+.boss-trophy::before,
+.boss-trophy::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--line);
+}
+.boss-trophy svg {
+  flex-shrink: 0;
+  display: block;
+  color: var(--accent-d);
+}
+
+.boss-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 30px;
+  line-height: 1.05;
+  letter-spacing: -0.5px;
+  color: var(--ink);
+  margin: 0 0 10px;
+  font-variation-settings: 'opsz' 96;
+  text-wrap: balance;
+}
+.boss-instruction {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink);
+  margin: 0 auto;
+  max-width: 32ch;
+  text-wrap: balance;
+}
+.boss-instruction strong {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent-d);
+  padding: 0 2px;
+}
+
+.boss-state {
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  text-align: center;
+  margin: 18px 0 0;
+  text-wrap: balance;
+}
+
+/* ------ CONSIDERANDO (pre-selección en vivo) ------
+   Bloque que aparece en la vista del resto cuando el jefe pre-selecciona
+   a alguien. Se actualiza en vivo conforme el jefe cambia su decisión.
+   Look: recuadro champagne con label mono caps, mini-ficha (avatar +
+   nombre), y un hint "sin confirmar" hasta que el jefe confirme. */
+.considerando {
+  margin: 18px auto 0;
+  max-width: 280px;
+  padding: 12px 14px;
+  background: var(--accent-soft);
+  border: 1.5px solid var(--accent-d);
+  border-radius: 2px;
+  text-align: center;
+  /* Animación de aparición: fade desde -8px. */
+  animation: considerandoEntra 320ms ease-out both;
+}
+@keyframes considerandoEntra {
+  0%   { opacity: 0; transform: translateY(-6px); }
+  100% { opacity: 1; transform: translateY(0);    }
+}
+
+.considerando-label {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent-d);
+  margin: 0 0 8px;
+}
+
+.considerando-pick {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 0 6px;
+}
+.considerando-nombre {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--ink);
+  font-variation-settings: 'opsz' 24;
+  text-wrap: balance;
+  min-width: 0;
+}
+.considerando-vos {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--paper);
+  background: var(--accent-d);
+  padding: 2px 6px 3px;
+  border-radius: 2px;
+}
+
+.considerando-hint {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+/* Variante "soy yo el casi-elegido" — borde más grueso + sombra champagne
+   para darle peso visual al ser destinatario. Tensión específica:
+   "te están por elegir a vos". */
+.considerando-yo {
+  border-width: 2.5px;
+  box-shadow: 3px 3px 0 var(--accent-d);
+}
+
+/* Variante CONFIRMADA — borde tinta pleno + sello "Confirmado". El
+   destinatario está cerrado, ya no se puede cambiar. */
+.considerando-confirmada {
+  background: var(--paper-soft);
+  border-color: var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.considerando-confirmada .considerando-label {
+  color: var(--ink);
+}
+
+/* ------ Botón disabled del actionbar — coherente con votacion. ------ */
+.reconocimiento-screen .actionbar .btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   Desktop — la grilla puede usar más columnas si hay muchos jugadores.
+   Con 3 candidatos queda 3 col; con 5 queda 3+2; etc.
+   ============================================================ */
+@media (min-width: 720px) {
+  .candidatos {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+}

@@ -1,6 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { GameService } from '../game.service';
 import { Avatar } from '../avatar/avatar';
+import { Brand } from '../brand/brand';
 import { Intro } from '../intro/intro';
 import { CountUp } from '../count-up';
 import { temaDelDia } from '../challenge-meta';
@@ -17,7 +18,7 @@ import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
  */
 @Component({
   selector: 'app-marcador',
-  imports: [Avatar, Intro, CountUp],
+  imports: [Avatar, Brand, Intro, CountUp],
   templateUrl: './marcador.html',
 })
 export class Marcador {

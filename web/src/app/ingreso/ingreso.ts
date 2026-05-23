@@ -32,6 +32,8 @@ export class Ingreso {
   readonly nickname = signal('');
   readonly code = signal('');
   readonly avatar = signal(AVATAR_DEFAULT);
+  /** Nombre de la empresa (solo aplica al crear sala). Vacío = default. */
+  readonly companyName = signal('');
 
   /** ¿Está abierto el modal de selección? */
   readonly pickerAbierto = signal(false);
@@ -87,7 +89,11 @@ export class Ingreso {
       return;
     }
     if (this.modo() === 'crear') {
-      this.juego.crearSala(this.nickname().trim(), this.avatar());
+      this.juego.crearSala(
+        this.nickname().trim(),
+        this.avatar(),
+        this.companyName().trim() || undefined,
+      );
     } else {
       this.juego.unirseSala(this.code(), this.nickname().trim(), this.avatar());
     }

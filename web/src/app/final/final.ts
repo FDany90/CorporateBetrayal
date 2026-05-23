@@ -1,5 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { GameService } from '../game.service';
+import { Brand } from '../brand/brand';
 import { Intro } from '../intro/intro';
 import { Reveal } from '../reveal/reveal';
 import { Avatar } from '../avatar/avatar';
@@ -38,7 +39,7 @@ import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
  */
 @Component({
   selector: 'app-final',
-  imports: [Intro, Reveal, Avatar],
+  imports: [Brand, Intro, Reveal, Avatar],
   templateUrl: './final.html',
   styleUrl: './final.css',
 })

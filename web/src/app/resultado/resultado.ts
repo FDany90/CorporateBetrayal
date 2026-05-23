@@ -1,6 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { GameService } from '../game.service';
 import { Avatar } from '../avatar/avatar';
+import { Brand } from '../brand/brand';
 import { Intro } from '../intro/intro';
 import { Reveal } from '../reveal/reveal';
 import { CountUp } from '../count-up';
@@ -14,7 +15,7 @@ import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
  */
 @Component({
   selector: 'app-resultado',
-  imports: [Avatar, CountUp, Intro, Reveal],
+  imports: [Avatar, Brand, CountUp, Intro, Reveal],
   templateUrl: './resultado.html',
   styleUrl: './resultado.css',
 })
@@ -71,6 +72,28 @@ export class Resultado {
   readonly esTablero = computed(
     () => this.juego.estado()?.challengeId === 'tablero-scrum',
   );
+
+  /** ¿El minijuego que acaba de cerrar es el Reconocimiento del Mes? */
+  readonly esReconocimiento = computed(
+    () => this.juego.estado()?.challengeId === 'reconocimiento-del-mes',
+  );
+
+  /** Jefe del Reconocimiento (todavía publicado en state.bossId durante
+   *  la fase 'result' — se limpia recién en la próxima ronda). */
+  readonly jefe = computed(() => {
+    const id = this.juego.estado()?.bossId ?? '';
+    if (!id) return null;
+    return this.jugadores().find((p) => p.id === id) ?? null;
+  });
+
+  /** Destinatario al que el jefe le otorgó el Reconocimiento. La decisión
+   *  del jefe se preserva durante 'result' (no se resetea en iniciarFase).
+   *  null si no hubo destinatario (caso degenerado). */
+  readonly destinatario = computed(() => {
+    const j = this.jefe();
+    if (!j || !j.decision) return null;
+    return this.jugadores().find((p) => p.id === j.decision) ?? null;
+  });
 
   /** Tarjetas del Tablero (con valor real revelado por el server). */
   readonly cards = computed(() => this.juego.estado()?.cards ?? []);

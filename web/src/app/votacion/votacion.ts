@@ -1,6 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { GameService } from '../game.service';
 import { Avatar } from '../avatar/avatar';
+import { Brand } from '../brand/brand';
 import { Timer } from '../timer/timer';
 import { temaDelDia } from '../challenge-meta';
 import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
@@ -24,7 +25,7 @@ import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
  */
 @Component({
   selector: 'app-votacion',
-  imports: [Avatar, Timer],
+  imports: [Avatar, Brand, Timer],
   templateUrl: './votacion.html',
   styleUrl: './votacion.css',
 })

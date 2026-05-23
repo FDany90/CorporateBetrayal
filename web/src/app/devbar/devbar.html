@@ -1,6 +1,6 @@
 <!-- Solo visible durante la partida. Colapsado = botón ⚙; abierto =
      panel con los atajos. position:fixed, no interfiere con el layout. -->
-@if (enPartida()) {
+@if (mostrar()) {
   <div class="devbar" [class.devbar-open]="abierto()">
     @if (abierto()) {
       <div class="devbar-panel">

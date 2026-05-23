@@ -10,21 +10,27 @@
 import { BOTON_DEL_BONUS } from "./botonDelBonus";
 import { EL_RECORTE } from "./elRecorte";
 import { TABLERO_SCRUM } from "./tableroScrum";
+import { RECONOCIMIENTO_DEL_MES } from "./reconocimientoDelMes";
 
 export type ChallengeFormat = "individual" | "grupal";
 
 /**
  * Tipo de minijuego — define su flujo de fases:
- *   'llamadas' → briefing → [calls → result] × tandas   (El Botón del Bonus)
- *   'votacion' → briefing → meeting → vote → result      (El Recorte)
- *   'tablero'  → briefing → tablero → result             (El Tablero SCRUM)
+ *   'llamadas'        → briefing → [calls → result] × tandas   (El Botón del Bonus)
+ *   'votacion'        → briefing → meeting → vote → result      (El Recorte)
+ *   'tablero'         → briefing → tablero → result             (El Tablero SCRUM)
+ *   'reconocimiento'  → briefing → reconocimiento → result      (El Reconocimiento del Mes)
  *
  * 'tablero' (información asimétrica): hay K tarjetas con valor secreto. Cada
  * jugador conoce 1 (mensaje privado), el resto los estima. Se llama libre por
  * Teams; la web no guía. Acierto/error → ±X Influencia por tarjeta. Sin estimar
  * = 0 (opcional). Solo se puntúan tarjetas NO propias.
+ *
+ * 'reconocimiento' (asimetría total): un jugador al azar es el "jefe del mes"
+ * (state.bossId) y tiene un Reconocimiento para otorgar a OTRO jugador. Los
+ * demás lobbean por Teams; el jefe decide. Destinatario → +bossDelta Influencia.
  */
-export type ChallengeKind = "llamadas" | "votacion" | "tablero";
+export type ChallengeKind = "llamadas" | "votacion" | "tablero" | "reconocimiento";
 
 /** La "ficha" de un minijuego (subconjunto pragmático de modelo-datos §4). */
 export interface ChallengeDefinition {
@@ -58,6 +64,12 @@ export interface ChallengeDefinition {
   tableroSeconds?: number;
   /** Influencia que se suma/resta por cada tarjeta acertada/errada. */
   tableroPayoff?: number;
+  // --- kind 'reconocimiento' ---
+  /** Segundos límite de la fase 'reconocimiento'. 0/undefined = sin límite.
+   *  Al vencer, si el jefe no eligió, el server elige al azar entre los otros. */
+  bossSeconds?: number;
+  /** Influencia que gana el destinatario elegido por el jefe. */
+  bossDelta?: number;
 }
 
 /** Catálogo de minijuegos implementados. Se agregan acá. */
@@ -65,4 +77,5 @@ export const CHALLENGE_REGISTRY: Record<string, ChallengeDefinition> = {
   [BOTON_DEL_BONUS.id]: BOTON_DEL_BONUS,
   [EL_RECORTE.id]: EL_RECORTE,
   [TABLERO_SCRUM.id]: TABLERO_SCRUM,
+  [RECONOCIMIENTO_DEL_MES.id]: RECONOCIMIENTO_DEL_MES,
 };

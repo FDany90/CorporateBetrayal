@@ -35,12 +35,12 @@
       <div class="page" @pageAnim><app-briefing /></div>
     } @else if (estado.phase === 'calls') {
       <div class="page" @pageAnim><app-desafio /></div>
-    } @else if (estado.phase === 'meeting') {
-      <div class="page" @pageAnim><app-reunion /></div>
     } @else if (estado.phase === 'vote') {
       <div class="page" @pageAnim><app-votacion /></div>
     } @else if (estado.phase === 'tablero') {
       <div class="page" @pageAnim><app-tablero-scrum /></div>
+    } @else if (estado.phase === 'reconocimiento') {
+      <div class="page" @pageAnim><app-reconocimiento /></div>
     } @else if (estado.phase === 'result') {
       <div class="page" @pageAnim><app-resultado /></div>
     } @else if (estado.phase === 'marcador') {

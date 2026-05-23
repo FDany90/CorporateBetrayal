@@ -200,3 +200,111 @@
 }
 .delta-chip.up   { color:var(--approved); }
 .delta-chip.down { color:var(--stamp);    }
+
+/* ============================================================
+   Reveal del Reconocimiento del Mes — "Memo oficial · RRHH"
+   ============================================================
+   Ficha grande del destinatario con marco doble champagne, nombre
+   display y sello "+8 💼" rotado. Mismo lenguaje editorial que la
+   ficha del jefe en la pantalla de fase. */
+
+.reco-otorgado {
+  text-align: center;
+  margin: 6px 0 12px;
+  padding: 14px 14px 18px;
+  background: var(--paper-soft);
+  border: 1.5px solid var(--ink);
+  border-radius: 2px;
+  box-shadow: 4px 4px 0 var(--accent-d);
+  position: relative;
+}
+
+.reco-otorgado-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0 0 12px;
+}
+
+.reco-otorgado-frame {
+  width: 128px;
+  height: 128px;
+  margin: 0 auto 12px;
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.reco-otorgado-frame::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  z-index: -1;
+  transform: translate(4px, 4px);
+}
+
+.reco-otorgado-nombre {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 28px;
+  line-height: 1.05;
+  letter-spacing: -0.4px;
+  color: var(--ink);
+  margin: 0 0 22px;
+  font-variation-settings: 'opsz' 96;
+  text-wrap: balance;
+  /* Block-level flex centrado: nombre en su propia línea y el sello "+8"
+     queda en la línea siguiente, no a la derecha del nombre. */
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 8px;
+}
+
+/* Sello "+8 💼" — display grande con borde tinta y rotación leve, como
+   un tampón de "APROBADO" sobre el memo. Block-level para forzarlo a su
+   propia línea, debajo del nombre. */
+.reco-otorgado-sello {
+  display: block;
+  width: max-content;
+  margin: 0 auto 12px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: 0.5px;
+  color: var(--approved);
+  padding: 8px 16px 10px;
+  border: 2.5px solid var(--approved);
+  background: var(--paper);
+  transform: rotate(-3deg);
+  white-space: nowrap;
+}
+.reco-otorgado-icon {
+  font-size: 20px;
+  margin-left: 2px;
+}
+
+.reco-otorgado-pie {
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  margin: 0 auto;
+  max-width: 32ch;
+  text-wrap: balance;
+}
+.reco-otorgado-pie strong {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink);
+  padding: 0 1px;
+}
