@@ -72,7 +72,9 @@
                 @if (p.id === miId()) { <span class="vos-tag">vos</span> }
               </span>
               <span class="row-dots"></span>
-              <span class="row-inf">💼 {{ p.influence }}</span>
+              <span class="row-inf" [attr.aria-label]="'Influencia ' + p.influence">
+                <span aria-hidden="true">💼</span> {{ p.influence }}
+              </span>
             </div>
             <!-- Nota al pie del último puesto: "en proceso de mejora". -->
             @if (i === plantilla().length - 1) {

@@ -3,7 +3,9 @@
     <span class="brand">
       SINERGIA<span class="dot">·</span>CORP
     </span>
-    <span class="pill">💼 {{ yo()?.influence ?? 0 }}</span>
+    <span class="pill" [attr.aria-label]="'Tu Influencia: ' + (yo()?.influence ?? 0)">
+      <span aria-hidden="true">💼</span> {{ yo()?.influence ?? 0 }}
+    </span>
   </div>
   <div class="appheader">
     Reunión · Ronda {{ ronda() }} de {{ rondasTotal() }}

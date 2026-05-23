@@ -7,6 +7,15 @@
        - dispara la animación `pageAnim` (animations.ts) cuando entra al DOM,
          es decir, cada vez que cambia la rama del @if/@else if.
      -->
+<!-- Barra de "enviando" — global, fija arriba. Aparece cuando hay un
+     round-trip en curso (ver GameService.enviando) y desaparece al
+     llegar el próximo onStateChange. Vive en el shell (no en cada botón)
+     para que sobreviva el cambio de pantalla y puentee el hueco visual
+     entre el tap y la nueva fase, especialmente en producción con latencia. -->
+<div class="enviando-bar"
+     [class.enviando-bar-activa]="juego.enviando()"
+     aria-hidden="true"></div>
+
 <!-- `.desk` = el "escritorio" que envuelve la hoja + la ficha lateral.
      En mobile es display:contents (no existe como caja: .app se comporta
      como hoy). En desktop se vuelve un flex row centrado (ver styles.css).
@@ -30,6 +39,8 @@
       <div class="page" @pageAnim><app-reunion /></div>
     } @else if (estado.phase === 'vote') {
       <div class="page" @pageAnim><app-votacion /></div>
+    } @else if (estado.phase === 'tablero') {
+      <div class="page" @pageAnim><app-tablero-scrum /></div>
     } @else if (estado.phase === 'result') {
       <div class="page" @pageAnim><app-resultado /></div>
     } @else if (estado.phase === 'marcador') {

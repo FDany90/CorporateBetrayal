@@ -61,6 +61,20 @@
   --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
   --font-mono:    'JetBrains Mono', ui-monospace, Menlo, monospace;
   --font-body:    var(--font-mono);
+  /* "Hand": fuente manuscrita para objetos diegéticos como el Tablero
+     SCRUM (post-its escritos a mano dentro del sistema corporativo). */
+  --font-hand:    'Caveat', 'Patrick Hand', 'Comic Sans MS', cursive;
+
+  /* — Post-its (Tablero SCRUM) — papelitos pegados sobre la mesa.
+     Tonos saturados pero apagados, para que dialoguen con el papel
+     crema del shell sin chillar. La tinta sigue siendo carbón. */
+  --post-yellow: #ffe27a;
+  --post-green:  #c8e7a3;
+  --post-pink:   #f6b8c8;
+  --post-blue:   #aed4f0;
+  --post-orange: #ffb787;
+  --post-ink:    #2a2018;  /* marcador grueso, no negro puro */
+  --post-red:    #c64545;  /* círculo dibujado a mano para marcar */
 }
 
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -97,7 +111,8 @@ body{
    el contenido se expande y empuja el .actionbar fuera del viewport.
    Forzamos flex column flex:1 min-height:0 para mantener la cadena. */
 app-ingreso, app-lobby, app-briefing, app-desafio, app-resultado,
-app-marcador, app-final, app-reunion, app-votacion, app-comunicado{
+app-marcador, app-final, app-reunion, app-votacion, app-comunicado,
+app-tablero-scrum{
   display:flex;flex-direction:column;flex:1;min-height:0;
 }
 
@@ -866,6 +881,88 @@ app-intro.intro{
 }
 @media (prefers-reduced-motion: reduce){
   .tw-typing::after{ animation:none; opacity:0; }
+}
+
+/* ============================================================
+   .sr-only — visually-hidden utility para anuncios de lectores
+   de pantalla. Lo usa el timer para anunciar UNA vez el estado
+   urgente sin spamear cada segundo. Patrón estándar (Bootstrap/Tailwind). */
+.sr-only{
+  position:absolute;
+  width:1px; height:1px;
+  padding:0; margin:-1px;
+  overflow:hidden;
+  clip:rect(0,0,0,0);
+  white-space:nowrap;
+  border:0;
+}
+
+/* ============================================================
+   FEEDBACK DE LATENCIA — barra "enviando" + press auto-completable
+   ------------------------------------------------------------
+   En producción (Render free, ~200-300ms RTT) hay un hueco visual
+   entre el tap y la respuesta del server donde el botón "no hace
+   nada". Esto puentea esa ventana con feedback que NO depende del
+   botón (que se destruye al cambiar de pantalla):
+
+     - `.enviando-bar`: banda fija de 3px arriba de todo, animada
+       mientras `juego.enviando()` sea true. Vive en el shell, así
+       sobrevive el cambio de pantalla.
+     - `.btn.is-pressing`: keyframe de "thud" de 240ms que se dispara
+       en pointerdown (vía un listener global en app.ts) y se completa
+       sola — no depende de `:active`, que se corta al soltar / al
+       transicionar.
+   ============================================================ */
+.enviando-bar{
+  position:fixed;
+  top:0; left:0; right:0;
+  height:3px;
+  background:transparent;
+  z-index:9999;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 200ms ease;
+}
+.enviando-bar-activa{
+  opacity:1;
+  background:linear-gradient(90deg,
+    transparent 0%,
+    rgba(176,141,61,.05) 20%,
+    var(--accent) 50%,
+    rgba(176,141,61,.05) 80%,
+    transparent 100%);
+  background-size:50% 100%;
+  background-repeat:no-repeat;
+  animation:enviandoSlide 1.1s linear infinite;
+}
+@keyframes enviandoSlide{
+  0%   { background-position:-50% 0; }
+  100% { background-position:150% 0; }
+}
+@media (prefers-reduced-motion: reduce){
+  .enviando-bar-activa{
+    animation:none;
+    background:var(--accent);
+  }
+}
+
+/* "Thud" de tap auto-completable. La regla `.btn:active` ya da el press
+   visual cuando el botón sigue en pantalla, pero al transicionar el botón
+   se destruye y queda "frizado". Acá animamos en pointerdown y dejamos
+   que el keyframe complete por su cuenta. */
+.btn.is-pressing{
+  animation:btnPressThud 240ms cubic-bezier(.4,0,.2,1) both;
+}
+@keyframes btnPressThud{
+  0%   { transform:translateY(0);
+         box-shadow:0 4px 0 var(--accent), 0 6px 12px rgba(26,22,18,.20); }
+  35%  { transform:translateY(3px);
+         box-shadow:0 1px 0 var(--accent), 0 2px 6px rgba(26,22,18,.20); }
+  100% { transform:translateY(0);
+         box-shadow:0 4px 0 var(--accent), 0 6px 12px rgba(26,22,18,.20); }
+}
+@media (prefers-reduced-motion: reduce){
+  .btn.is-pressing{ animation:none; }
 }
 
 /* Tap para saltar (modo orquestado): todo aparece al instante en su estado

@@ -1,0 +1,107 @@
+<!-- Pantalla Tablero SCRUM — UI completa (paso 2).
+     Cada tarjeta es un "ticket". La que conocés muestra su valor real;
+     las demás tienen una fila de chips Fibonacci tappeable. -->
+<div class="screen tablero-screen">
+  <div class="topbar">
+    <span class="brand">
+      SINERGIA<span class="dot">·</span>CORP
+    </span>
+    <span class="pill" [attr.aria-label]="'Tu Influencia: ' + (yo()?.influence ?? 0)">
+      <span aria-hidden="true">💼</span> {{ yo()?.influence ?? 0 }}
+    </span>
+  </div>
+  <div class="appheader">
+    Día {{ dia() }} de {{ diasTotal() }} · {{ tema() }}
+  </div>
+
+  <app-timer [endsAt]="phaseEndsAt()" [totalSeconds]="phaseDuration()" />
+
+  <div class="content">
+    <p class="kicker">Reunión de planning · Estimaciones</p>
+    <h1 class="doc-h1">Tablero del Sprint</h1>
+
+    <p class="tablero-lead">
+      Hablá con tus colegas por <strong>Teams</strong> para averiguar el valor
+      en story points de las tarjetas que <strong>no conocés</strong>.
+      Tu tarjeta ya la sabés — usala para negociar, <em>verdad o mentira</em>.
+      Acertar suma, errar resta.
+    </p>
+
+    <div class="tarjetas">
+      @for (c of cards(); track c.id) {
+        <article
+          class="tarjeta"
+          [class.tarjeta-mia]="esMia(c.id)"
+          [class.tarjeta-lista]="!esMia(c.id) && estimacionDe(c.id) !== undefined"
+        >
+          <header class="tarjeta-head">
+            <h2 class="tarjeta-nombre">{{ c.nombre }}</h2>
+            @if (esMia(c.id)) {
+              <span class="tag host">vos</span>
+            }
+          </header>
+
+          @if (c.descripcion) {
+            <p class="tarjeta-descripcion">{{ c.descripcion }}</p>
+          }
+
+          @if (esMia(c.id)) {
+            <!-- Tu tarjeta: valor real garabateado grande, llena el alto. -->
+            <div class="tarjeta-mia-valor">
+              <span class="val">{{ miTarjeta()?.valor }}</span>
+            </div>
+          } @else {
+            <!-- Tarjeta ajena: grilla 3×2 de chips Fibonacci. -->
+            <div class="tarjeta-estimar">
+              <!-- Toggle group: cada chip es un botón pressable individual
+                   (no radio: se puede deseleccionar). Por eso usamos
+                   aria-pressed en cada chip y NO role="radiogroup". -->
+              <div class="tarjeta-chips" role="group"
+                   [attr.aria-label]="'Estimación de ' + c.nombre">
+                @for (n of FIBONACCI; track n) {
+                  <button
+                    type="button"
+                    class="chip"
+                    [class.chip-sel]="estimacionDe(c.id) === n"
+                    [disabled]="yo()?.acted"
+                    [attr.aria-pressed]="estimacionDe(c.id) === n"
+                    [attr.aria-label]="n + ' story points'"
+                    (click)="clickChip(c.id, n)"
+                  >
+                    {{ n }}
+                  </button>
+                }
+              </div>
+              <span
+                class="tarjeta-estado"
+                aria-live="polite"
+                aria-atomic="true"
+              >
+                @if (estimacionDe(c.id) !== undefined) {
+                  Estimaste <strong>{{ estimacionDe(c.id) }}</strong> ·
+                  tocá de nuevo para borrar
+                } @else {
+                  Sin estimar
+                }
+              </span>
+            </div>
+          }
+        </article>
+      }
+    </div>
+  </div>
+
+  <div class="actionbar">
+    @if (yo()?.acted) {
+      <p class="muted-note" aria-live="polite" aria-atomic="true">
+        Estimación confirmada. Esperando al resto…
+        ({{ confirmados() }}/{{ total() }})
+      </p>
+    } @else {
+      <button class="btn" (click)="confirmar()">CONFIRMAR ESTIMACIÓN</button>
+      <p class="muted-note" aria-live="polite" aria-atomic="true">
+        ({{ confirmados() }}/{{ total() }} confirmados)
+      </p>
+    }
+  </div>
+</div>

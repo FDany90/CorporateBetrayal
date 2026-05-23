@@ -17,6 +17,7 @@
 const TEMAS: Record<string, string> = {
   'boton-del-bonus': 'Bono de Equipo',
   'el-recorte':      'Recorte de Presupuesto',
+  'tablero-scrum':   'Tablero del Sprint',
 };
 
 /** Texto del día para el appheader. Mayúsculas las pone el CSS. */
@@ -36,4 +37,5 @@ export interface MinijuegoMeta {
 export const MINIJUEGOS: readonly MinijuegoMeta[] = [
   { id: 'boton-del-bonus', label: 'El Botón del Bonus (individual)' },
   { id: 'el-recorte',      label: 'El Recorte (grupal)' },
+  { id: 'tablero-scrum',   label: 'El Tablero SCRUM (individual)' },
 ];

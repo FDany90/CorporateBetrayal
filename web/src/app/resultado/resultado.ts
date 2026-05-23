@@ -1,6 +1,8 @@
 import { Component, computed, inject } from '@angular/core';
 import { GameService } from '../game.service';
 import { Avatar } from '../avatar/avatar';
+import { Intro } from '../intro/intro';
+import { Reveal } from '../reveal/reveal';
 import { CountUp } from '../count-up';
 import { NOMBRE_CHALLENGE } from '../models';
 import { temaDelDia } from '../challenge-meta';
@@ -12,8 +14,9 @@ import { dlog } from '../dlog'; // TEMPORAL: logs de depuración
  */
 @Component({
   selector: 'app-resultado',
-  imports: [Avatar, CountUp],
+  imports: [Avatar, CountUp, Intro, Reveal],
   templateUrl: './resultado.html',
+  styleUrl: './resultado.css',
 })
 export class Resultado {
   private readonly juego = inject(GameService);
@@ -36,8 +39,14 @@ export class Resultado {
 
   /** Cambio de influencia del último desafío (puede ser negativo). */
   readonly delta = computed(() => this.yo()?.lastDelta ?? 0);
-  /** Signo a mostrar delante del delta ("+" si fue positivo). */
-  readonly signo = computed(() => (this.delta() > 0 ? '+' : ''));
+
+  /** Formato tipográfico del delta: "+3" / "−3" usando el signo MENOS
+   *  matemático (U+2212), no el guion ASCII (U+002D). 0 va sin signo. */
+  formatDelta(n: number): string {
+    if (n > 0) return '+' + n;
+    if (n < 0) return '−' + Math.abs(n);
+    return '0';
+  }
 
   /** Influencia actual y la previa al desafío (actual − delta). El conteo
    *  va de la previa a la actual: sube si ganaste, baja si perdiste. */
@@ -55,6 +64,41 @@ export class Resultado {
     const id = this.juego.estado()?.challengeId ?? '';
     return NOMBRE_CHALLENGE[id] ?? 'La ronda';
   });
+
+  /* ---------- Tablero SCRUM: datos del reveal ---------- */
+
+  /** ¿El minijuego que acaba de cerrar es el Tablero SCRUM? */
+  readonly esTablero = computed(
+    () => this.juego.estado()?.challengeId === 'tablero-scrum',
+  );
+
+  /** Tarjetas del Tablero (con valor real revelado por el server). */
+  readonly cards = computed(() => this.juego.estado()?.cards ?? []);
+
+  /** Mi tarjeta propia (la que conocía) — persiste durante 'result'. */
+  readonly miTarjeta = this.juego.miTarjeta;
+  /** Mis estimaciones por tarjeta — persisten durante 'result'. */
+  readonly misEstimaciones = this.juego.misEstimaciones;
+
+  /** ¿Es mi tarjeta propia (la que ya conocía)? */
+  esMia(cardId: string): boolean {
+    return this.miTarjeta()?.cardId === cardId;
+  }
+  /** Mi estimación para una tarjeta (o undefined si no estimé). */
+  estimacionDe(cardId: string): number | undefined {
+    return this.misEstimaciones()[cardId];
+  }
+  /** Estado del acierto: 'mia' (no se puntúa), 'sin-estimar' (0),
+   *  'acierto' (+payoff), 'error' (−payoff). */
+  estadoCarta(
+    cardId: string,
+    valorReal: number,
+  ): 'mia' | 'sin-estimar' | 'acierto' | 'error' {
+    if (this.esMia(cardId)) return 'mia';
+    const est = this.estimacionDe(cardId);
+    if (est === undefined) return 'sin-estimar';
+    return est === valorReal ? 'acierto' : 'error';
+  }
 
   /** Día actual / total y tema editorial — para el appheader. */
   readonly dia = computed(() => this.juego.estado()?.ronda ?? 0);

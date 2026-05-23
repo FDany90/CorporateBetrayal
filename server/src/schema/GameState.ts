@@ -30,6 +30,18 @@ export class Pairing extends Schema {
   @type("string") bId = "";
 }
 
+/** Una tarjeta del Tablero SCRUM (kind 'tablero').
+ *  `valorReal` arranca en 0 (oculto) durante la fase 'tablero' — el valor
+ *  secreto NUNCA se sincroniza mientras se juega; cada jugador recibe el
+ *  valor de SU tarjeta por mensaje PRIVADO. Al resolver, el server escribe
+ *  todos los `valorReal` en el state para el reveal del resultado. */
+export class Card extends Schema {
+  @type("string") id = "";
+  @type("string") nombre = "";
+  @type("string") descripcion = "";
+  @type("number") valorReal = 0;
+}
+
 /**
  * Estado de una partida.
  * `status`: lobby | playing
@@ -57,4 +69,9 @@ export class GameState extends Schema {
   // muestra la cuenta regresiva.
   @type("number") phaseEndsAt = 0;
   @type("number") phaseDurationSec = 0;
+  // --- Tablero SCRUM (kind 'tablero') ---
+  // Tarjetas del sprint actual. Vacío fuera de la fase 'tablero'/'result'
+  // de ese minijuego. Durante 'tablero': cada Card.valorReal = 0 (oculto);
+  // al resolver, el server pone el valor real para el reveal.
+  @type([Card]) cards = new ArraySchema<Card>();
 }

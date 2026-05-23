@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, OnInit, computed, inject } from '@angular/core';
 import { GameService } from './game.service';
 import { DeskContext } from './desk-context/desk-context';
 import { Ingreso } from './ingreso/ingreso';
@@ -11,6 +11,7 @@ import { Final } from './final/final';
 import { Reunion } from './reunion/reunion';
 import { Votacion } from './votacion/votacion';
 import { Comunicado } from './comunicado/comunicado';
+import { TableroScrum } from './tablero-scrum/tablero-scrum';
 import { Devbar } from './devbar/devbar';
 import { pageAnim } from './animations';
 
@@ -30,15 +31,41 @@ import { pageAnim } from './animations';
   imports: [
     DeskContext,
     Ingreso, Lobby, Briefing, Desafio, Resultado,
-    Marcador, Final, Reunion, Votacion, Comunicado, Devbar,
+    Marcador, Final, Reunion, Votacion, Comunicado, TableroScrum, Devbar,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',
   animations: [pageAnim],
 })
-export class App {
+export class App implements OnInit {
   /** protected: lo usa el template, no hace falta exponerlo más. */
   protected readonly juego = inject(GameService);
+
+  ngOnInit(): void {
+    // Listener GLOBAL para el "thud" de press en cualquier .btn de la app.
+    // Cubrimos pointerdown (mouse + touch) Y keydown Enter/Space (teclado),
+    // así el feedback es coherente entre input métodos. Document-level para
+    // no repetirlo en cada componente y para que sobreviva si el botón se
+    // destruye antes de completar.
+    const aplicarPress = (btn: HTMLElement | null) => {
+      if (!btn || btn.classList.contains('is-pressing')) return;
+      btn.classList.add('is-pressing');
+      setTimeout(() => btn.classList.remove('is-pressing'), 260);
+    };
+    document.addEventListener('pointerdown', (e) => {
+      const target = e.target as HTMLElement | null;
+      aplicarPress(target?.closest('.btn') as HTMLElement | null);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const target = e.target as HTMLElement | null;
+      const btn = target?.closest('.btn') as HTMLElement | null;
+      // Solo si el foco está EN el botón mismo (no en otro elemento que
+      // por casualidad esté dentro de un .btn-wrapper hipotético).
+      if (btn !== target) return;
+      aplicarPress(btn);
+    });
+  }
 
   /**
    * Fases en las que se muestra la ficha lateral (solo desktop). Son las
@@ -49,7 +76,7 @@ export class App {
    *    al lado le restaría dramatismo al sello/circular).
    */
   private static readonly FASES_CON_FICHA = new Set([
-    'briefing', 'calls', 'meeting', 'vote', 'result', 'marcador',
+    'briefing', 'calls', 'meeting', 'vote', 'tablero', 'result', 'marcador',
   ]);
 
   /** ¿Mostrar la ficha lateral? (la oculta el CSS en mobile igual). */

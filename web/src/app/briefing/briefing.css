@@ -225,3 +225,114 @@
   text-transform: lowercase;
   padding: 0 2px;
 }
+
+/* ============================================================
+   EJEMPLO POST-IT (Briefing del Tablero SCRUM)
+   ------------------------------------------------------------
+   Un único post-it amarillo "tuyo", como llegaría a la pantalla
+   del Tablero. CSS puro (sin imagen) para que quede nítido a
+   cualquier DPI y consistente con el tablero real. Reusa los
+   tokens globales --post-* y --font-hand.
+   ============================================================ */
+.ejemplo-postit-wrap {
+  margin: 18px 0 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.ejemplo-postit {
+  position: relative;
+  background: var(--post-yellow);
+  width: min(300px, 86%);
+  padding: 18px 18px 14px;
+  border-radius: 1px;
+  transform: rotate(-1.4deg);
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.06),
+    0 12px 16px -6px rgba(0, 0, 0, 0.3),
+    0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.06), transparent 18%);
+}
+/* Cinta scotch arriba — misma técnica que en el tablero. */
+.ejemplo-postit::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  width: 70px;
+  height: 18px;
+  background: rgba(255, 247, 200, 0.55);
+  border: 1px solid rgba(180, 160, 80, 0.18);
+  border-top: 0;
+  border-bottom: 0;
+  transform: translateX(-50%) rotate(-3deg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  pointer-events: none;
+}
+
+.ejemplo-postit-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.ejemplo-postit-nombre {
+  font-family: var(--font-hand);
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1.05;
+  color: var(--post-ink);
+  letter-spacing: 0.3px;
+  flex: 1;
+  margin: 0;
+  transform: rotate(-0.4deg);
+}
+.ejemplo-postit-vos {
+  font-family: var(--font-hand);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--post-red);
+  transform: rotate(-6deg);
+  margin-top: 4px;
+  white-space: nowrap;
+}
+.ejemplo-postit-desc {
+  font-family: var(--font-hand);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.15;
+  color: var(--post-ink);
+  opacity: 0.72;
+  margin: 0 0 6px;
+  letter-spacing: 0.2px;
+}
+/* El valor real, garabateado grande y rojo. Centrado. */
+.ejemplo-postit-valor {
+  font-family: var(--font-hand);
+  font-weight: 700;
+  font-size: 64px;
+  line-height: 1;
+  color: var(--post-red);
+  text-align: center;
+  transform: rotate(-3deg);
+  padding: 4px 0 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Caption editorial debajo del post-it (mono, kicker chico) — vuelve
+   al lenguaje del shell, marcando que el post-it era solo un ejemplo. */
+.ejemplo-postit-wrap figcaption {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  text-align: center;
+  padding-top: 8px;
+  border-top: 1px dashed var(--line);
+  width: min(300px, 86%);
+}

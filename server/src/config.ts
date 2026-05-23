@@ -20,11 +20,26 @@ export interface GameConfig {
 
 /**
  * Config por defecto: 2 rondas (G-I) — partida corta para iterar/probar.
- *   I → El Botón del Bonus   ·   G → El Recorte
+ *   G → El Recorte
+ *   I → El Tablero SCRUM o El Botón del Bonus (pool de 2 candidatos)
+ *
+ * El motor toma el PRIMER candidato no usado del pool (ver `iniciarRonda`
+ * en GameRoom.ts). Como ambos arrancan sin usar, juega el primero listado:
+ * **Tablero SCRUM** (el más nuevo, el que estamos probando). Para que
+ * Botón vuelva a ser default, invertir el orden del pool.
+ * rounds: [
+  { tipo: "grupal",      challengePool: ["el-recorte"] },
+  { tipo: "individual",  challengePool: ["tablero-scrum", "boton-del-bonus"] },
+  { tipo: "grupal",      challengePool: ["el-recorte"] },
+  { tipo: "individual",  challengePool: ["tablero-scrum", "boton-del-bonus"] },
+],
  */
 export const CONFIG_DEFECTO: GameConfig = {
   rounds: [
+    { tipo: "individual", challengePool: [ "boton-del-bonus"] },
     { tipo: "grupal", challengePool: ["el-recorte"] },
-    { tipo: "individual", challengePool: ["boton-del-bonus"] },
+    { tipo: "individual", challengePool: ["tablero-scrum"] },
+    
+    
   ],
 };

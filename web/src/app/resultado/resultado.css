@@ -1,0 +1,202 @@
+/* Pantalla Resultado — estilos del reveal del Tablero SCRUM.
+   La vista genérica (Botón / Recorte) usa solo clases globales (`big`,
+   `card`, `player`...) y no necesita reglas acá. */
+
+.reveal-tarjetas{
+  display:flex;
+  flex-direction:column;
+  gap:22px;
+  padding:6px 4px 10px;
+  margin-bottom:8px;
+}
+@media (min-width: 760px){
+  .reveal-tarjetas{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:24px 20px;
+  }
+}
+
+/* --- Post-it del reveal ---
+   Mismo lenguaje visual que el tablero (papel + tape + manuscrita +
+   rotación leve) pero ahora con el valor real GARABATEADO ENORME +
+   un pie con tu estimación y el ±3 coloreado. */
+.postit-reveal{
+  position:relative;
+  background:var(--post-yellow);
+  padding:14px 16px 12px;
+  border-radius:1px;
+  box-shadow:
+    0 1px 0 rgba(0,0,0,.06),
+    0 10px 14px -6px rgba(0,0,0,.28),
+    0 4px 6px -2px rgba(0,0,0,.18);
+  background-image:linear-gradient(180deg,
+    rgba(0,0,0,.06), transparent 18%);
+  display:flex;
+  flex-direction:column;
+}
+
+/* Cinta scotch arriba (idem tablero). */
+.postit-reveal::before{
+  content:'';
+  position:absolute;
+  top:-10px; left:50%;
+  width:70px; height:18px;
+  background:rgba(255,247,200,.55);
+  border:1px solid rgba(180,160,80,.18);
+  border-top:0;border-bottom:0;
+  transform:translateX(-50%) rotate(-3deg);
+  box-shadow:0 1px 2px rgba(0,0,0,.08);
+  pointer-events:none;
+}
+
+/* Paleta y rotaciones rotativas (mismo patrón que el tablero, para que
+   visualmente sea "el mismo tablero, cerrado"). */
+.postit-reveal:nth-child(5n+1){ background-color:var(--post-yellow); transform:rotate(-0.6deg); }
+.postit-reveal:nth-child(5n+2){ background-color:var(--post-green);  transform:rotate( 0.7deg); }
+.postit-reveal:nth-child(5n+3){ background-color:var(--post-pink);   transform:rotate(-0.4deg); }
+.postit-reveal:nth-child(5n+4){ background-color:var(--post-blue);   transform:rotate( 0.8deg); }
+.postit-reveal:nth-child(5n){   background-color:var(--post-orange); transform:rotate(-0.9deg); }
+
+/* Cabecera: nombre + tag vos (si corresponde). */
+.postit-reveal-head{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  margin-bottom:6px;
+}
+.postit-reveal-nombre{
+  font-family:var(--font-hand);
+  font-weight:700;
+  font-size:25px;
+  line-height:1.05;
+  color:var(--post-ink);
+  letter-spacing:0.3px;
+  flex:1; min-width:0;
+  margin:0;
+  transform:rotate(-0.4deg);
+}
+.postit-reveal-vos{
+  font-family:var(--font-hand);
+  font-weight:700;
+  font-size:18px;
+  line-height:1;
+  color:var(--post-red);
+  transform:rotate(-6deg);
+  margin-top:4px;
+  white-space:nowrap;
+}
+
+/* Bajada (descripción) — más opaca, manuscrita más chica. */
+.postit-reveal-desc{
+  font-family:var(--font-hand);
+  font-weight:500;
+  font-size:16px;
+  line-height:1.15;
+  color:var(--post-ink);
+  opacity:.7;
+  margin:0 0 8px;
+  letter-spacing:0.2px;
+  text-wrap:pretty;
+}
+
+/* EL valor real revelado, garabateado grande y rojo, rotado. Es el "sello"
+   del veredicto del sprint. */
+.postit-reveal-valor{
+  font-family:var(--font-hand);
+  font-weight:700;
+  font-size:90px;
+  line-height:1;
+  color:var(--post-red);
+  text-align:center;
+  transform:rotate(-3deg);
+  padding:6px 0 4px;
+  font-variant-numeric:tabular-nums;
+  /* Bordeado sutil para que se sienta "estampado en tinta". */
+  text-shadow:
+    0 1px 0 rgba(198,69,69,.10),
+    1px 0 0 rgba(198,69,69,.06);
+}
+
+/* Pie del post-it: "estimaste X · acierto/erraste · ±3". Manuscrita
+   chica, con la palabra clave y el delta coloreados. */
+.postit-reveal-pie{
+  font-family:var(--font-hand);
+  font-weight:500;
+  font-size:17px;
+  color:var(--post-ink);
+  opacity:.85;
+  margin-top:auto; /* pegado al pie del post-it */
+  padding-top:4px;
+  border-top:1px dashed rgba(0,0,0,.12);
+  text-wrap:pretty;
+}
+.postit-reveal-pie .pie-info strong{
+  color:var(--post-ink);
+  font-weight:700;
+}
+/* Mayor especificidad que `.pie-info strong` para pisar el color sin
+   necesidad de `!important`. */
+.postit-reveal-pie .pie-info strong.pie-acierto{
+  color:var(--approved);
+}
+.postit-reveal-pie .pie-info strong.pie-error{
+  color:var(--post-red);
+}
+.pie-delta{
+  font-size:20px;
+  margin-left:4px;
+  transform:rotate(-3deg);
+  display:inline-block;
+}
+
+/* Tinte de fondo extra según el estado — sutil para no tapar el color
+   del post-it, solo "marcando" el resultado al borde. */
+.postit-reveal-acierto{
+  box-shadow:
+    0 0 0 2px rgba(93,122,58,.45) inset,
+    0 1px 0 rgba(0,0,0,.06),
+    0 10px 14px -6px rgba(0,0,0,.28),
+    0 4px 6px -2px rgba(0,0,0,.18);
+}
+.postit-reveal-error{
+  box-shadow:
+    0 0 0 2px rgba(198,69,69,.45) inset,
+    0 1px 0 rgba(0,0,0,.06),
+    0 10px 14px -6px rgba(0,0,0,.28),
+    0 4px 6px -2px rgba(0,0,0,.18);
+}
+
+/* --- Resumen "TU INFLUENCIA" al final --- */
+.reveal-resumen{
+  margin-top:14px;
+  padding-top:12px;
+  border-top:1px dashed var(--line);
+}
+.reveal-resumen .big{
+  padding:8px 0 2px;
+}
+
+/* --- Marcador del sprint (listado de jugadores) --- */
+.reveal-marcador{
+  margin-top:18px;
+}
+.reveal-marcador-titulo{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:17px;
+  letter-spacing:-0.2px;
+  color:var(--ink);
+  margin:0 0 8px;
+}
+/* Chip pequeño con el delta de este round, al lado de la Influencia. */
+.delta-chip{
+  font-family:var(--font-mono);
+  font-weight:700;
+  font-size:11px;
+  letter-spacing:0.5px;
+  margin-left:4px;
+  font-variant-numeric:tabular-nums;
+}
+.delta-chip.up   { color:var(--approved); }
+.delta-chip.down { color:var(--stamp);    }

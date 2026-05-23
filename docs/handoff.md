@@ -3,27 +3,29 @@
 > Documento de traspaso. Si abrís el proyecto en otra PC o en una sesión
 > nueva (de Claude o tuya), **empezá por acá**.
 
-**Última actualización:** 2026-05-22 · **Hito actual:** Paso 3 completo ·
-2 minijuegos · cliente Angular con lenguaje visual editorial aplicado a
-**7 pantallas** (Ingreso / Lobby / Comunicado / Final / Briefing /
-Desafío / Votación) · nomenclatura editorial **"Día X de Y · Tema del
-día"** en todos los appheaders de juego · votación con **conteo en vivo,
-Confirmar Voto y reordenamiento animado** · **sistema de animaciones**
-(variantes de beat reusables, count-up numérico, reveals escalonados) ·
-**herramientas de desarrollo** (devbar flotante: partida rápida, salir al
-lobby, saltar fase, arrancar en un minijuego) · sistema de avatars (15
-SVGs + modal) · a11y/UX mobile-first auditada (WIG Vercel) · **layout
-DESKTOP** (escritorio de nogal + vade de cuero + hoja de papel + ficha
-lateral de personal) como progressive enhancement sobre el mobile.
+**Última actualización:** 2026-05-23 · **Hito actual:** **3 minijuegos
+jugables** (Botón / Recorte / **Tablero SCRUM**) · cliente Angular con
+lenguaje visual editorial aplicado a **8 pantallas** + nueva pantalla
+del Tablero · nomenclatura editorial **"Día X de Y · Tema del día"** ·
+**sistema de timers de fase** (reloj autoritativo en server, banner con
+barra de progreso) · votación con **conteo en vivo, Confirmar Voto y
+reordenamiento animado** · **efecto máquina de escribir** (directiva
+appReveal + Intro como orquestador secuencial) en Briefing/Comunicado/
+Final · **post-its escritos a mano** (Caveat) en el Tablero SCRUM ·
+**feedback de latencia** (barra enviando + thud de press global, puentea
+el round-trip de Render) · sistema de avatars (15 SVGs + modal) ·
+**layout DESKTOP** (escritorio de nogal + vade de cuero + hoja de papel
++ ficha lateral de personal) como progressive enhancement sobre el
+mobile · a11y auditada y corregida (WIG Vercel, segunda pasada
+2026-05-23).
 
-**PIVOTE (2026-05-22):** el target de esta versión pasó a ser **desktop**
-(se juega en la compu del laburo, al lado de Teams). El playtest será en
+**PIVOTE (2026-05-22):** el target de esta versión es **desktop** (se
+juega en la compu del laburo, al lado de Teams). El playtest será en
 desktop. La integración mobile real con llamadas será **otro proyecto**
 futuro (app nativa). Ver §7 y §9.
 
-**Próximo objetivo:** **terminar la adaptación desktop** (propagar +
-afinar en las pantallas restantes) → MVP de **4 minijuegos** (2 indiv. +
-2 grupales, naciendo ya responsive) → **playtest en desktop**. Ver §9.
+**Próximo objetivo:** sumar el **4° minijuego (otro grupal)** para
+cerrar el MVP de 4 → **playtest en desktop**. Ver §9.
 
 ---
 
@@ -77,7 +79,7 @@ Roadmap del [GDD §10](GDD.md):
 | 1 — Esqueleto (lobby en tiempo real) | ✅ completo |
 | 2 — Bucle base (El Botón del Bonus) | ✅ completo |
 | **3 — Motor de rondas + marcador + pantalla final** | ✅ **completo (hito actual)** |
-| 4 — Resto del catálogo de minijuegos | 🔄 en curso (2 de 13) |
+| 4 — Resto del catálogo de minijuegos | 🔄 en curso (3 de 13 — falta un 4° grupal para cerrar MVP) |
 | 5 — Pulido (estética, onboarding) | 🔄 en curso (lenguaje editorial aplicado a 7 pantallas) |
 | 6 — Deploy y post-MVP | 🔄 en curso (deploy de prueba VIVO: Vercel + Render, ver §5) |
 
@@ -87,10 +89,58 @@ Roadmap del [GDD §10](GDD.md):
 **Qué funciona hoy:** la partida corre de punta a punta:
 - **Lobby:** crear/unirse por código, lista en vivo, reconexión, anfitrión,
   expulsar jugadores, bots de desarrollo.
-- **Motor de rondas:** 4 rondas con patrón I-G-I-G (parametrizable en
-  `server/src/config.ts`), marcador entre rondas y pantalla final.
-- **2 minijuegos:** *El Botón del Bonus* (individual, llamadas 1-a-1 en
-  tandas sin repetir pareja) y *El Recorte* (grupal, votación).
+- **Motor de rondas:** estructura parametrizable en `server/src/config.ts`
+  (hoy I-G-I = 3 rondas; partida corta para iterar/probar). Marcador entre
+  rondas y pantalla final.
+- **3 minijuegos:** *El Botón del Bonus* (individual, llamadas 1-a-1 en
+  tandas sin repetir pareja), *El Recorte* (grupal, votación) y
+  ***El Tablero SCRUM*** (individual, información asimétrica + adivinar).
+- **Sistema de timers de fase** (reloj autoritativo en server, ver
+  `phaseEndsAt`/`phaseDurationSec` en `GameState`): 60s por llamada del
+  Botón, 120s en el voto del Recorte, 120s en el Tablero. Banner con
+  barra de progreso + estado urgente en los últimos 10s (`<app-timer>`).
+
+**El Tablero SCRUM (kind `tablero`):** información asimétrica + adivinar.
+- **3-6 tarjetas** del sprint (K = `clamp(3, ceil(N/2)+2, 6)` con tope
+  K≤N) elegidas al azar de un pool de 15 (sátira corporativa: "Login con
+  Google", "Migrar a la nube", etc.) con **valor real Fibonacci aleatorio
+  por partida** (1/2/3/5/8/13). Cada tarjeta tiene nombre + bajada corta.
+- Cada jugador **conoce 1 tarjeta** (simétrico, asignación round-robin
+  barajada). El valor real es **secreto del server** — llega por mensaje
+  PRIVADO `tuTablero` a cada cliente al entrar a la fase (los valores
+  reales NUNCA viajan en el state sincronizado mientras se juega).
+- **Llamadas libres por Teams** (la web no guía a quién llamar). Cada
+  uno comparte/miente su valor; al final adivina los ajenos.
+- **UI:** post-its de colores rotativos (amarillo/verde/rosa/celeste/
+  naranja) escritos a mano con Caveat, con leve rotación + cinta scotch.
+  Chips Fibonacci en grilla 3×2 (toggle, `aria-pressed`). Tap para
+  estimar; tap de nuevo para borrar (sin estimar = 0 puntos).
+- **Puntaje:** ±3 Influencia por tarjeta NO propia (acierto / error);
+  sin estimar = 0. Cada tarjeta vale lo mismo (los SP solo son el dato
+  a adivinar, no se traducen 1:1 a Influencia, para que ninguna tarjeta
+  domine el puntaje).
+- **Result reveal:** secuencia orquestada con `appReveal="stamp"` —
+  cada post-it cae con el valor real estampado en rojo y un pie con
+  "estimaste X · acierto/erraste · ±3". TU INFLUENCIA con count-up +
+  Marcador del sprint al final.
+
+**Sistema de typewriter / orquestación de reveals** (briefing, comunicado,
+final): directiva `appReveal` + `<app-intro>` orquestador. Cada elemento
+declara su modo (`type`, `fade`, `slide`, `stamp`, `kicker`, `sello`) y
+opcionalmente su `revealOrder`. La directiva tipea HTML-aware
+(preserva `<strong>` y `<em>`), respeta `prefers-reduced-motion`, y un
+tap salta toda la secuencia. Velocidad default 90 cps configurable por
+elemento con `[revealCps]`. Ver `web/src/app/reveal/` y `intro/`.
+
+**Feedback de latencia** (mitiga el "frizado" del round-trip de Render):
+- Signal `enviando` en `GameService` que se prende en `confirmar()` /
+  `decidir()` y se apaga en cada `onStateChange` (con safety timeout 5s).
+- **Barra global** `.enviando-bar` arriba del shell, champagne, animada
+  mientras hay round-trip. Vive en el shell → sobrevive el cambio de
+  pantalla, puentea el hueco visual.
+- **Thud auto-completable** en `.btn`: keyframe `btnPressThud` de 240ms
+  que se dispara en `pointerdown` y `keydown` Enter/Space vía un
+  listener GLOBAL en `app.ts` (sin tocar componentes individuales).
 
 **Lenguaje visual "Editorial Sinergia"** aplicado a siete pantallas:
 - **Ingreso** — formulario con tipografía editorial (Fraunces + JetBrains Mono),
@@ -136,18 +186,29 @@ Remera, Finanzas, Legales, Diseño). Componente `<app-avatar>` reusable +
 modal `<app-avatar-picker>` pantalla-completa.
 
 **Accesibilidad y UX mobile-first** (auditado contra Vercel Web Interface
-Guidelines, ver el skill `/web-design-guidelines`):
+Guidelines, ver el skill `/web-design-guidelines`; segunda pasada 2026-05-23):
 - Zoom de usuario habilitado, `touch-action: manipulation` global, sin
   delay de 300ms en doble-tap.
 - `:focus-visible` champagne en todos los interactivos (teclado).
 - `prefers-reduced-motion` neutraliza animaciones para usuarios sensibles.
-- Tap targets ≥40-44px en todos los botones.
+- Tap targets ≥44px en todos los botones (incluyendo chips Fibonacci del
+  Tablero).
 - Labels asociados a inputs (`for`/`id`), `autocomplete`/`inputmode` en
   inputs, `aria-label` en icon-only buttons.
 - Modal del picker: `role="dialog" aria-modal`, cerrar con ESC, focus trap,
   autofocus al abrir, restaurar foco al cerrar.
 - `aria-live="polite"` en zonas async ("Esperando a los demás…").
 - `tabular-nums` en columnas numéricas, `text-wrap: balance` en headings.
+- **Emojis decorativos** (`💼`, `★`) con `aria-hidden="true"` y
+  `aria-label` en el contenedor → SR lee "Tu Influencia: 12" en vez de
+  "maletín 12".
+- **Timer del round** anuncia UNA vez al SR al entrar a urgente vía
+  `<span class="sr-only" role="status">` (evita spam segundo-a-segundo).
+- **Tipografía**: signo menos matemático `−` (U+2212) en deltas
+  negativos vía helper `formatDelta`; ellipsis `…` (U+2026) en estados
+  de carga; guillemets `«»` en frases del briefing default.
+- **Press feedback con teclado**: el thud de `.btn` también se dispara
+  con Enter/Space (no solo pointerdown), coherente con mouse/touch.
 
 **Layout DESKTOP** (nuevo, 2026-05-22) — *progressive enhancement* sobre el
 mobile-first, todo en `web/src/styles.css` dentro de `@media (min-width:760px)`
@@ -298,57 +359,56 @@ Detalle de cada archivo: [codigo.md](codigo.md).
 
 ## 9. Próximos pasos
 
-**Objetivo inmediato: terminar desktop → 4 minijuegos → playtest en
-desktop.** El deploy ya está hecho (Vercel + Render, §5). Con el pivote a
-desktop (§7), el orden quedó:
+**Objetivo inmediato: 4° minijuego (otro grupal) → playtest en desktop.**
+Hoy hay 3 minijuegos jugables (Botón, Recorte, Tablero SCRUM); falta UNO
+grupal para cerrar el MVP de 4. El deploy ya está hecho (Vercel + Render,
+§5).
 
-1. **Terminar la adaptación desktop** (EN CURSO — lo próximo al volver):
-   - El shell desktop ya está (escritorio + vade + hoja + ficha lateral, §4).
-   - **Propagar y afinar** pantalla por pantalla: revisar cómo se ve cada
-     una en desktop con la hoja a 680px y la ficha al lado (Briefing,
-     Desafío, Votación, Reunión, Resultado, Marcador, Comunicado, Final,
-     Lobby, Ingreso). Algunas pantallas pensadas para columna angosta
-     pueden quedar con mucho aire o desbalanceadas en la hoja ancha —
-     ajustar dónde convenga (multi-columna donde sume, anchos máximos de
-     bloques, etc.). Iterar como siempre, una pantalla a la vez.
-   - Afinar detalles del escritorio según gusto (saturación del bordó,
-     grosor de las esquineras, cuánto cuero asoma = `padding` del `.desk`).
-2. **Sumar 2 minijuegos** (de a uno por incremento, **naciendo ya responsive**):
-   - Otro **individual** (kind `llamadas`, como El Botón del Bonus).
-   - Otro **grupal** (kind `votacion`, como El Recorte).
-   Ambos son de *kinds* ya existentes → **no tocan el motor**: solo una
-   `ChallengeDefinition` nueva en `server/src/challenges/` + registro,
-   su entrada en `challenge-meta.ts` (tema + selector dev) y los textos
-   de su briefing. (Dani dijo que ya tiene en mente cuáles; falta elegir.)
-3. **Playtest en desktop** con 3-5 amigos. Observar si el debate/voto en la
-   llamada funciona; ajustar balance y copy según lo que pase.
+1. **Sumar el 4° minijuego (otro grupal)** — un solo incremento, **naciendo
+   ya responsive y con look post-it o editorial según corresponda**.
+   Candidatos del [GDD §6.B](GDD.md): *Votación de Reconocimiento*
+   (espejo positivo del Recorte: voteDelta +, el más votado GANA Influencia,
+   reusa el kind `votacion` y el motor), *El Deploy del Viernes* (más
+   complejo: requiere pozo + probabilidad — toca el motor),
+   *El Reconocimiento del Mes* (un jefe regala un punto), *El Marrón*
+   (hot potato; toca el motor con timer aleatorio). El más simple = la
+   Votación de Reconocimiento — **reusa el kind `votacion` y solo es una
+   nueva `ChallengeDefinition` + entry en `challenge-meta.ts`**. Si Dani
+   prefiere algo más visual, ver lista.
+2. **Playtest en desktop** con 3-5 amigos. Observar si el debate / voto /
+   negociación por Teams funciona; ajustar balance, timings, copy.
 
 > **Config pendiente (no bloquea):** poner el Build Filter de Render
 > (`server/**`) para que los pushes web no redeployen el server (§5).
 
-**Después del MVP / playtest:**
+**Hecho recientemente** (al 2026-05-23):
 
-4. **Feedback de botones / latencia percibida** (detectado en el playtest
-   en celular, 2026-05-21): al tocar un botón de acción (ENTENDIDO,
-   CONFIRMAR VOTO, opciones del desafío) no se ve feedback hasta que
-   cambia la pantalla — entre el tap y la respuesta del server hay un
-   round-trip que en producción (Render + red) se nota y se siente
-   "frizado". Solución recomendada: feedback inmediato al tap (animación
-   de "press" que se completa sola) + estado "enviando…" que persiste
-   hasta que llega el nuevo estado. NO retrasar el envío (sumaría lag);
-   mostrar el feedback en paralelo. Alineado con WIG ("spinner during
-   request"). Probablemente un estado `enviando` (signal) reusable.
-5. **Temporizadores en pantalla** — desde cero (no existen en server). Cada
-   fase con tiempo límite + contador visible. Plan: server primero
-   (timestamp de fin de fase en `GameState` + `setTimeout`), luego UI
-   (`<app-timer>` reusable).
-6. **Migrar las últimas pantallas al lenguaje editorial**: **Reunión**,
-   **Resultado** y **Marcador** ya tienen el appheader unificado y el
-   Marcador/Resultado ya tienen animaciones; falta terminar el rediseño
-   del contenido (kicker, h1 editorial) en Reunión.
-7. **Resto del catálogo** — quedan minijuegos del GDD, uno por incremento.
-8. **Pendiente del Paso 3** — desempate por **votación directa** en la
+- ✅ ~~Feedback de botones / latencia percibida~~ — resuelto con
+  `.enviando-bar` global + thud `.btn.is-pressing` global (mouse + touch
+  + teclado). Ver §4 "Feedback de latencia".
+- ✅ ~~Temporizadores en pantalla~~ — implementados (reloj autoritativo en
+  server + componente `<app-timer>` con barra + estado urgente).
+- ✅ ~~Layout desktop~~ — escritorio + vade + hoja + ficha lateral.
+- ✅ ~~Efecto máquina de escribir en briefings~~ — directiva `appReveal`
+  + Intro orquestador, aplicado a Briefing/Comunicado/Final.
+- ✅ ~~Tablero SCRUM~~ — nuevo kind `tablero` con info asimétrica.
+
+**Más adelante / backlog:**
+
+3. **Migrar las últimas pantallas al lenguaje editorial**: **Reunión**
+   tiene el appheader unificado pero le falta el rediseño del contenido
+   (kicker, h1 editorial). Resultado/Marcador ya tienen animaciones.
+4. **Resto del catálogo** — quedan minijuegos del GDD, uno por incremento
+   (post-MVP).
+5. **Pendiente del Paso 3** — desempate por **votación directa** en la
    pantalla final (hoy, si hay empate en el #1, comparten puesto).
+6. **Bundle budget** — el budget de 500 kB en `angular.json` se está
+   excediendo por ~20 kB con la nueva paleta + Caveat + reveal system.
+   Subir el budget o code-split por feature (lazy load del Tablero).
+7. **`@filter` de Colyseus** para `decision` en fase `calls`: hoy las
+   decisiones del Botón van en el state sincronizado (técnicamente un
+   snooper con devtools podría leer la del rival antes del reveal).
+   Aceptable para juego entre amigos, pero pulible.
 
 **Decisiones abiertas** pendientes: ver la sección 11 del [GDD](GDD.md)
 (balance de puntajes, sets de palabras/tarjetas, etc.).

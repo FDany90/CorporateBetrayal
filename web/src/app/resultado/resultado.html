@@ -1,70 +1,212 @@
+<!-- Pantalla de Resultado.
+     Dos vistas según el minijuego:
+       · Tablero SCRUM: reveal sequence con post-its estampados uno por
+         uno, mostrando el valor real, tu estimación y tu +/−.
+       · El resto (Botón / Recorte): vista genérica con TU INFLUENCIA +
+         marcador. La pantalla Marcador (siguiente) refina el ranking. -->
 <div class="screen">
   <div class="topbar">
     <span class="brand">
       SINERGIA<span class="dot">·</span>CORP
     </span>
-    <span class="pill">💼 {{ yo()?.influence ?? 0 }}</span>
+    <span class="pill" [attr.aria-label]="'Tu Influencia: ' + (yo()?.influence ?? 0)">
+      <span aria-hidden="true">💼</span> {{ yo()?.influence ?? 0 }}
+    </span>
   </div>
   <div class="appheader">
     Día {{ dia() }} de {{ diasTotal() }} · {{ tema() }}
   </div>
 
-  <div class="content">
-    <!-- Título según sea un resultado parcial (entre tandas) o el final. -->
-    @if (esFinal()) {
-      <h2>{{ nombre() }} — terminó</h2>
-    } @else {
-      <h2>Tanda {{ tanda() }} de {{ tandasTotal() }} — resultado</h2>
-    }
+  @if (esTablero()) {
+    <!-- ============ Result del Tablero SCRUM ============ -->
+    <app-intro>
+      <div class="content">
+        <p class="kicker">Tablero cerrado · Estimaciones reveladas</p>
+        <h1 class="doc-h1">El veredicto del sprint</h1>
 
-    <div class="big">
-      <div class="lbl">TU INFLUENCIA</div>
-      <div class="val">
-        <!-- El número cuenta desde la influencia previa a la actual:
-             sube si ganaste, baja si perdiste. Más lento que el del
-             marcador para que el cambio se "sienta". -->
-        <span
-          [appCountUp]="influencia()"
-          [from]="influenciaPrevia()"
-          [countDelay]="350"
-          [countDuration]="1400"
-        ></span>
-        <!-- up/down colorea el delta según sea ganancia o pérdida. -->
-        <span [class.up]="delta() >= 0" [class.down]="delta() < 0">
-          ({{ signo() }}{{ delta() }})
-        </span>
+        <div class="reveal-tarjetas">
+          @for (c of cards(); track c.id; let i = $index) {
+            <article
+              class="postit-reveal"
+              [class.postit-reveal-mia]="esMia(c.id)"
+              [class.postit-reveal-acierto]="estadoCarta(c.id, c.valorReal) === 'acierto'"
+              [class.postit-reveal-error]="estadoCarta(c.id, c.valorReal) === 'error'"
+              [class.postit-reveal-sin]="estadoCarta(c.id, c.valorReal) === 'sin-estimar'"
+              appReveal="stamp"
+              [revealOrder]="i"
+            >
+              <header class="postit-reveal-head">
+                <h3 class="postit-reveal-nombre">{{ c.nombre }}</h3>
+                @if (esMia(c.id)) {
+                  <span class="postit-reveal-vos">★ vos</span>
+                }
+              </header>
+              @if (c.descripcion) {
+                <p class="postit-reveal-desc">{{ c.descripcion }}</p>
+              }
+              <div class="postit-reveal-valor">{{ c.valorReal }}</div>
+              <div class="postit-reveal-pie">
+                @switch (estadoCarta(c.id, c.valorReal)) {
+                  @case ('mia') {
+                    <span class="pie-info">tu carta · sin movimiento</span>
+                  }
+                  @case ('sin-estimar') {
+                    <span class="pie-info">no estimaste · sin movimiento</span>
+                  }
+                  @case ('acierto') {
+                    <span class="pie-info">
+                      estimaste <strong>{{ estimacionDe(c.id) }}</strong> ·
+                      <strong class="pie-acierto">¡acierto!</strong>
+                      <strong class="pie-acierto pie-delta">+3</strong>
+                    </span>
+                  }
+                  @case ('error') {
+                    <span class="pie-info">
+                      estimaste <strong>{{ estimacionDe(c.id) }}</strong> ·
+                      <strong class="pie-error">erraste</strong>
+                      <strong class="pie-error pie-delta">−3</strong>
+                    </span>
+                  }
+                }
+              </div>
+            </article>
+          }
+        </div>
+
+        <!-- Resumen del cambio de Influencia con count-up. -->
+        <div
+          class="reveal-resumen"
+          appReveal="fade"
+          [revealOrder]="cards().length"
+        >
+          <div class="big">
+            <div class="lbl">TU INFLUENCIA</div>
+            <div class="val">
+              <span
+                [appCountUp]="influencia()"
+                [from]="influenciaPrevia()"
+                [countDelay]="350"
+                [countDuration]="1400"
+              ></span>
+              <span [class.up]="delta() >= 0" [class.down]="delta() < 0">
+                ({{ formatDelta(delta()) }})
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Marcador del sprint: cómo le fue a cada uno este round.
+             El delta per-jugador (lastDelta) sale del state; lo muestro
+             coloreado al lado de la Influencia total. -->
+        <div
+          class="reveal-marcador"
+          appReveal="fade"
+          [revealOrder]="cards().length + 1"
+        >
+          <h2 class="reveal-marcador-titulo">Marcador del sprint</h2>
+          <div class="card pad0">
+            @for (p of ranking(); track p.id; let i = $index) {
+              <div class="player">
+                <span class="pos">{{ i + 1 }}</span>
+                <app-avatar [id]="p.avatar" [size]="36" />
+                <span class="nm">
+                  {{ p.nickname }}
+                  @if (p.id === miId()) { <span class="tag">vos</span> }
+                </span>
+                <span class="st"
+                      [attr.aria-label]="'Influencia ' + p.influence + (p.lastDelta !== 0 ? ' (' + formatDelta(p.lastDelta) + ' este sprint)' : '')">
+                  <span aria-hidden="true">💼</span> {{ p.influence }}
+                  @if (p.lastDelta !== 0) {
+                    <span
+                      class="delta-chip"
+                      [class.up]="p.lastDelta > 0"
+                      [class.down]="p.lastDelta < 0"
+                      aria-hidden="true"
+                    >
+                      ({{ formatDelta(p.lastDelta) }})
+                    </span>
+                  }
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="actionbar">
+        @if (yo()?.acted) {
+          <p class="muted-note" aria-live="polite" aria-atomic="true">
+            Esperando a los demás… ({{ acks() }}/{{ total() }})
+          </p>
+        } @else {
+          <button
+            class="btn"
+            appReveal="fade"
+            [revealOrder]="cards().length + 2"
+            (click)="confirmar()"
+          >
+            CONTINUAR
+          </button>
+        }
+      </div>
+    </app-intro>
+  } @else {
+    <!-- ============ Result genérico (Botón / Recorte) ============ -->
+    <div class="content">
+      @if (esFinal()) {
+        <h2>{{ nombre() }} — terminó</h2>
+      } @else {
+        <h2>Tanda {{ tanda() }} de {{ tandasTotal() }} — resultado</h2>
+      }
+
+      <div class="big">
+        <div class="lbl">TU INFLUENCIA</div>
+        <div class="val">
+          <span
+            [appCountUp]="influencia()"
+            [from]="influenciaPrevia()"
+            [countDelay]="350"
+            [countDuration]="1400"
+          ></span>
+          <span [class.up]="delta() >= 0" [class.down]="delta() < 0">
+            ({{ formatDelta(delta()) }})
+          </span>
+        </div>
+      </div>
+
+      <p class="muted-note">
+        El número te deja sacar conclusiones de tu colega. 😏
+      </p>
+
+      <h2 style="margin-top:18px">Marcador</h2>
+      <div class="card pad0">
+        @for (p of ranking(); track p.id; let i = $index) {
+          <div class="player">
+            <span class="pos">{{ i + 1 }}</span>
+            <app-avatar [id]="p.avatar" [size]="36" />
+            <span class="nm">
+              {{ p.nickname }}
+              @if (p.id === miId()) { <span class="tag">vos</span> }
+            </span>
+            <span class="st"
+                  [attr.aria-label]="'Influencia ' + p.influence">
+              <span aria-hidden="true">💼</span> {{ p.influence }}
+            </span>
+          </div>
+        }
       </div>
     </div>
 
-    <p class="muted-note">
-      El número te deja sacar conclusiones de tu colega. 😏
-    </p>
-
-    <h2 style="margin-top:18px">Marcador</h2>
-    <div class="card pad0">
-      @for (p of ranking(); track p.id; let i = $index) {
-        <div class="player">
-          <span class="pos">{{ i + 1 }}</span>
-          <app-avatar [id]="p.avatar" [size]="36" />
-          <span class="nm">
-            {{ p.nickname }}
-            @if (p.id === miId()) { <span class="tag">vos</span> }
-          </span>
-          <span class="st">💼 {{ p.influence }}</span>
-        </div>
+    <div class="actionbar">
+      @if (yo()?.acted) {
+        <p class="muted-note" aria-live="polite" aria-atomic="true">
+          Esperando a los demás… ({{ acks() }}/{{ total() }})
+        </p>
+      } @else {
+        <button class="btn" (click)="confirmar()">
+          {{ esFinal() ? 'CONTINUAR' : 'SIGUIENTE LLAMADA' }}
+        </button>
       }
     </div>
-  </div>
-
-  <div class="actionbar">
-    @if (yo()?.acted) {
-      <p class="muted-note" aria-live="polite" aria-atomic="true">
-        Esperando a los demás… ({{ acks() }}/{{ total() }})
-      </p>
-    } @else {
-      <button class="btn" (click)="confirmar()">
-        {{ esFinal() ? 'CONTINUAR' : 'SIGUIENTE LLAMADA' }}
-      </button>
-    }
-  </div>
+  }
 </div>

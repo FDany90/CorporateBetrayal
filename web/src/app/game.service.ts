@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { Client, Room } from 'colyseus.js';
-import { PairingView, PlayerView, StateView } from './models';
+import { CardView, PairingView, PlayerView, StateView } from './models';
 import { environment } from '../environments/environment';
 import { dlog } from './dlog'; // TEMPORAL: logs de depuración
 
@@ -30,6 +30,21 @@ export class GameService {
   private readonly _conectado = signal(false);
   private readonly _cargando = signal(false);
   private readonly _error = signal<string | null>(null);
+  // --- Tablero SCRUM (kind 'tablero') ---
+  // El valor REAL de tu tarjeta llega por mensaje privado del server (NO va
+  // en el state compartido — es el secreto del juego). Lo guardamos acá.
+  private readonly _miTarjeta = signal<{ cardId: string; valor: number } | null>(null);
+  // Mis estimaciones por tarjeta (cardId → valor). Se llenan al estimar y
+  // por re-emisión del server cuando me reconecto en la fase 'tablero'.
+  private readonly _misEstimaciones = signal<Record<string, number>>({});
+  // Flag de "round-trip en curso": se prende al mandar una acción que
+  // cambia de fase (ack / decidir en calls) y se apaga cuando llega el
+  // próximo onStateChange. Lo usa la barra `.enviando-bar` del shell para
+  // dar feedback visible MIENTRAS esperamos la respuesta del server (en
+  // producción son 200-300ms; sin esto, el botón parece frizado). Hay un
+  // safety timeout por si la respuesta nunca llega.
+  private readonly _enviando = signal(false);
+  private enviandoTimer?: ReturnType<typeof setTimeout>;
 
   /** Estado de la partida (null = todavía no estoy en una sala). */
   readonly estado = this._estado.asReadonly();
@@ -43,6 +58,14 @@ export class GameService {
   readonly error = this._error.asReadonly();
   /** URL del game server, para diagnóstico en pantalla. */
   readonly servidorUrl = this.endpointPorDefecto();
+  /** La tarjeta que conocés en El Tablero SCRUM (recibida por mensaje
+   *  privado al entrar a la fase). null fuera del Tablero. */
+  readonly miTarjeta = this._miTarjeta.asReadonly();
+  /** Tus estimaciones actuales en el Tablero (cardId → valor Fibonacci). */
+  readonly misEstimaciones = this._misEstimaciones.asReadonly();
+  /** ¿Hay una acción en vuelo esperando respuesta del server? La consume
+   *  la barra `.enviando-bar` del shell para puentear el round-trip. */
+  readonly enviando = this._enviando.asReadonly();
 
   constructor() {
     dlog('service', 'GameService creado');
@@ -170,7 +193,34 @@ export class GameService {
         jugadores: snap.players.length,
         hostId: snap.hostId,
       });
+      // Llegó la respuesta del server: apagamos el flag de "enviando"
+      // (la barra del shell desaparece y los botones vuelven a habilitarse).
+      this.terminarEnviando();
       this._estado.set(snap);
+      // Al salir de las fases 'tablero' Y 'result' (= cuando ya cerró el
+      // reveal y arrancó otra ronda/lobby), limpiar la tarjeta y estimaciones
+      // privadas. Las preservamos durante 'result' porque la pantalla del
+      // reveal las usa para mostrar "tu estimación vs el valor real".
+      if (snap.phase !== 'tablero' && snap.phase !== 'result') {
+        if (this._miTarjeta()) this._miTarjeta.set(null);
+        if (Object.keys(this._misEstimaciones()).length > 0) {
+          this._misEstimaciones.set({});
+        }
+      }
+    });
+
+    // Mensajes PRIVADOS del Tablero SCRUM. Llegan solo a este cliente y NO
+    // pasan por el state compartido — así el valor secreto no se filtra.
+    room.onMessage(
+      'tuTablero',
+      (msg: { ownedCardId: string; ownedValor: number }) => {
+        dlog('tuTablero', msg);
+        this._miTarjeta.set({ cardId: msg.ownedCardId, valor: msg.ownedValor });
+      },
+    );
+    room.onMessage('misEstimaciones', (msg: Record<string, number>) => {
+      dlog('misEstimaciones', msg);
+      this._misEstimaciones.set(msg ?? {});
     });
     room.onError((code, message) => {
       dlog('onError', { code, message });
@@ -251,16 +301,31 @@ export class GameService {
   }
   confirmar(): void {
     dlog('enviar', 'ack');
+    this.marcarEnviando();
     this.room?.send('ack');
   }
   decidir(valor: 'verde' | 'rojo'): void {
     dlog('enviar', 'decidir', valor);
+    // 'decidir' en calls (Botón) gatilla el resolver del server cuando
+    // todos deciden → cambia de fase → arma feedback de espera.
+    this.marcarEnviando();
     this.room?.send('decidir', valor);
   }
   /** Voto de un minijuego de votación (El Recorte): manda el id del votado. */
   votar(idVotado: string): void {
     dlog('enviar', 'decidir(voto)', idVotado);
     this.room?.send('decidir', idVotado);
+  }
+
+  /** Estimación de una tarjeta del Tablero SCRUM. `valor = 0` borra (sin
+   *  estimar). Actualiza también la copia local optimistamente. */
+  estimar(cardId: string, valor: number): void {
+    dlog('enviar', 'estimar', { cardId, valor });
+    this.room?.send('estimar', { cardId, valor });
+    const cur = { ...this._misEstimaciones() };
+    if (valor === 0) delete cur[cardId];
+    else cur[cardId] = valor;
+    this._misEstimaciones.set(cur);
   }
 
   /** Sale de la sala y limpia todo el estado local. */
@@ -271,6 +336,9 @@ export class GameService {
     this._estado.set(null);
     this._conectado.set(false);
     this._miId.set(null);
+    this._miTarjeta.set(null);
+    this._misEstimaciones.set({});
+    this.terminarEnviando();
     try {
       localStorage.removeItem('traicion.session');
     } catch {
@@ -281,6 +349,23 @@ export class GameService {
   /* ============================================================
      Helpers
      ============================================================ */
+
+  /** Prende el flag de "round-trip en vuelo" — la barra del shell empieza
+   *  a animarse. Si por algún motivo no llega `onStateChange` en 5s, lo
+   *  apagamos solos para no dejar la barra colgada (timeout de seguridad). */
+  private marcarEnviando(): void {
+    this._enviando.set(true);
+    if (this.enviandoTimer) clearTimeout(this.enviandoTimer);
+    this.enviandoTimer = setTimeout(() => this.terminarEnviando(), 5000);
+  }
+
+  private terminarEnviando(): void {
+    if (this.enviandoTimer) {
+      clearTimeout(this.enviandoTimer);
+      this.enviandoTimer = undefined;
+    }
+    if (this._enviando()) this._enviando.set(false);
+  }
 
   /** Identidad persistente del jugador (para reconectar como el mismo). */
   private getPlayerToken(): string {
@@ -324,6 +409,16 @@ export class GameService {
           phaseDurationSec?: number;
           players?: { forEach: (cb: (p: PlayerView) => void) => void };
           pairings?: { forEach: (cb: (p: PairingView) => void) => void };
+          cards?: {
+            forEach: (
+              cb: (c: {
+                id: string;
+                nombre: string;
+                descripcion?: string;
+                valorReal?: number;
+              }) => void,
+            ) => void;
+          };
         }
       | undefined;
 
@@ -350,6 +445,18 @@ export class GameService {
       s.pairings.forEach((pr) => pairings.push({ aId: pr.aId, bId: pr.bId }));
     }
 
+    const cards: CardView[] = [];
+    if (s?.cards && typeof s.cards.forEach === 'function') {
+      s.cards.forEach((c) =>
+        cards.push({
+          id: c.id,
+          nombre: c.nombre,
+          descripcion: c.descripcion ?? '',
+          valorReal: c.valorReal ?? 0,
+        }),
+      );
+    }
+
     return {
       code: s?.code ?? '',
       status: s?.status ?? 'lobby',
@@ -365,6 +472,7 @@ export class GameService {
       phaseDurationSec: s?.phaseDurationSec ?? 0,
       players,
       pairings,
+      cards,
     };
   }
 }

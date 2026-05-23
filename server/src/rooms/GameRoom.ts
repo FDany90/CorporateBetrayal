@@ -1,8 +1,9 @@
 import { Room, Client } from "colyseus";
-import { GameState, Player, Pairing } from "../schema/GameState";
+import { GameState, Player, Pairing, Card } from "../schema/GameState";
 import { roundRobinSchedule, ParejaPlana } from "../emparejador";
 import { CONFIG_DEFECTO, GameConfig } from "../config";
 import { CHALLENGE_REGISTRY, ChallengeDefinition } from "../challenges/registry";
+import { FIBONACCI_SP } from "../challenges/tableroScrum";
 
 // Ids del catálogo de avatares — los dibuja el cliente con SVGs (ver
 // web/src/app/avatars.ts). El server solo persiste el id como
@@ -54,6 +55,17 @@ export class GameRoom extends Room<GameState> {
    *  = no hay timer corriendo. Es el reloj AUTORITATIVO: al vencer, el
    *  server fuerza el avance (no depende del cliente). */
   private faseTimer?: ReturnType<typeof setTimeout>;
+  /* ---------- Tablero SCRUM (kind 'tablero') ---------- */
+  /** Dueño de cada tarjeta: playerId → cardId. Es secreto: NO se sincroniza
+   *  al cliente; cada humano recibe SU `ownedCardId` por mensaje privado. */
+  private ownerByPlayer = new Map<string, string>();
+  /** Valor real (Fibonacci) de cada tarjeta: cardId → valor. Secreto del
+   *  server hasta el reveal en `resolverTablero` (ahí se vuelca al state). */
+  private cardValores = new Map<string, number>();
+  /** Estimaciones por jugador: playerId → (cardId → valor Fibonacci).
+   *  No se sincroniza (para que no se copien entre jugadores); se persiste
+   *  en memoria y al reconectar se re-emite por mensaje privado. */
+  private estimaciones = new Map<string, Map<string, number>>();
 
   onCreate(options: JoinOptions) {
     this.state = new GameState();
@@ -136,6 +148,38 @@ export class GameRoom extends Room<GameState> {
       this.chequearAvance();
     });
 
+    // 'estimar' es del Tablero SCRUM (kind 'tablero'): el cliente envía
+    // su estimación de una tarjeta. La guardamos en memoria del server (no
+    // se sincroniza para que no se copien entre jugadores).
+    //   payload = { cardId: string, valor: number }
+    //   valor = 0 → "sin estimar" (se borra la entrada)
+    //   valor = Fibonacci válido → se guarda
+    this.onMessage(
+      "estimar",
+      (client, payload: { cardId?: string; valor?: number } = {}) => {
+        if (this.state.phase !== "tablero") return;
+        const p = this.state.players.get(client.sessionId);
+        if (!p) return;
+        if (p.acted) return; // ya confirmó, no se toca más
+        const cardId = payload.cardId ?? "";
+        if (!cardId || !this.cardValores.has(cardId)) return;
+        // No se puede estimar la tarjeta propia (ya la conocés).
+        if (this.ownerByPlayer.get(p.id) === cardId) return;
+        const valor = payload.valor ?? 0;
+        let mine = this.estimaciones.get(p.id);
+        if (!mine) {
+          mine = new Map<string, number>();
+          this.estimaciones.set(p.id, mine);
+        }
+        if (valor === 0) {
+          mine.delete(cardId);
+          return;
+        }
+        if (!(FIBONACCI_SP as readonly number[]).includes(valor)) return;
+        mine.set(cardId, valor);
+      },
+    );
+
     // 'decidir' cubre dos cosas según la fase:
     //  - en 'calls' (El Botón): el valor es "verde" | "rojo".
     //  - en 'vote'  (El Recorte): el valor es el id del jugador votado.
@@ -175,6 +219,35 @@ export class GameRoom extends Room<GameState> {
           this.state.players.set(client.sessionId, p);
           // El sessionId cambió: si era el anfitrión, traspasar el rol.
           if (this.state.hostId === oldId) this.state.hostId = client.sessionId;
+          // Su `ownerByPlayer` y `estimaciones` están indexados por el id
+          // viejo: migrarlos al nuevo sessionId.
+          const ownedOld = this.ownerByPlayer.get(oldId);
+          if (ownedOld) {
+            this.ownerByPlayer.delete(oldId);
+            this.ownerByPlayer.set(client.sessionId, ownedOld);
+          }
+          const estOld = this.estimaciones.get(oldId);
+          if (estOld) {
+            this.estimaciones.delete(oldId);
+            this.estimaciones.set(client.sessionId, estOld);
+          }
+          // Si estamos en la fase 'tablero', re-emitir su tarjeta privada
+          // y sus estimaciones actuales (el cliente se reconectó y las perdió).
+          if (this.state.phase === "tablero") {
+            const owned = this.ownerByPlayer.get(client.sessionId);
+            if (owned) {
+              client.send("tuTablero", {
+                ownedCardId: owned,
+                ownedValor: this.cardValores.get(owned) ?? 0,
+              });
+            }
+            const mine = this.estimaciones.get(client.sessionId);
+            if (mine && mine.size > 0) {
+              const obj: Record<string, number> = {};
+              mine.forEach((v, k) => (obj[k] = v));
+              client.send("misEstimaciones", obj);
+            }
+          }
           console.log(`[GameRoom] ${p.nickname} reingresó`);
           return;
         }
@@ -286,6 +359,9 @@ export class GameRoom extends Room<GameState> {
     this.state.challengeId = elegido;
     if (elegido) this.usados.add(elegido);
 
+    // Limpiar tarjetas/estimaciones de un Tablero previo (si lo hubo).
+    this.limpiarTablero();
+
     // Si el minijuego es de llamadas, armar el calendario de tandas.
     this.schedule = [];
     this.state.tanda = 0;
@@ -343,6 +419,12 @@ export class GameRoom extends Room<GameState> {
       }
       this.chequearAvance();
     } else if (fase === "vote") {
+      for (const [, p] of this.state.players) {
+        if (p.connected && !p.acted) p.acted = true;
+      }
+      this.chequearAvance();
+    } else if (fase === "tablero") {
+      // Tomar las estimaciones actuales tal como estén; sin estimar = 0.
       for (const [, p] of this.state.players) {
         if (p.connected && !p.acted) p.acted = true;
       }
@@ -438,6 +520,8 @@ export class GameRoom extends Room<GameState> {
           this.iniciarTanda(1);
         } else if (kind === "votacion") {
           this.iniciarFase("meeting");
+        } else if (kind === "tablero") {
+          this.iniciarTablero();
         } else {
           this.terminarRonda(); // ronda placeholder, sin minijuego
         }
@@ -482,6 +566,17 @@ export class GameRoom extends Room<GameState> {
         if (p.connected && !p.acted) return;
       }
       this.resolverVotacion();
+      return;
+    }
+
+    if (fase === "tablero") {
+      // Como el voto: avanza cuando todos los conectados confirmaron.
+      // Las estimaciones se persisten en memoria (no son `decision`)
+      // y se resuelven contra `cardValores` (la verdad del server).
+      for (const [, p] of this.state.players) {
+        if (p.connected && !p.acted) return;
+      }
+      this.resolverTablero();
     }
   }
 
@@ -531,6 +626,145 @@ export class GameRoom extends Room<GameState> {
     this.armarTimer(this.challengeActual?.voteSeconds ?? 0);
   }
 
+  /* ---------- Tablero SCRUM (kind 'tablero') ---------- */
+
+  /** Entra a la fase 'tablero': elige K tarjetas del pool, les asigna valor
+   *  Fibonacci real (secreto en `cardValores`), reparte un dueño por jugador
+   *  (round-robin sobre tarjetas barajadas), y manda a cada humano por
+   *  mensaje PRIVADO su `ownedCardId` + valor. Los bots estiman al azar y
+   *  confirman al instante. */
+  private iniciarTablero() {
+    this.limpiarTablero();
+    this.state.phase = "tablero";
+
+    const def = this.challengeActual;
+    if (!def) {
+      this.terminarRonda();
+      return;
+    }
+    const pool = def.cardPool ?? [];
+    const players = [...this.state.players.values()];
+    const N = players.length;
+    const idealK = def.cardsCount
+      ? def.cardsCount(N)
+      : Math.max(3, Math.min(N, 6));
+    // K ≤ N (toda tarjeta debe tener al menos un dueño) y ≤ pool.length.
+    const K = Math.max(1, Math.min(idealK, N, pool.length));
+
+    // Elegir K tarjetas únicas del pool al azar.
+    const elegidas = this.barajar([...pool]).slice(0, K);
+
+    // Crear tarjetas en el state (sin valor real visible) + valor secreto.
+    for (let i = 0; i < elegidas.length; i++) {
+      const card = new Card();
+      card.id = `card_${i}`;
+      card.nombre = elegidas[i].nombre;
+      card.descripcion = elegidas[i].descripcion;
+      card.valorReal = 0; // oculto durante la fase
+      this.state.cards.push(card);
+      const valor =
+        FIBONACCI_SP[Math.floor(Math.random() * FIBONACCI_SP.length)];
+      this.cardValores.set(card.id, valor);
+    }
+
+    // Asignar dueños: round-robin de jugadores barajados sobre tarjetas
+    // barajadas. Si N > K, algunas tarjetas tendrán 2+ dueños (esperado).
+    const cardIds = this.barajar(
+      this.state.cards.map((c) => c.id),
+    );
+    const playersShuffled = this.barajar(players);
+    playersShuffled.forEach((p, idx) => {
+      this.ownerByPlayer.set(p.id, cardIds[idx % cardIds.length]);
+    });
+
+    // Resetear estado por jugador. Bots estiman al azar y confirman ya.
+    for (const [, p] of this.state.players) {
+      p.acted = false;
+      p.decision = "";
+      p.lastDelta = 0;
+      if (p.isBot) {
+        const owned = this.ownerByPlayer.get(p.id);
+        const mine = new Map<string, number>();
+        for (const c of this.state.cards) {
+          if (c.id === owned) continue;
+          mine.set(
+            c.id,
+            FIBONACCI_SP[Math.floor(Math.random() * FIBONACCI_SP.length)],
+          );
+        }
+        this.estimaciones.set(p.id, mine);
+        p.acted = true;
+      }
+    }
+
+    // Mensaje PRIVADO a cada cliente humano: tu tarjeta + su valor real.
+    for (const client of this.clients) {
+      const owned = this.ownerByPlayer.get(client.sessionId);
+      if (!owned) continue;
+      client.send("tuTablero", {
+        ownedCardId: owned,
+        ownedValor: this.cardValores.get(owned) ?? 0,
+      });
+    }
+
+    // Timer de 2 minutos (por defecto, definido en TABLERO_SCRUM).
+    this.armarTimer(def.tableroSeconds ?? 0);
+    // Por si la sala es solo bots, el avance es inmediato.
+    this.chequearAvance();
+  }
+
+  /** Resuelve el Tablero: ±payoff por cada tarjeta NO propia según acierto/
+   *  error. Sin estimar = 0. Revela `valorReal` en el state para el result. */
+  private resolverTablero() {
+    for (const [, p] of this.state.players) p.lastDelta = 0;
+    const payoff = this.challengeActual?.tableroPayoff ?? 3;
+
+    for (const [pid, p] of this.state.players) {
+      const owned = this.ownerByPlayer.get(pid);
+      const mine = this.estimaciones.get(pid);
+      let delta = 0;
+      for (const c of this.state.cards) {
+        if (c.id === owned) continue; // la propia no se puntúa
+        const est = mine?.get(c.id);
+        if (est === undefined) continue; // sin estimar = 0
+        const real = this.cardValores.get(c.id) ?? 0;
+        if (est === real) delta += payoff;
+        else delta -= payoff;
+      }
+      p.influence += delta;
+      p.lastDelta = delta;
+    }
+
+    // Revelar valores reales en el state para que el cliente los muestre
+    // en el resultado.
+    for (const c of this.state.cards) {
+      c.valorReal = this.cardValores.get(c.id) ?? 0;
+    }
+
+    this.iniciarFase("result");
+    console.log("[GameRoom] Tablero SCRUM resuelto");
+  }
+
+  /** Limpia tarjetas + dueños + valores + estimaciones del Tablero. Se
+   *  llama al cerrar el minijuego (terminar ronda, volver al lobby) y al
+   *  entrar a una nueva instancia de tablero. */
+  private limpiarTablero() {
+    this.state.cards.clear();
+    this.ownerByPlayer.clear();
+    this.cardValores.clear();
+    this.estimaciones.clear();
+  }
+
+  /** Fisher–Yates sin mutar el array original (devuelve copia barajada). */
+  private barajar<T>(arr: T[]): T[] {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
   /** Cuenta los votos: el más votado recibe `voteDelta` (negativo en El
    *  Recorte). Si hay empate, lo reciben todos los empatados. */
   private resolverVotacion() {
@@ -560,6 +794,7 @@ export class GameRoom extends Room<GameState> {
 
   private volverLobby() {
     this.limpiarTimer();
+    this.limpiarTablero();
     this.state.status = "lobby";
     this.state.phase = "lobby";
     this.state.challengeId = "";

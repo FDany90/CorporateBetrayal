@@ -3,7 +3,9 @@
     <span class="brand">
       SINERGIA<span class="dot">·</span>CORP
     </span>
-    <span class="pill">💼 {{ yo()?.influence ?? 0 }}</span>
+    <span class="pill" [attr.aria-label]="'Tu Influencia: ' + (yo()?.influence ?? 0)">
+      <span aria-hidden="true">💼</span> {{ yo()?.influence ?? 0 }}
+    </span>
   </div>
   <div class="appheader">
     Día {{ dia() }} de {{ diasTotal() }} · {{ tema() }}
@@ -31,7 +33,8 @@
             </span>
             <!-- El emoji queda fijo; el número cuenta de 0 al valor,
                  arrancando cuando aparece su fila (mismo delay del beat). -->
-            <span class="st">💼
+            <span class="st" [attr.aria-label]="'Influencia ' + p.influence">
+              <span aria-hidden="true">💼</span>
               <span [appCountUp]="p.influence" [countDelay]="(i + 2) * 700"></span>
             </span>
           </div>

@@ -9,7 +9,9 @@
     <span class="brand">
       SINERGIA<span class="dot">·</span>CORP
     </span>
-    <span class="pill">💼 {{ yo()?.influence ?? 0 }}</span>
+    <span class="pill" [attr.aria-label]="'Tu Influencia: ' + (yo()?.influence ?? 0)">
+      <span aria-hidden="true">💼</span> {{ yo()?.influence ?? 0 }}
+    </span>
   </div>
   <div class="appheader">
     Día {{ dia() }} de {{ diasTotal() }} · {{ tema() }}
@@ -80,6 +82,53 @@
           <p class="briefing-cierre" appReveal="type">
             Vas a tener <strong>varias llamadas</strong> con colegas
             distintos. Gana quien acumula más Influencia al cerrar el día.
+          </p>
+        }
+
+        @case ('tablero-scrum') {
+          <p class="kicker" appReveal="type">
+            Memo interno · Estimación grupal
+          </p>
+          <h1 class="doc-h1" appReveal="slide">El Tablero SCRUM</h1>
+
+          <p class="briefing-lead" appReveal="type">
+            La Dirección convoca a estimar las tareas del nuevo sprint.
+            A cada uno se le asigna <strong>una tarjeta</strong> con su
+            valor real en <em>story points</em> — vos lo sabés, los demás no.
+            Del resto de las tarjetas no sabés <strong>nada</strong>.
+            Hay que averiguarlo hablando con los colegas.
+          </p>
+
+          <!-- Ejemplo visual: un post-it amarillo "tuyo" como llegaría
+               a la pantalla. CSS puro (sin imagen), así queda nítido a
+               cualquier DPI y consistente con el tablero real. -->
+          <figure class="ejemplo-postit-wrap" appReveal="stamp">
+            <div class="ejemplo-postit">
+              <header class="ejemplo-postit-head">
+                <h3 class="ejemplo-postit-nombre">Login con Google</h3>
+                <span class="ejemplo-postit-vos">★ vos</span>
+              </header>
+              <p class="ejemplo-postit-desc">
+                Que los usuarios no tengan que crear otra cuenta. Otra vez.
+              </p>
+              <div class="ejemplo-postit-valor">5</div>
+            </div>
+            <figcaption>así te llega TU tarjeta · sabés que vale 5</figcaption>
+          </figure>
+
+          <p class="briefing-lead" appReveal="type">
+            <strong>Llamás a quien quieras, cuando quieras</strong>, por Teams.
+            Compartís tu valor a cambio de saber el suyo — podés decir la
+            <em class="verde">verdad</em> o <em class="rojo">mentir</em>.
+            El otro tampoco te debe la verdad. Para las tarjetas que no
+            conocés, tocás los chips Fibonacci con tu mejor estimación.
+          </p>
+
+          <p class="briefing-cierre" appReveal="type">
+            Al cerrar: por cada tarjeta que <em class="verde">acertás</em>
+            sumás Influencia; por cada una que <em class="rojo">errás</em>,
+            restás. El que mejor lee a los demás —y mejor miente— se lleva
+            la jornada.
           </p>
         }
 

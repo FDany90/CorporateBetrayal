@@ -1,0 +1,276 @@
+/* Tablero SCRUM — diseño "tablero kanban de oficina real": cada tarjeta
+   es un POST-IT pegado sobre la mesa, escrito a mano (font Caveat). El
+   shell editorial alrededor (topbar/appheader/timer/actionbar) sigue
+   intacto — el contraste cuenta una historia: el sistema corporativo
+   contiene un tablerito casero de SCRUM.
+
+   Trucos visuales del post-it (CSS puro):
+    - Fondo de color (paleta var(--post-*) rotada por nth-child).
+    - Mini ROTACIÓN distinta por papelito (-0.6° a +0.8°) para que parezcan
+      pegados a mano y no perfectamente alineados.
+    - Sombra suave + un degradé sutil arriba (la franja de pegamento del
+      post-it real).
+    - Una CINTA scotch translúcida arriba (::before), inclinada.
+    - Tipografía manuscrita (Caveat) en todos los textos del papelito —
+      título, números, etiquetas chicas — para que se sienta "escrito".
+*/
+
+.tablero-lead{
+  font-family:var(--font-body);
+  font-size:13px;
+  color:var(--ink);
+  margin-bottom:18px;
+  text-wrap:pretty;
+}
+
+/* La grilla:
+    - mobile: pila vertical (1 columna) — el post-it ocupa toda la hoja.
+    - desktop (760px+): grilla 2 columnas — los post-its son más cuadrados,
+      más fieles al kanban real, y se ven más a la vez.
+   Gap generoso porque son objetos físicos sobre la mesa, no filas de
+   planilla. El padding del contenedor evita que las rotaciones leves
+   recorten los bordes contra el borde de la hoja. */
+.tarjetas{
+  display:flex;
+  flex-direction:column;
+  gap:22px;
+  padding:6px 4px 10px;
+}
+@media (min-width: 760px){
+  .tarjetas{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:24px 20px;
+    /* Default `align-items: stretch`: las tarjetas en la misma fila se
+       estiran al alto de la más alta. Combinado con flex-column adentro
+       (.tarjeta-estimar y .tarjeta-mia-valor con flex:1), la tarjeta
+       propia centra su número grande en el alto disponible — todas las
+       tarjetas de una fila terminan con la misma altura. */
+  }
+}
+
+/* --- Post-it base --- */
+.tarjeta{
+  position:relative;
+  background:var(--post-yellow); /* default; nth-child de abajo lo cambia */
+  padding:14px 16px 12px;
+  border-radius:1px;              /* casi recto: papel cuadrado */
+  box-shadow:
+    0 1px 0 rgba(0,0,0,.06),
+    0 10px 14px -6px rgba(0,0,0,.28),
+    0 4px 6px -2px rgba(0,0,0,.18);
+  transition:transform 200ms ease, box-shadow 200ms ease;
+  /* La línea de "pegamento" arriba del post-it real. */
+  background-image:linear-gradient(180deg,
+    rgba(0,0,0,.06), transparent 18%);
+  /* Flex column para que el contenido interno (chips o valor) pueda
+     estirarse y todas las tarjetas de una fila queden con el mismo alto. */
+  display:flex;
+  flex-direction:column;
+}
+
+/* Cinta scotch arriba — translúcida, traslapando levemente. Sutil. */
+.tarjeta::before{
+  content:'';
+  position:absolute;
+  top:-10px;
+  left:50%;
+  width:70px;
+  height:18px;
+  background:rgba(255,247,200,.55);
+  border:1px solid rgba(180,160,80,.18);
+  border-top:0;
+  border-bottom:0;
+  transform:translateX(-50%) rotate(-3deg);
+  box-shadow:0 1px 2px rgba(0,0,0,.08);
+  pointer-events:none;
+}
+
+/* Paleta rotativa: cada post-it un color distinto + una rotación leve
+   propia, para que parezcan pegados a mano (no en grilla CAD). */
+.tarjeta:nth-child(5n+1){
+  background-color:var(--post-yellow);
+  transform:rotate(-0.6deg);
+}
+.tarjeta:nth-child(5n+2){
+  background-color:var(--post-green);
+  transform:rotate(0.7deg);
+}
+.tarjeta:nth-child(5n+3){
+  background-color:var(--post-pink);
+  transform:rotate(-0.4deg);
+}
+.tarjeta:nth-child(5n+4){
+  background-color:var(--post-blue);
+  transform:rotate(0.8deg);
+}
+.tarjeta:nth-child(5n){
+  background-color:var(--post-orange);
+  transform:rotate(-0.9deg);
+}
+
+/* Cabecera del post-it: título + tag "vos" si corresponde. */
+.tarjeta-head{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  margin-bottom:8px;
+}
+.tarjeta-nombre{
+  font-family:var(--font-hand);
+  font-weight:700;
+  font-size:25px;
+  line-height:1.05;
+  color:var(--post-ink);
+  letter-spacing:0.3px;
+  flex:1;
+  min-width:0;
+  margin:0;
+  /* leve "wonk" como si la mano temblara un toque */
+  transform:rotate(-0.4deg);
+}
+
+/* Bajada del post-it: 1-2 líneas en manuscrita más chica y opaca, como
+   anotación al margen del título. NO es secreta — todos la ven. */
+.tarjeta-descripcion{
+  font-family:var(--font-hand);
+  font-weight:500;
+  font-size:17px;
+  line-height:1.15;
+  color:var(--post-ink);
+  opacity:.72;
+  margin:0 0 10px;
+  letter-spacing:0.2px;
+  text-wrap:pretty;
+}
+
+/* Pisamos el .tag editorial cuando va dentro del post-it: a mano, rojo. */
+.tarjeta-head .tag{
+  background:transparent;
+  color:var(--post-red);
+  font-family:var(--font-hand);
+  font-weight:700;
+  font-size:22px;
+  letter-spacing:0;
+  text-transform:none;
+  padding:0;
+  border-radius:0;
+  transform:rotate(-6deg);
+  line-height:1;
+  align-self:flex-start;
+  margin-top:2px;
+}
+/* Le ponemos un asterisco/estrella manuscrita delante. */
+.tarjeta-head .tag::before{
+  content:'★ ';
+  color:var(--post-red);
+}
+
+/* --- Tarjeta propia: el valor real, garabateado grande ---
+   `flex:1` la hace estirarse al alto disponible (igual al chip-grid de
+   las ajenas en su misma fila desktop), y centra el número adentro. */
+.tarjeta-mia-valor{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:4px 0 2px;
+}
+.tarjeta-mia-valor .val{
+  font-family:var(--font-hand);
+  font-weight:700;
+  font-size:96px;
+  line-height:1;
+  color:var(--post-red);
+  transform:rotate(-3deg);
+  font-variant-numeric:tabular-nums;
+}
+
+/* --- Tarjeta ajena: chips Fibonacci en grilla 3×2 ---
+   `flex:1` para que se estire vertical y el status quede pegado abajo
+   (margin-top:auto en .tarjeta-estado). */
+.tarjeta-estimar{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+}
+
+.tarjeta-chips{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:2px 8px;
+  margin-bottom:4px;
+  justify-items:center;
+}
+
+/* Cada chip = un número manuscrito. Sin caja por defecto; el SELECCIONADO
+   tiene un "círculo a mano" en rojo alrededor. */
+.chip{
+  background:transparent;
+  border:none;
+  width:44px;
+  height:44px;
+  padding:0;
+  font-family:var(--font-hand);
+  font-weight:700;
+  font-size:26px;
+  line-height:1;
+  color:var(--post-ink);
+  opacity:.55;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-variant-numeric:tabular-nums;
+  transition:opacity 160ms ease, transform 160ms ease, color 160ms ease;
+  position:relative;
+}
+.chip:active{ transform:translateY(1px); }
+@media (hover: hover){
+  .chip:hover:not(:disabled):not(.chip-sel){
+    opacity:1;
+    color:var(--post-red);
+  }
+}
+
+/* Seleccionado: número rojo + un "círculo dibujado a mano" usando un pseudo
+   con border redondeado y leve rotación. Da el efecto de marcador encima. */
+.chip-sel{
+  opacity:1;
+  color:var(--post-red);
+}
+.chip-sel::after{
+  content:'';
+  position:absolute;
+  inset:2px;
+  border:2.5px solid var(--post-red);
+  border-radius:50%;
+  /* La elipsis "rota" + un poco más ancha que alta para look manuscrito. */
+  transform:rotate(-7deg) scaleX(1.05) scaleY(0.95);
+  pointer-events:none;
+  /* Borde más grueso al inicio del trazo (truco simple: doble sombra). */
+  box-shadow:inset 1px 1px 0 rgba(198,69,69,.20);
+}
+.chip:disabled{
+  cursor:not-allowed;
+  opacity:.35;
+}
+.chip-sel:disabled{ opacity:.85; }
+
+.tarjeta-estado{
+  display:block;
+  font-family:var(--font-hand);
+  font-weight:500;
+  font-size:16px;
+  color:var(--post-ink);
+  opacity:.65;
+  text-transform:none;
+  letter-spacing:0;
+  min-height:18px;
+  margin-top:auto; /* lo empuja al pie del post-it */
+  padding-top:4px;
+}
+.tarjeta-estado strong{
+  color:var(--post-red);
+  font-weight:700;
+}

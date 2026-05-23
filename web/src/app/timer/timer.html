@@ -1,13 +1,23 @@
 <!-- Banner de tiempo: etiqueta + m:ss + barra que se vacía. Solo se
-     renderiza si hay un timer activo (endsAt > 0). -->
+     renderiza si hay un timer activo (endsAt > 0).
+
+     A11y: el valor visible mm:ss NO usa aria-live (anunciaría cada
+     segundo → spam). En cambio, cuando entrás al estado `urgente`
+     (últimos 10s), un <span class="sr-only" role="status"> se renderiza
+     UNA vez y dispara un anuncio SR. La barra es decorativa. -->
 @if (activo()) {
   <div class="timer" [class.timer-urgente]="urgente()" role="timer">
     <div class="timer-row">
       <span class="timer-lbl">Tiempo</span>
-      <span class="timer-val" aria-live="off">{{ mmss() }}</span>
+      <span class="timer-val">{{ mmss() }}</span>
     </div>
     <div class="timer-track" aria-hidden="true">
       <div class="timer-fill" [style.width.%]="pct()"></div>
     </div>
+    @if (urgente()) {
+      <span class="sr-only" role="status">
+        Quedan menos de 10 segundos.
+      </span>
+    }
   </div>
 }

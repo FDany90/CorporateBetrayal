@@ -29,6 +29,15 @@ export interface PairingView {
   bId: string;
 }
 
+/** Una tarjeta del Tablero SCRUM. `valorReal` es 0 durante la fase
+ *  (oculto); el server lo escribe en el state al resolver, para el reveal. */
+export interface CardView {
+  id: string;
+  nombre: string;
+  descripcion: string;
+  valorReal: number;
+}
+
 /** Nombre legible de cada minijuego, por su id (para títulos de la UI). */
 export const NOMBRE_CHALLENGE: Record<string, string> = {
   'boton-del-bonus': 'El Botón del Bonus',
@@ -54,4 +63,6 @@ export interface StateView {
   // --- timers de fase ---
   phaseEndsAt: number;     // epoch ms de fin de fase (0 = sin timer)
   phaseDurationSec: number; // duración total de la fase (para la barra)
+  // --- Tablero SCRUM (kind 'tablero') ---
+  cards: CardView[];
 }
